@@ -57,12 +57,13 @@ get_odds <- function(df,
                     select(opponent = team, 
                            espn_opp = team_id,
                            action_network_id), by = c("opp_id" = "action_network_id")) %>% 
-        mutate(date = day)
+        mutate(date = day) %>% 
+        filter(!is.na(team), !is.na(opponent))
       
       temp.odds <- data.frame()
       
       for(j in 1:length(matches$id)){
-        temp = if(!is.null(matches$odds[[j]])){
+        temp = if(!is.null(matches$odds[[j]]) & length(matches$odds[[j]]) > 0){
           data.frame(matches$odds[[j]]) %>% 
             left_join(books, by = "book_id") %>% 
             filter(type == "game", book_name == {bk_name}) %>% 
@@ -77,7 +78,7 @@ get_odds <- function(df,
                                total, over, under))
         }
         
-        if(length(temp$ml) ==2){
+        if(length(temp$ml) == 2){
           temp = temp %>% 
             cbind(type = c("away", "home")) %>% 
             mutate(game_id = matches$id[[j]]) %>% 
