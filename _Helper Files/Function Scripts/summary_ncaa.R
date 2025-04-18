@@ -1,8 +1,10 @@
-summary.ncaa_simulation <- function(object, ...){
+summary.ncaa_simulation <- function(object,
+                                    type = c('mbb', 'wbb'),
+                                    ...){
   rlang::check_installed(c("gt", "scales (>= 1.2.0)", "hoopR"), "to compute a summary table.")
   
   source_note <- paste(
-    "summary of",
+    "Summary of",
     scales::number(
       object$sim_params$simulations,
       scale_cut = scales::cut_short_scale()
@@ -69,7 +71,7 @@ summary.ncaa_simulation <- function(object, ...){
     team_l1  = c(head(left_bkt$team_name, left.length.1),
                  rep(NA, max.len - left.length.1)),
     rd2_l1 = c(head(left_bkt$round_2, left.length.1),
-                 rep(NA, max.len - left.length.1)),
+               rep(NA, max.len - left.length.1)),
     sweet_l1 = c(head(left_bkt$sweet_sixteen, left.length.1),
                  rep(NA, max.len - left.length.1)),
     eight_l1 = c(head(left_bkt$elite_eight, left.length.1),
@@ -87,7 +89,7 @@ summary.ncaa_simulation <- function(object, ...){
     team_l2  = c(tail(left_bkt$team_name, left.length.2),
                  rep(NA, max.len - left.length.2)),
     rd2_l2 = c(tail(left_bkt$round_2, left.length.2),
-                 rep(NA, max.len - left.length.2)),
+               rep(NA, max.len - left.length.2)),
     sweet_l2 = c(tail(left_bkt$sweet_sixteen, left.length.2),
                  rep(NA, max.len - left.length.2)),
     eight_l2 = c(tail(left_bkt$elite_eight, left.length.2),
@@ -105,7 +107,7 @@ summary.ncaa_simulation <- function(object, ...){
     team_r1  = c(head(right_bkt$team_name, right.length.1),
                  rep(NA, max.len - right.length.1)),
     rd2_r1 = c(head(right_bkt$round_2, right.length.1),
-                 rep(NA, max.len - right.length.1)),
+               rep(NA, max.len - right.length.1)),
     sweet_r1 = c(head(right_bkt$sweet_sixteen, right.length.1),
                  rep(NA, max.len - right.length.1)),
     eight_r1 = c(head(right_bkt$elite_eight, right.length.1),
@@ -123,7 +125,7 @@ summary.ncaa_simulation <- function(object, ...){
     team_r2  = c(tail(right_bkt$team_name, right.length.2),
                  rep(NA, max.len - right.length.2)),
     rd2_r2 = c(tail(right_bkt$round_2, right.length.2),
-                 rep(NA, max.len - right.length.2)),
+               rep(NA, max.len - right.length.2)),
     sweet_r2 = c(tail(right_bkt$sweet_sixteen, right.length.2),
                  rep(NA, max.len - right.length.2)),
     eight_r2 = c(tail(right_bkt$elite_eight, right.length.2),
@@ -135,6 +137,15 @@ summary.ncaa_simulation <- function(object, ...){
     winner_r2 = c(tail(right_bkt$won_title, right.length.2),
                   rep(NA, max.len - right.length.2))
   )
+  
+  gt_title <- gt_dante_title(
+    title = glue::glue("<img src='https://upload.wikimedia.org/wikipedia/commons/2/28/March_Madness_logo.svg' height = '75'></br>
+                                MARCH MADNESS {object$sim_params$ncaa_season} SIMULATION"),
+    subtitle = 'Based on DANTE ratings',
+    title_font_size = 26,
+    subtitle_font_size = 16,
+    type = {type},
+    logo_height = 85)
   
   tbl %>%
     gt::gt() %>%
@@ -148,8 +159,7 @@ summary.ncaa_simulation <- function(object, ...){
                                 contains("eight"),
                                 contains("final"),
                                 contains("winner")), missing_text = " ") %>% 
-    gt::tab_header(title = gt::html(glue::glue("<img src='https://upload.wikimedia.org/wikipedia/commons/2/28/March_Madness_logo.svg' height = '50'></br>
-                                MARCH MADNESS {object$sim_params$ncaa_season} SIMULATION"))) %>% 
+    gt::tab_header(title = gt::html(gt_title)) %>% 
     gt::cols_label(
       seed_l1 = gt::md("**SEED**"),
       seed_l2 = gt::md("**SEED**"),
@@ -224,15 +234,6 @@ summary.ncaa_simulation <- function(object, ...){
         gt::contains("winner")),
       rows = everything()
     ) %>%
-    #gt_fmt_pct_special(
-    #  columns = c(
-    #    gt::contains("sweet"),
-    #    gt::contains("eight"),
-    #    gt::contains("final"),
-    #    gt::contains("winner")
-    #  ),
-    #  rows = !starts_with(" ")
-    #) %>% 
     gt::cols_width(
       gt::contains("rd2") ~ gt::px(60),
       gt::contains("sweet") ~ gt::px(60),
@@ -292,11 +293,11 @@ summary.ncaa_simulation <- function(object, ...){
     ) %>%
     gt::tab_style(
       locations = gt::cells_column_labels(columns = c(gt::contains("seed"),
-                                             gt::contains("rd2"),
-                                             gt::contains("sweet"),
-                                             gt::contains("eight"),
-                                             gt::contains("final"),
-                                             gt::contains("winner"))),
+                                                      gt::contains("rd2"),
+                                                      gt::contains("sweet"),
+                                                      gt::contains("eight"),
+                                                      gt::contains("final"),
+                                                      gt::contains("winner"))),
       style = gt::cell_text(weight = "bold")
     ) %>%
     gt::tab_style(
@@ -309,18 +310,29 @@ summary.ncaa_simulation <- function(object, ...){
         align = "right",
         size = "medium",
         font = list(
-          gt::google_font("Audiowide"),
+          gt::google_font("Big Shoulders"),
           gt::default_fonts()
         )
       )
     ) %>%
     gt::tab_style(
+      locations = gt::cells_title(),
+      style = gt::cell_text(
+        font = list(
+          gt::google_font("Eagle Lake"),
+          gt::default_fonts()
+        ), 
+        color = "#9C7B59"
+      )
+    )  %>%
+    gt::tab_style(
       locations = gt::cells_column_spanners(spanners = everything()),
       style = gt::cell_text(
         align = "center",
         size = "large",
+        color = "black",
         font = list(
-          gt::google_font("Audiowide"),
+          gt::google_font("Sixtyfour"),
           gt::default_fonts()
         )
       )
@@ -341,6 +353,47 @@ summary.ncaa_simulation <- function(object, ...){
 
 saveRDS(summary.ncaa_simulation, 'Simulation Backup/Functions/summary.ncaa_simulation.rds')
 
+# Dante title 
+gt_dante_title <- function(title,
+                           subtitle,
+                           value = NULL,
+                           logo_link = NULL,
+                           type = c('mbb', 'wbb'),
+                           title_font_size = 24,
+                           title_font_weight = 'bold',
+                           title_lineheight = 0.5,
+                           subtitle_font_size = 16,
+                           subtitle_font_weight = 'normal',
+                           subtitle_lineheight = 0.5,
+                           logo_height = 65) {
+  
+  # logo link is an optional parameter in case a user wants to plot a different logo (e.g. retro)
+  link <- if(!is.null(logo_link)) {
+    logo_link
+  } else if(type == 'wbb') {
+    paste0("data:", "image/png", ";base64,",base64enc::base64encode("Beatrice.png"))
+  } else if (type == 'mbb') {
+    paste0("data:", "image/png", ";base64,",base64enc::base64encode("Virgil 2.png"))
+  } 
+  
+  title_header <- glue::glue(
+    "<div style='display: flex; justify-content: space-between; align-items: center;'>
+     <div style='flex-grow: 1;'>
+       <span style='font-weight: {title_font_weight}; font-size: {title_font_size}px; line-height: {title_lineheight};'>{title}</span><br>
+       <span style='font-size: {subtitle_font_size}px; font-weight: {subtitle_font_weight}; line-height: {subtitle_lineheight};'>{subtitle}</span>
+     </div>
+     <div>
+       <img src='{link}' style='height: {logo_height}px; width: auto; vertical-align: middle; border-radius: 15px; border: 2px solid #000000'>
+     </div>
+   </div>"
+  )
+  
+  return(title_header)
+  
+}
+
+saveRDS(gt_dante_title, 'Minos/Simulation Backup/Functions/gt_dante_title.rds')
+
 # Taken from Thomas Mock's package gtExtras to avoid the dependency
 # on a non cran package.
 # https://github.com/jthomasmock/gtExtras/blob/HEAD/R/gt_theme_538.R
@@ -350,7 +403,7 @@ table_theme <- function(gt_object,...) {
     gt::opt_all_caps()  %>%
     gt::opt_table_font(
       font = list(
-        gt::google_font("Chivo"),
+        gt::google_font("Big Shoulders"),
         gt::default_fonts()
       ),
       weight = 300
@@ -387,10 +440,10 @@ table_theme <- function(gt_object,...) {
       stub.border.width = gt::px(0),
       data_row.padding = gt::px(3),
       source_notes.border.lr.style = "none",
-      source_notes.background.color = "gray30",
-      table.font.size = 16,
+      source_notes.background.color = "black",
+      table.font.size = 20,
       heading.align = "center",
-      heading.background.color = "gray30",
+      heading.background.color = "black",
       ...
     )
 }
@@ -399,8 +452,8 @@ saveRDS(table_theme, 'Simulation Backup/Functions/table_theme.rds')
 
 # output of ggsci::rgb_material("light-blue") + "white"
 table_colors_positive <- c("white",
-                           "#E0F4FEFF", "#B2E5FCFF", "#80D3F9FF", "#4EC3F7FF", "#28B6F6FF", "#02A9F3FF",
-                           "#029AE5FF", "#0187D1FF", "#0177BDFF", "#00579AFF"
+                           "#F7E6E6", "#EFCCCC", "#E7B3B3", "#DF999A", "#D78081", "#CE6667",
+                           "#C64D4E", "#BE3335", "#B61A1B", "#AE0002"
 )
 
 saveRDS(table_colors_positive, 'Simulation Backup/Functions/table_colors_positive.rds')

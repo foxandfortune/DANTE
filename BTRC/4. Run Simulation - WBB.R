@@ -16,6 +16,7 @@ sim_method <- "to_oreb_ast"
 
 # Load ratings ------------------
 ratings <- readRDS(glue::glue("Stats/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_{cur_yr}.rds"))
+ratings_no_prior <- readRDS(glue::glue("Stats/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_no_prior_{cur_yr}.rds"))
 
 ratings <- list(
   pace = ratings$pace,
@@ -26,6 +27,20 @@ ratings <- list(
   
   disp_Rtg = 13
 )
+
+ratings_no_prior <- list(
+  pace = ratings_no_prior$pace,
+  ast = ratings_no_prior$ast,
+  oreb = ratings_no_prior$oreb,
+  to = ratings_no_prior$to,
+  rtg = ratings_no_prior$rtg,
+  
+  disp_Rtg = 13
+)
+
+# Load teams -------------------
+teams <- readRDS(glue::glue('Stats/Teams/team_database.rds')) %>% 
+  mutate(team_id = as.integer(team_id))
 
 ## Reset the working directory so the simulation can work ---------
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
@@ -49,15 +64,12 @@ is_sequential <- readRDS("Simulation Backup/Functions/is_sequential.rds")
 # Load process_games and ratings based on sim method -------------------------------------------
 process_games <- readRDS(glue::glue("Simulation Backup/Functions/process_games_wk_{sim_method}.rds"))
 
-# Load teams -------------------
-teams <- readRDS(glue::glue('Season Simulation Backup/team_database.rds')) %>% 
-  mutate(team_id = as.integer(team_id))
-
 # Load schedule -----------------
 schedule <- hoopR::load_mbb_schedule(seasons = {cur_yr}) %>% 
   filter(status_type_completed == FALSE,
          home_id %in% teams$team_id & away_id %in% teams$team_id) %>%
-  filter(game_date >= Sys.Date(), game_date <= Sys.Date() + 0)
+  filter(game_date >= Sys.Date(),
+         game_date <= Sys.Date() + 0)
 
 unique(schedule$game_date)
 
@@ -83,7 +95,7 @@ rating_ids <- ratings$rtg %>%
   mutate(team_id = str_remove_all(name, "team_id_")) %>% 
   pull(team_id)
 
-schedule <- schedule %>%
+schedule <- schedule %>% 
   filter(home_id %in% rating_ids & away_id %in% rating_ids)
 
 ##########################RUN SIMULATION #########################################################################
@@ -100,6 +112,18 @@ object <- simulate_ncaa(ncaa_season =  {cur_yr},
                      simulations = 10000,
                      sim_include = "REG")
 
+## Set seed ------------------
+set.seed(214)
+
+## Run again without priors -------------------------------------
+object_no_prior <- simulate_ncaa(ncaa_season =  {cur_yr},
+                                 process_games = {process_games},
+                                 schedule = {schedule},
+                                 if_ended_today = FALSE,
+                                 fresh_season = TRUE,
+                                 ratings = {ratings_no_prior},
+                                 simulations = 10000,
+                                 sim_include = "REG")
 
 ##########################GET ODDS############################################################################
 library(jsonlite)
@@ -117,9 +141,15 @@ dates <- schedule %>%
   select(game_date) %>% 
   distinct()
 
+#i <- 1
+#bk_name <- "Consensus"
+#league_nm <- "ncaab"
+#df <- dates
+
 ## Get odds ----------
 odds <- get_odds(dates,
-                 bk_name = "Consensus")
+                 bk_name = "Consensus",
+                 league_nm = 'ncaab')
  
 # Team bets ---------------------------------------------
 team_bets <- as.data.frame(object$games) %>% 
@@ -168,7 +198,7 @@ team_bets <- as.data.frame(object$games) %>%
   relocate(c(under_odds, under_val), .after = is_under) %>% 
   filter(!is.na(team))
 
-head(team_bets)
+head(team_bets, 10)
 
 ## Moneyline bets ------------------------------------------
 moneyline <- team_bets %>% 
@@ -182,7 +212,11 @@ moneyline <- team_bets %>%
   left_join(game_ids, by = c("game_date", "team_id")) %>% 
   relocate(game_id)
 
-print(moneyline)
+print(moneyline %>% arrange(team))
+
+moneyline %>% 
+  filter(ml_val > .02, ml_val <=.11) %>% 
+  arrange(team)
 
 ## Wrong team favored ----------------------
 wtf <- team_bets %>% 
@@ -209,7 +243,9 @@ spread <- team_bets %>%
   left_join(game_ids, by = c("game_date", "team_id")) %>% 
   relocate(game_id)
 
-print(spread)
+print(spread %>% arrange(team))
+print(spread %>% filter(spread_val > 0.5) %>% arrange(game_date,
+                                                      team))
 
 ## Team overs -----------------
 tm_over <- team_bets %>%  
@@ -304,7 +340,7 @@ game_under <- game_bets %>%
          total_val)
 
 print(game_over)
-print(game_under)
+print(game_under %>% arrange(away_tm))
 
 # Combine all bets --------------------------------------
 all_bets <- list(ml = {moneyline},
@@ -317,6 +353,11 @@ all_bets <- list(ml = {moneyline},
 
 all_results <- as.data.frame(object$games) %>% 
   double_odds() %>% 
+  left_join(schedule %>% 
+              select(game_date, team_id = home_id, opp_id = away_id) %>% 
+              bind_rows(schedule %>% 
+                          select(game_date, team_id = away_id, opp_id = home_id)),
+            by = c("team_id", "opp_id")) %>% 
   mutate(opp_score = team_score - result,
          game_total = team_score + opp_score) %>% 
   left_join(teams %>% 
@@ -324,21 +365,62 @@ all_results <- as.data.frame(object$games) %>%
   left_join(teams %>% 
               select(opp_id = team_id, Opp = team), by = "opp_id") %>% 
   with_groups(.groups = c(team_id, Team,
-                          opp_id, Opp),
+                          opp_id, Opp, game_date),
               summarise, win = mean(outcome),
               result = -median(result),
               team_total = round(mean(team_score)/.5, 0) * 0.5,
               opp_total = round(mean(opp_score)/.5, 0) * 0.5,
               game_total = round(mean(game_total)/.5, 0) * 0.5) %>% 
   left_join(schedule %>% 
-              select(team_id = home_id, game_id) %>% 
+              select(game_date, team_id = home_id, game_id) %>% 
               bind_rows(schedule %>% 
-                          select(team_id = away_id, game_id)),
-            by = "team_id") %>% 
+                          select(game_date, team_id = away_id, game_id)),
+            by = c("team_id", "game_date")) %>% 
+  select(-game_date) %>% 
   left_join(hoopR::load_mbb_schedule() %>% 
               select(game_id, game_date = game_date_time), by = "game_id") %>% 
-  relocate(c(game_date, game_id)) %>% 
+  relocate(c(game_date, game_date, game_id)) %>% 
   arrange(game_date, game_id)
+
+all_results_no_prior <- as.data.frame(object_no_prior$games) %>% 
+  double_odds() %>% 
+  left_join(schedule %>% 
+              select(game_date, team_id = home_id, opp_id = away_id) %>% 
+              bind_rows(schedule %>% 
+                          select(game_date, team_id = away_id, opp_id = home_id)),
+            by = c("team_id", "opp_id")) %>% 
+  mutate(opp_score = team_score - result,
+         game_total = team_score + opp_score) %>% 
+  left_join(teams %>% 
+              select(team_id, Team = team), by = "team_id") %>%
+  left_join(teams %>% 
+              select(opp_id = team_id, Opp = team), by = "opp_id") %>% 
+  with_groups(.groups = c(team_id, Team,
+                          opp_id, Opp, game_date),
+              summarise, win = mean(outcome),
+              result = -median(result),
+              team_total = round(mean(team_score)/.5, 0) * 0.5,
+              opp_total = round(mean(opp_score)/.5, 0) * 0.5,
+              game_total = round(mean(game_total)/.5, 0) * 0.5) %>% 
+  left_join(schedule %>% 
+              select(game_date, team_id = home_id, game_id) %>% 
+              bind_rows(schedule %>% 
+                          select(game_date, team_id = away_id, game_id)),
+            by = c("team_id", "game_date")) %>% 
+  select(-game_date) %>% 
+  left_join(hoopR::load_mbb_schedule() %>% 
+              select(game_id, game_date = game_date_time), by = "game_id") %>% 
+  relocate(c(game_date, game_date, game_id)) %>% 
+  arrange(game_date, game_id)
+
+## Combine results with no prior
+all_results <- all_results %>% 
+  left_join(all_results_no_prior %>% 
+              select(game_id, team_id,
+                     win_noprior = win,
+                     result_noprior = result), by = c("game_id", "team_id")) %>% 
+  relocate(win_noprior, .after = win) %>% 
+  relocate(result_noprior, .after = result)
 
 ## Save -----
 saveRDS(all_bets,

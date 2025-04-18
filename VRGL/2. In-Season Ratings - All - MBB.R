@@ -66,15 +66,7 @@ max_games <- games_to_play %>%
   distinct() %>% 
   pull(games_to_play)
 
-weight.df <- data.frame(game_no = seq.int(from = 1,
-                                          to = max_games,
-                                          by = 1)) %>%
-  mutate(weight = 0.85 ^ game_no,
-         weight = weight / sum(weight),
-         cum_weight = cumsum(weight)) %>% 
-  mutate(row = row_number()) %>% 
-  select(row, cum_weight)
-
+print(max_games)
 
 # Load priors ---------------
 priors.all <- readRDS(glue::glue('Power Ratings/Team Ratings/Priors/priors_{season}.rds'))
@@ -145,6 +137,18 @@ stat_name <- "poss_per_40"
 ## Features ----------
 list <- c('game_date', 'team_id', 'opp_id')
 
+## Weight data frame ----------------
+weight.df <- data.frame(game_no = seq.int(from = 1,
+                                          # Adjust max games as needed
+                                          to = max_games - 0,
+                                          by = 1)) %>%
+  mutate(weight = 0.7 ^ game_no,
+         weight = weight / sum(weight),
+         # Adjust by prior minimum as needed
+         cum_weight = cumsum(weight) * (1 - 0.10)) %>% 
+  mutate(row = row_number()) %>% 
+  select(row, cum_weight)
+
 ## Load weights -----
 wgt_var <- readRDS(glue::glue('Power Ratings/Weights/single_season_{stat_name}_weights.rds')) %>%
   rename(year = season) %>%
@@ -159,15 +163,15 @@ wgt_var <- readRDS(glue::glue('Power Ratings/Weights/single_season_{stat_name}_w
 print(wgt_var)
 
 ## Load lambda adj -----
-lambda_adj <- .05 #readRDS(glue::glue('Power Ratings/Weights/single_season_{stat_name}_weights.rds')) %>%
-  #rename(year = season) %>%
-  #filter(year <= season) %>% 
-  #with_groups(.groups = year, mutate, rank = dense_rank(rmse)) %>% 
-  #filter(rank == 1) %>%
-  #mutate(weight = .97^(season - as.numeric(year))) %>% 
-  #summarise(lambda_adj = weighted.mean(x = lambda_adj, w = weight)) %>% 
-  #select(lambda_adj) %>% 
-  #as.double()
+lambda_adj <- readRDS(glue::glue('Power Ratings/Weights/single_season_{stat_name}_weights.rds')) %>%
+  rename(year = season) %>%
+  filter(year <= season) %>% 
+  with_groups(.groups = year, mutate, rank = dense_rank(rmse)) %>% 
+  filter(rank == 1) %>%
+  mutate(weight = .97^(season - as.numeric(year))) %>% 
+  summarise(lambda_adj = weighted.mean(x = lambda_adj, w = weight)) %>% 
+  select(lambda_adj) %>% 
+  as.double()
 
 print(lambda_adj)
 
@@ -183,34 +187,49 @@ raw.coeff.pace <- create_ratings(df = summary,
 
 # Add priors to create ratings ---------
 ratings.pace <- priors.pace %>% 
-  left_join(raw.coeff.pace,
+  full_join(raw.coeff.pace,
             by = "name",
             suffix = c("_prior", "_curr")) %>% 
-  left_join(games_played, by = "name") %>%  
+  left_join(games_played, by = "name") %>%
   mutate(games_played = case_when(
     is.na(games_played) ~ round(mean(games_played, na.rm = TRUE), 2),
     TRUE ~ games_played)) %>% 
   left_join(games_to_play, by = "name") %>% 
   left_join(weight.df, by = c("games_played" = "row")) %>% 
+  mutate(cum_weight = replace_na(cum_weight,
+                                 max(cum_weight, na.rm = TRUE))) %>% 
   mutate(value = case_when(
     is.na(value_curr) ~ value_prior,
+    is.na(value_prior) ~ value_curr,
     str_detect(name, "team_id_") | str_detect(name, "opp_id_") ~ 
       cum_weight * value_curr + (1 - cum_weight) * value_prior,
     TRUE ~ (0.9 + 0.1 * games_played / max_games) * value_curr + 
-      (0.1 - 0.1 * games_played / max_games) * value_prior)) %>% 
+      (0.1 - 0.1 * games_played / max_games) * value_prior)) %>%
   select(name, value)
 
 head(ratings.pace)
 
 ## Clear stuff out  --------
 rm(stat_name, list, wgt_var,
-   priors.pace, raw.coeff.pace)
+   priors.pace)
 
 # Assist Rate -----------------------------------
 stat_name <- "ast_rt"
 
 ## Features ----------
 list <- c('game_date', 'team_id', 'opp_id')
+
+## Weight data frame ----------------
+weight.df <- data.frame(game_no = seq.int(from = 1,
+                                          # Adjust max games as needed
+                                          to = max_games - 0,
+                                          by = 1)) %>%
+  mutate(weight = 0.9 ^ game_no,
+         weight = weight / sum(weight),
+         # Adjust by prior minimum as needed
+         cum_weight = cumsum(weight) * (1 - 0.10)) %>% 
+  mutate(row = row_number()) %>% 
+  select(row, cum_weight)
 
 ## Load weights -----
 wgt_var <- readRDS(glue::glue('Power Ratings/Weights/single_season_{stat_name}_weights.rds')) %>%
@@ -251,7 +270,7 @@ raw.coeff.ast <- create_ratings(df = summary,
 
 # Add priors to create ratings ---------
 ratings.ast <- priors.ast %>% 
-  left_join(raw.coeff.ast,
+  full_join(raw.coeff.ast,
             by = "name",
             suffix = c("_prior", "_curr")) %>% 
   left_join(games_played, by = "name") %>%  
@@ -260,8 +279,11 @@ ratings.ast <- priors.ast %>%
     TRUE ~ games_played)) %>% 
   left_join(games_to_play, by = "name") %>% 
   left_join(weight.df, by = c("games_played" = "row")) %>% 
+  mutate(cum_weight = replace_na(cum_weight,
+                                 max(cum_weight, na.rm = TRUE))) %>% 
   mutate(value = case_when(
     is.na(value_curr) ~ value_prior,
+    is.na(value_prior) ~ value_curr,
     str_detect(name, "team_id_") | str_detect(name, "opp_id_") ~ 
       cum_weight * value_curr + (1 - cum_weight) * value_prior,
     TRUE ~ (0.9 + 0.1 * games_played / max_games) * value_curr + 
@@ -272,13 +294,25 @@ head(ratings.ast)
 
 ## Clear stuff out  --------
 rm(stat_name, list, wgt_var,
-   priors.ast, raw.coeff.ast)
+   priors.ast)
 
 # Offensive rebound rate -----------------------------------
 stat_name <- "oreb_rt"
 
 ## Features ----------
 list <- c('game_date', 'team_id', 'opp_id')
+
+## Weight data frame ----------------
+weight.df <- data.frame(game_no = seq.int(from = 1,
+                                          # Adjust max games as needed
+                                          to = max_games - 2,
+                                          by = 1)) %>%
+  mutate(weight = 0.9 ^ game_no,
+         weight = weight / sum(weight),
+         # Adjust by prior minimum as needed
+         cum_weight = cumsum(weight) * (1 - 0.15)) %>% 
+  mutate(row = row_number()) %>% 
+  select(row, cum_weight)
 
 ## Load weights -----
 wgt_var <- readRDS(glue::glue('Power Ratings/Weights/single_season_{stat_name}_weights.rds')) %>%
@@ -320,7 +354,7 @@ raw.coeff.oreb <- create_ratings(df = summary,
 
 # Add priors to create ratings ---------
 ratings.oreb <- priors.oreb %>% 
-  left_join(raw.coeff.oreb,
+  full_join(raw.coeff.oreb,
             by = "name",
             suffix = c("_prior", "_curr")) %>% 
   left_join(games_played, by = "name") %>%  
@@ -329,8 +363,11 @@ ratings.oreb <- priors.oreb %>%
     TRUE ~ games_played)) %>% 
   left_join(games_to_play, by = "name") %>% 
   left_join(weight.df, by = c("games_played" = "row")) %>% 
+  mutate(cum_weight = replace_na(cum_weight,
+                                 max(cum_weight, na.rm = TRUE))) %>% 
   mutate(value = case_when(
     is.na(value_curr) ~ value_prior,
+    is.na(value_prior) ~ value_curr,
     str_detect(name, "team_id_") | str_detect(name, "opp_id_") ~ 
       cum_weight * value_curr + (1 - cum_weight) * value_prior,
     TRUE ~ (0.9 + 0.1 * games_played / max_games) * value_curr + 
@@ -341,13 +378,25 @@ head(ratings.oreb)
 
 ## Clear stuff out  --------
 rm(stat_name, list, wgt_var,
-   priors.oreb, raw.coeff.oreb)
+   priors.oreb)
 
 # Turnover Rate -----------------------------------
 stat_name <- "to_rt"
 
 ## Features ----------
 list <- c('game_date', 'team_id', 'opp_id')
+
+## Weight data frame ----------------
+weight.df <- data.frame(game_no = seq.int(from = 1,
+                                          # Adjust max games as needed
+                                          to = max_games - 0,
+                                          by = 1)) %>%
+  mutate(weight = 0.83 ^ game_no,
+         weight = weight / sum(weight),
+         # Adjust by prior minimum as needed
+         cum_weight = cumsum(weight) * (1 - 0.10)) %>% 
+  mutate(row = row_number()) %>% 
+  select(row, cum_weight)
 
 ## Load weights -----
 wgt_var <- readRDS(glue::glue('Power Ratings/Weights/single_season_{stat_name}_weights.rds')) %>%
@@ -387,7 +436,7 @@ raw.coeff.to <- create_ratings(df = summary,
 
 # Add priors to create ratings ---------
 ratings.to <- priors.to %>% 
-  left_join(raw.coeff.to,
+  full_join(raw.coeff.to,
             by = "name",
             suffix = c("_prior", "_curr")) %>% 
   left_join(games_played, by = "name") %>%  
@@ -396,8 +445,11 @@ ratings.to <- priors.to %>%
     TRUE ~ games_played)) %>% 
   left_join(games_to_play, by = "name") %>% 
   left_join(weight.df, by = c("games_played" = "row")) %>% 
+  mutate(cum_weight = replace_na(cum_weight,
+                                 max(cum_weight, na.rm = TRUE))) %>% 
   mutate(value = case_when(
     is.na(value_curr) ~ value_prior,
+    is.na(value_prior) ~ value_curr,
     str_detect(name, "team_id_") | str_detect(name, "opp_id_") ~ 
       cum_weight * value_curr + (1 - cum_weight) * value_prior,
     TRUE ~ (0.9 + 0.1 * games_played / max_games) * value_curr + 
@@ -408,13 +460,25 @@ head(ratings.to)
 
 ## Clear stuff out  --------
 rm(stat_name, list, wgt_var,
-   priors.to, raw.coeff.to)
+   priors.to)
 
 # Effective FG % -----------------------------------
 stat_name <- "efg_adj"
 
 ## Features ----------
 list <- c('game_date', 'team_id', 'opp_id')
+
+## Weight data frame ----------------
+weight.df <- data.frame(game_no = seq.int(from = 1,
+                                          # Adjust max games as needed
+                                          to = max_games - 0,
+                                          by = 1)) %>%
+  mutate(weight = 0.7 ^ game_no,
+         weight = weight / sum(weight),
+         # Adjust by prior minimum as needed
+         cum_weight = cumsum(weight) * (1 - 0.10)) %>% 
+  mutate(row = row_number()) %>% 
+  select(row, cum_weight)
 
 ## Load weights -----
 wgt_var <- readRDS(glue::glue('Power Ratings/Weights/single_season_{stat_name}_weights.rds')) %>%
@@ -455,7 +519,7 @@ raw.coeff.efg <- create_ratings(df = summary,
 
 # Add priors to create ratings ---------
 ratings.efg <- priors.efg %>% 
-  left_join(raw.coeff.efg,
+  full_join(raw.coeff.efg,
             by = "name",
             suffix = c("_prior", "_curr")) %>% 
   left_join(games_played, by = "name") %>%  
@@ -464,8 +528,11 @@ ratings.efg <- priors.efg %>%
     TRUE ~ games_played)) %>% 
   left_join(games_to_play, by = "name") %>% 
   left_join(weight.df, by = c("games_played" = "row")) %>% 
+  mutate(cum_weight = replace_na(cum_weight,
+                                 max(cum_weight, na.rm = TRUE))) %>% 
   mutate(value = case_when(
     is.na(value_curr) ~ value_prior,
+    is.na(value_prior) ~ value_curr,
     str_detect(name, "team_id_") | str_detect(name, "opp_id_") ~ 
       cum_weight * value_curr + (1 - cum_weight) * value_prior,
     TRUE ~ (0.9 + 0.1 * games_played / max_games) * value_curr + 
@@ -477,10 +544,23 @@ head(ratings.efg)
 
 ## Clear stuff out  --------
 rm(stat_name, list, wgt_var,
-   priors.efg, raw.coeff.efg)
+   priors.efg)
 
 # Team Ratings -----------------------------------------
 stat_name <- "rtg"
+
+## Weight data frame ----------------
+weight.df <- data.frame(game_no = seq.int(from = 1,
+                                          # Adjust max games as needed
+                                          to = max_games - 3,
+                                          by = 1)) %>%
+  mutate(weight = 0.95 ^ game_no,
+         weight = weight / sum(weight),
+         # Adjust by prior minimum as needed
+         cum_weight = cumsum(weight) * (1 - 0.15)) %>% 
+  mutate(row = row_number()) %>% 
+  select(row, cum_weight)
+
 
 ## Features ----------
 list <- c('game_date', 'team_id', 'opp_id',
@@ -502,16 +582,16 @@ wgt_var <- readRDS(glue::glue('Power Ratings/Weights/single_season_{stat_name}_w
 print(wgt_var)
 
 ## Load lambda adj -----
-lambda_adj <- readRDS(glue::glue('Power Ratings/Weights/single_season_{stat_name}_weights.rds')) %>%
-  mutate(wgt = as.double(wgt), lambda_adj = as.double(lambda)) %>% 
-  rename(year = season) %>%
-  filter(year <= season) %>% 
-  with_groups(.groups = year, mutate, rank = dense_rank(rmse)) %>% 
-  filter(rank == 1) %>%
-  mutate(weight = .97^(season - as.numeric(year))) %>% 
-  summarise(lambda_adj = weighted.mean(x = lambda_adj, w = weight)) %>% 
-  select(lambda_adj) %>% 
-  as.double()
+lambda_adj <- 0.75 #readRDS(glue::glue('Power Ratings/Weights/single_season_{stat_name}_weights.rds')) %>%
+  #mutate(wgt = as.double(wgt), lambda_adj = as.double(lambda)) %>% 
+  #rename(year = season) %>%
+  #filter(year <= season) %>% 
+  #with_groups(.groups = year, mutate, rank = dense_rank(rmse)) %>% 
+  #filter(rank == 1) %>%
+  #mutate(weight = .97^(season - as.numeric(year))) %>% 
+  #summarise(lambda_adj = weighted.mean(x = lambda_adj, w = weight)) %>% 
+  #select(lambda_adj) %>% 
+  #as.double()
 
 print(lambda_adj)
 
@@ -526,7 +606,7 @@ raw.coeff.rtg <- create_ratings(df = summary,
 
 # Add priors to create ratings ---------
 ratings.rtg <- priors.rtg %>% 
-  left_join(raw.coeff.rtg,
+  full_join(raw.coeff.rtg,
             by = "name",
             suffix = c("_prior", "_curr")) %>% 
   left_join(games_played, by = "name") %>%  
@@ -535,8 +615,11 @@ ratings.rtg <- priors.rtg %>%
     TRUE ~ games_played)) %>% 
   left_join(games_to_play, by = "name") %>% 
   left_join(weight.df, by = c("games_played" = "row")) %>% 
+  mutate(cum_weight = replace_na(cum_weight,
+                                 max(cum_weight, na.rm = TRUE))) %>% 
   mutate(value = case_when(
     is.na(value_curr) ~ value_prior,
+    is.na(value_prior) ~ value_curr,
     str_detect(name, "team_id_") | str_detect(name, "opp_id_") ~ 
       cum_weight * value_curr + (1 - cum_weight) * value_prior,
     TRUE ~ (0.9 + 0.1 * games_played / max_games) * value_curr + 
@@ -599,7 +682,7 @@ raw.coeff.rtg %>%
 
 # Clear stuff out
 rm(stat_name, list, wgt_var,
-   priors.rtg, raw.coeff.rtg)
+   priors.rtg)
 
 
 # Raw Team Ratings (DO NOT INCLUDE OTHER STATS) -----------------------------------------
@@ -649,7 +732,7 @@ raw.coeff.rtg.raw <- create_ratings(df = summary,
 
 # Add priors to create ratings ---------
 ratings.rtg_raw <- priors.rtg_raw %>% 
-  left_join(raw.coeff.rtg.raw,
+  full_join(raw.coeff.rtg.raw,
             by = "name",
             suffix = c("_prior", "_curr")) %>% 
   left_join(games_played, by = "name") %>%  
@@ -658,8 +741,11 @@ ratings.rtg_raw <- priors.rtg_raw %>%
     TRUE ~ games_played)) %>% 
   left_join(games_to_play, by = "name") %>% 
   left_join(weight.df, by = c("games_played" = "row")) %>% 
+  mutate(cum_weight = replace_na(cum_weight,
+                                 max(cum_weight, na.rm = TRUE))) %>% 
   mutate(value = case_when(
     is.na(value_curr) ~ value_prior,
+    is.na(value_prior) ~ value_curr,
     str_detect(name, "team_id_") | str_detect(name, "opp_id_") ~ 
       cum_weight * value_curr + (1 - cum_weight) * value_prior,
     TRUE ~ (0.9 + 0.1 * games_played / max_games) * value_curr + 
@@ -730,6 +816,19 @@ rtgs.all <- list(pace = {ratings.pace},
                  efg = {ratings.efg},
                  raw_rating = {ratings.rtg_raw})
 
+# Ratings with no priors ------------------------
+rtgs.no_prior <- list(pace = {raw.coeff.pace},
+                      ast = {raw.coeff.ast},
+                      oreb = {raw.coeff.oreb},
+                      to = {raw.coeff.to},
+                      rtg = {raw.coeff.rtg},
+                      #Additional for site
+                      efg = {raw.coeff.efg},
+                      raw_rating = {raw.coeff.rtg.raw})
+
 ## Save ratings --------
 saveRDS(rtgs.all,
         glue::glue("Power Ratings/Team Ratings/Inseason/inseason_ratings_all_{season}.rds"))
+
+saveRDS(rtgs.no_prior,
+        glue::glue("Power Ratings/Team Ratings/Inseason/inseason_ratings_all_no_prior_{season}.rds"))

@@ -1,31 +1,24 @@
-library(hoopR)
+library(wehoop)
 library(tidyverse)
 
 # Set working directory
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
+`%!in%` = Negate(`%in%`)
+
 # Set season
 cur_yr <- 2025
 
-`%!in%` = Negate(`%in%`)
-
 # Load full pbp and raw pbp, roster and team data ----------------------------------------------------
-pbp_full <- readRDS(glue::glue("Stats/PBP and Shot Data/pbp_{cur_yr}.rds"))
+pbp_full <- readRDS(glue::glue("Stats/PBP and Shot Data/pbp_wbb_{cur_yr}.rds"))
 
-pbp_raw <- hoopR::load_mbb_pbp(seasons = {cur_yr}) #%>% 
-  #mutate(type_id = case_when(
-    #type_id == 20437 ~ 437,
-    #type_id == 20558 ~ 558,
-    #type_id == 20572 ~ 572,
-    #type_id == 20574 ~ 574,
-    #type_id == 30558 ~ 558,
-    #TRUE ~ type_id))
+pbp_raw <- wehoop::load_wbb_pbp(seasons = {cur_yr})
 
 pbp_raw <- pbp_raw %>% 
   filter(game_id %!in% pbp_full$game_id)
 
 # Load roster
-roster <- hoopR::load_mbb_player_box(seasons = {cur_yr})
+roster <- wehoop::load_wbb_player_box(seasons = {cur_yr})
 
 # Check for missing play types ------------
 playtypes <- pbp_raw %>% 
@@ -34,10 +27,22 @@ playtypes <- pbp_raw %>%
   unique() %>% 
   arrange(type_id)
 
+pbp_raw <- pbp_raw %>% 
+  mutate(type_id = as.character(type_id),
+         type_id = str_remove_all(type_id, "20"),
+         type_id = str_remove_all(type_id, "30"),
+         type_id = as.integer(type_id))
+
 playtypes %>% 
   print(n = Inf)
 
-pbp_raw <- pbp_raw %>% filter(type_id != 0)
+pbp_raw %>% 
+  filter(type_id == "0" | is.na(type_id)) %>% 
+  select(game_id) %>% 
+  distinct()
+
+pbp_raw <- pbp_raw %>% 
+  filter(type_id != 0)
 
 # Get unique players and teams with positions -----------------------------------------
 players <- roster %>% 
@@ -56,8 +61,9 @@ doubles <- players %>%
 
 players2 <- as.data.frame(players) %>% 
   filter(athlete_id %!in% doubles$athlete_id) %>% 
-  rbind(doubles)
+  bind_rows(doubles)
 
+## Add player info to pbp and clean up ---------------------------
 pbp_raw <- pbp_raw %>% 
   mutate(clock_minutes = as.numeric(clock_minutes), # Fix the seconds remaining thing
          clock_seconds = as.numeric(clock_seconds),
@@ -156,7 +162,6 @@ pbp_raw <- pbp_raw %>%
   # Add shot clock
   mutate(shot_clock = case_when(
     shooting_play == TRUE & lag(type_id) == "586" & lag(type_id, n = 2) == "618" ~ 30 - poss_time,
-    shooting_play == TRUE & lag(type_id) == "586" ~ 20 - poss_time,
     shooting_play == TRUE & game_play_number == 1 ~ 30 - (2400 - secs_remaining),
     TRUE ~ 30 - elapsed),
     score_diff = home_score - away_score,
@@ -190,7 +195,7 @@ pbp_raw <- pbp_raw %>%
 
 # Fix shot clock below 0; use possession start, exclude fast break
 mean_sc <- pbp_raw %>%
-  bind_rows(pbp_full) %>% 
+  #bind_rows(pbp_full) %>% 
   filter(shot_clock >= 0, shooting_play == TRUE, is_fastbreak == FALSE) %>% 
   with_groups(.groups = poss_start, summarise, mean_sc = mean(shot_clock))
 
@@ -210,7 +215,7 @@ pbp_raw %>%
   filter(shooting_play == TRUE, shot_clock < 0)
 
 # Save roster ---------------
-saveRDS(roster, glue::glue("Stats/Rosters/roster_{cur_yr}.rds"))
+saveRDS(roster, glue::glue("Stats/Rosters/roster_wbb_{cur_yr}.rds"))
 
 # Add expected values to shots --------------------------------------------
 ## Shots with location -----------
@@ -310,34 +315,38 @@ library(splitTools)
 library(dials)
 library(xgboost)
 
-# Models
-xfg_loc <- xgb.load(glue::glue("Stats/Models/xfg {cur_yr}.model"))
-
-xfg_noloc <- xgb.load(glue::glue("Stats/Models/xfg noloc {cur_yr}.model"))
-
-xfg_ft <- readRDS(glue::glue("Stats/Models/ft {cur_yr}.rds"))
-
-# Preds to location shots
 set.seed(421)
 
+# Models
+xfg_loc <- xgb.load(glue::glue("Stats/Models/xfg wbb {cur_yr}.model"))
+
+xfg_noloc <- xgb.load(glue::glue("Stats/Models/xfg noloc wbb {cur_yr}.model"))
+
+xfg_ft <- readRDS(glue::glue("Stats/Models/ft wbb {cur_yr}.rds"))
+
+# Preds to location shots
 preds_loc <- stats::predict(
   xfg_loc,
   # get rid of the things not needed for prediction here
-  as.matrix(shots_loc %>% select(-c(label, game_id, game_play_number,
-                                    period_display_value, period_number,
-                                    team_id, poss_tm, poss_id, poss_row, poss_start,
-                                    player_id, other_player_id, player, number, athlete_headshot_href,
-                                    away_team_id, home_team_id,
-                                    point_value, shot_value)
-  ))
+  as.matrix(shots_loc %>% 
+              #rename(season_type_3 = season_type_) %>%
+              mutate(pos_G = case_when(
+                pos_SG == 1 ~ 1,
+                TRUE ~ pos_G))%>%
+              select(-c(label, game_id, game_play_number,
+                        period_display_value, period_number,
+                        team_id, poss_tm, poss_id, poss_row, poss_start,
+                        player_id, other_player_id, player, number, athlete_headshot_href,
+                        away_team_id, home_team_id,
+                        pos_SG,
+                        point_value, shot_value)
+              ))
 ) %>%
   tibble::as_tibble() %>%
   dplyr::rename(xfg = value) %>%
   dplyr::bind_cols(shots_loc)
 
 # Preds to no-location shots
-set.seed(421)
-
 preds_noloc <- stats::predict(
   xfg_noloc,
   # get rid of the things not needed for prediction here
@@ -426,7 +435,7 @@ pbp_raw <- pbp_raw %>%
 pbp_full <- bind_rows(pbp_full,
                       pbp_raw)
 
-saveRDS(pbp_full, glue::glue("Stats/PBP and Shot Data/pbp_{cur_yr}.rds"))
+saveRDS(pbp_full, glue::glue("Stats/PBP and Shot Data/pbp_wbb_{cur_yr}.rds"))
 
 # Clear out extra objects ------------------------------
 pbp <- pbp_full
@@ -441,10 +450,10 @@ rm(all_preds, doubles, mean_sc,
 library(sp)
 
 # Load teams -----
-teams <- readRDS(glue::glue("Stats/Teams/team_database.rds"))
+teams <- readRDS(glue::glue("Stats/Teams/team_database_wbb.rds"))
 
 # Load schedule ------ 
-schedule <- hoopR::load_mbb_schedule(seasons = {cur_yr}) %>% 
+schedule <- wehoop::load_wbb_schedule(seasons = {cur_yr}) %>% 
   as.data.frame() %>% 
   # Filter for teams in database
   filter(home_id %in% teams$team_id | away_id %in% teams$team_id) %>% 
@@ -453,11 +462,9 @@ schedule <- hoopR::load_mbb_schedule(seasons = {cur_yr}) %>%
 
 # Calculate days rest based on schedule ---------------
 sched_doubled <- schedule %>% 
-  select(game_id = id, game_date, team_id = home_id,
-         venue_id, neutral_site, conference_competition) %>% 
+  select(game_id = id, game_date, team_id = home_id, venue_id, neutral_site) %>% 
   bind_rows(schedule %>% 
-              select(game_id = id, game_date, team_id = away_id,
-                     venue_id, neutral_site, conference_competition)) %>% 
+              select(game_id = id, game_date, team_id = away_id, venue_id, neutral_site)) %>% 
   distinct() %>% 
   arrange(game_date) %>% 
   with_groups(.groups = c(team_id), mutate, days_rest = as.numeric(game_date - lag(game_date))) %>% 
@@ -466,7 +473,7 @@ sched_doubled <- schedule %>%
 
 # Get correct scores for games; filter out pbp which does not match to correct scores ------ 
 ## Load team box -----
-team_box <- hoopR::load_mbb_team_box({cur_yr}) %>% 
+team_box <- wehoop::load_wbb_team_box({cur_yr}) %>% 
   mutate(efg_adj = (0.5 * free_throws_made + field_goals_made + 0.5 * three_point_field_goals_made) / 
            (field_goals_attempted + free_throws_attempted),
          ast_rt = assists / field_goals_made,
@@ -545,12 +552,12 @@ summary <- pbp %>%
   arrange(game_date) %>% 
   # Add days rest for each team for each game
   left_join(sched_doubled %>% 
-              select(game_id, team_id, days_rest, conference_competition), by = c("game_id", "team_id")) %>% 
+              select(game_id, team_id, days_rest), by = c("game_id", "team_id")) %>% 
   mutate(is_home = case_when(
     neutral_site == TRUE ~ FALSE,
     team_home_away == "home" ~ TRUE,
     team_home_away == "away" ~ FALSE)) %>% 
-  select(-c(team_home_away, turnovers))
+  select(-team_home_away)
 
 ## Create summary for missing games by using team box
 summary_box <- team_box %>%
@@ -583,11 +590,15 @@ summary_box <- team_box %>%
   arrange(game_date) %>% 
   select(game_id, game_date, team_id, possessions,
          poss_per_40, team_score, opponent_team_id,
-         efg_adj, oreb_rt, ast_rt, to_rt, conference_competition,
+         efg_adj, oreb_rt, ast_rt, to_rt, 
          mins, pts_per_poss, rtg, neutral_site,
          venue_id, tournament_id, days_rest, is_home)
 
 summary <- bind_rows(summary, summary_box)
+
+summary %>% 
+  filter(is.na(ast_rt) | is.na(oreb_rt) |
+           is.na(to_rt) | is.na(efg_adj))
 
 ## Create shot type summary ------------
 shot_type_summary <- pbp %>% 
@@ -631,12 +642,9 @@ summary %>%
 summary %>% 
   filter(is.na(is_home))
 
-summary %>% 
-  filter(is.na(conference_competition))
-
 # Load team venues for calculating travel -------------------
-all_venues <- readRDS("Stats/Teams/team_venues.rds") %>%
-  bind_rows(readRDS("Stats/Teams/neutral_sites.rds")) %>% 
+all_venues <- readRDS("Stats/Teams/team_venues_wbb.rds") %>%
+  bind_rows(readRDS("Stats/Teams/neutral_sites_wbb.rds")) %>% 
   mutate(latitude = as.numeric(latitude),
          longitude = as.numeric(longitude))
 
@@ -675,12 +683,10 @@ coords <- summary %>%
 
 ### Check for NA values --------------------
 coords %>% 
-  filter(is.na(ven_lat) | is.na(ven_lng) | is.na(tm_lat) | is.na(tm_lng)) #%>%
+  filter(is.na(ven_lat) | is.na(ven_lng) | is.na(tm_lat) | is.na(tm_lng)) #%>% 
 # If missing values, check for missing venues
-#select(venue_id, ven_lat, ven_lng, tm_lat, tm_lng) %>% 
+#select(venue_id) %>% 
 #distinct()
-
-#coords <- coords %>% filter(!is.na(tm_lat))
 
 ### Check for duplicates ---------------------
 duplicates <- coords %>% 
@@ -720,4 +726,4 @@ coords <- as.data.frame(coords)
 head(coords, 10)
 
 # Save --------------------------
-saveRDS(coords, glue::glue("Stats/Power Ratings/Raw Data/poss_stats_with_types_{cur_yr}.rds"))
+saveRDS(coords, glue::glue("Stats/Power Ratings/Raw Data/poss_stats_with_types_wbb_{cur_yr}.rds"))
