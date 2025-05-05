@@ -2,8 +2,8 @@
 title: "About"
 ---
 
-About this site
+# Basic Methodology
 
-```{r}
-1 + 1
-```
+The rating methodology is pretty straightforward. I use a ridge regression to adjust the main team stats (pace, rebound rate, turnover rate, assist rate, rating) for things like opponent, home court, travel, and days of rest. The general structure owes a lot to this article from Bud Davis: [Opponent-Adjusted Stats Using Ridge Regression](https://blog.collegefootballdata.com/opponent-adjusted-stats-ridge-regression/)
+
+That's the overall gist. There's also a few other pieces that get adjusted along the way, which I'll expound upon below.
