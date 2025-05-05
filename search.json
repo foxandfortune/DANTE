@@ -7,24 +7,10 @@
     "text": "This is a site for NCAA power ratings.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites.\n\n1 + 1\n\n[1] 2"
   },
   {
-    "objectID": "dante_page/about.html",
-    "href": "dante_page/about.html",
-    "title": "About",
-    "section": "",
-    "text": "About this site\n\n1 + 1\n\n[1] 2"
-  },
-  {
     "objectID": "about.html",
     "href": "about.html",
     "title": "About",
     "section": "",
-    "text": "About this site\n\n1 + 1\n\n[1] 2"
-  },
-  {
-    "objectID": "dante_page/index.html",
-    "href": "dante_page/index.html",
-    "title": "DANTE Ratings",
-    "section": "",
-    "text": "This is a site for NCAA power ratings.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites.\n\n1 + 1\n\n[1] 2"
+    "text": "Basic Methodology\nThe rating methodology is pretty straightforward. I use a ridge regression to adjust the main team stats (pace, rebound rate, turnover rate, assist rate, rating) for things like opponent, home court, travel, and days of rest. The general structure owes a lot to this article from Bud Davis: Opponent-Adjusted Stats Using Ridge Regression\nThat’s the overall gist. There’s also a few other pieces that get adjusted along the way, which I’ll expound upon below."
   }
 ]
