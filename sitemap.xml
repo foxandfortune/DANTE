@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://foxandfortune.github.io/DANTE/index.html</loc>
-    <lastmod>2025-05-04T01:48:23.600Z</lastmod>
+    <loc>https://foxandfortune.github.io/DANTE/vrgl_ratings.html</loc>
+    <lastmod>2025-05-05T02:22:09.096Z</lastmod>
+  </url>
+  <url>
+    <loc>https://foxandfortune.github.io/DANTE/btrc_ratings.html</loc>
+    <lastmod>2025-05-05T02:22:45.652Z</lastmod>
   </url>
   <url>
     <loc>https://foxandfortune.github.io/DANTE/about.html</loc>
     <lastmod>2025-05-05T02:02:19.008Z</lastmod>
+  </url>
+  <url>
+    <loc>https://foxandfortune.github.io/DANTE/index.html</loc>
+    <lastmod>2025-05-04T01:48:23.600Z</lastmod>
   </url>
 </urlset>
