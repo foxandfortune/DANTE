@@ -4,6 +4,7 @@ library(gtExtras)
 
 # Set working directory
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+setwd('..')
 
 # Add NOT IN function:
 `%!in%` = Negate(`%in%`)
@@ -12,7 +13,13 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 season <- 2025
 
 # Dante header function
-gt_dante_title <- readRDS('Minos/Simulation Backup/Functions/gt_dante_title.rds')
+gt_dante_title <- readRDS('_Helper Files/Simulation Functions/gt_dante_title.rds')
+
+# Create Table Function -------------------------
+create_ratings_table <- readRDS('_Helper Files/Other/create_ratings_table.rds')
+
+# MBB Theme -------------------------
+rank_theme <- readRDS('_Helper Files/Other/rank_theme_wbb.rds')
 
 # Check to see if season is finished -------------
 season_comp_status <- wehoop::load_wbb_schedule(2025) %>% 
@@ -22,9 +29,9 @@ season_comp_status <- wehoop::load_wbb_schedule(2025) %>%
 
 # Load ratings 
 if(season_comp_status == TRUE){
-  ratings_all <- readRDS(glue::glue('Stats/Power Ratings/Team Ratings/Full Season/ratings_all_wbb_{season}.rds'))
+  ratings_all <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Full Season/ratings_all_wbb_{season}.rds'))
 } else {
-  ratings_all <- readRDS(glue::glue('Stats/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_wbb_{season}.rds'))
+  ratings_all <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_wbb_{season}.rds'))
 }
 
 ratings.pace <- ratings_all$pace
@@ -35,7 +42,7 @@ ratings.efg <- ratings_all$efg
 ratings.rtg <- ratings_all$raw_rating
 
 # Load Teams
-teams <- readRDS('Stats/Teams/team_database_wbb.rds')
+teams <- readRDS('_Helper Files/Team Data/team_database_wbb.rds')
 
 conf <- cbbreadr::load_teams(2025) %>%
   left_join(cbbreadr::load_conferences() %>% 
@@ -284,7 +291,7 @@ head(ratings_tbl, 10)
 # Make table header ------------------
 gt_title <- gt_dante_title(title = glue::glue("{season} BTRC Ratings for Women's Basketball"),
                            subtitle = "Defense-Adjusted Net Team Efficiency (D.A.N.T.E.)",
-                           filepath = '',
+                           filepath = '_Helper Files/Other/',
                            type = "wbb",
                            logo_height = 75)
 

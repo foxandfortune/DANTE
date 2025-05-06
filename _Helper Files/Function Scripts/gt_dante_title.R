@@ -2,6 +2,7 @@ gt_dante_title <- function(title,
                            subtitle,
                            value = NULL,
                            logo_link = NULL,
+                           filepath,
                            type = c('mbb', 'wbb'),
                            title_font_size = 24,
                            title_font_weight = 'bold',
@@ -15,9 +16,9 @@ gt_dante_title <- function(title,
   link <- if(!is.null(logo_link)) {
     logo_link
   } else if(type == 'wbb') {
-    paste0("data:", "image/png", ";base64,",base64enc::base64encode("Beatrice.png"))
+    paste0("data:", "image/png", ";base64,",base64enc::base64encode(glue::glue("{filepath}Beatrice.png")))
   } else if (type == 'mbb') {
-    paste0("data:", "image/png", ";base64,",base64enc::base64encode("Virgil 2.png"))
+    paste0("data:", "image/png", ";base64,",base64enc::base64encode(glue::glue("{filepath}Virgil.png")))
   } 
   
   title_header <- glue::glue(
@@ -35,3 +36,5 @@ gt_dante_title <- function(title,
   return(title_header)
   
 }
+
+saveRDS(gt_dante_title, '_Helper Files/Simulation Functions/gt_dante_title.rds')

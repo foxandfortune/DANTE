@@ -14,6 +14,12 @@ season <- 2025
 # Dante header function
 gt_dante_title <- readRDS('Minos/Simulation Backup/Functions/gt_dante_title.rds')
 
+# Create Table Function -------------------------
+create_ratings_table <- readRDS('_Helper Files/Other/create_ratings_table.rds')
+
+# MBB Theme -------------------------
+rank_theme <- readRDS('_Helper Files/Other/rank_theme_mbb')
+
 # Check to see if season is finished -------------
 season_comp_status <- hoopR::load_mbb_schedule(2025) %>% 
   filter(tournament_id == 22,
@@ -36,7 +42,7 @@ ratings.efg <- ratings_all$efg
 ratings.rtg <- ratings_all$raw_rating
 
 # Load Teams
-teams <- readRDS('Stats/Teams/team_database.rds')
+teams <- readRDS('_Helper Files/Team Data/team_database.rds')
 conf <- cbbreadr::load_teams(2025) %>%
   left_join(cbbreadr::load_conferences() %>% 
               select(conference_id = id,

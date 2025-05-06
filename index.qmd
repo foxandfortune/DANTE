@@ -5,13 +5,3 @@ execute:
 ---
 
 This is a site for NCAA power ratings.
-
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
-
-```{r}
-#| output: false
-variable_here <- 1 + 1
-
-```
-
-Look at this number: `r variable_here`
