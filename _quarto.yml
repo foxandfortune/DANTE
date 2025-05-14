@@ -7,10 +7,22 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - about.qmd
       - vrgl_ratings.qmd
       - btrc_ratings.qmd
-  
+      - about.qmd
+      - the_playlist.qmd
+
+    right:
+      - icon: linkedin
+        href: https://www.linkedin.com/in/matconner/
+      - icon: github
+        href: https://github.com/foxandfortune
+      - icon: boombox-fill
+        href: https://open.spotify.com/user/huntingthesnark
+      - icon: book
+        href: https://www.goodreads.com/author/show/20422355.Brandon_Conner
+      - icon: youtube
+        href: https://www.youtube.com/@Bless_Dem_Boyz
 
 format:
   html:

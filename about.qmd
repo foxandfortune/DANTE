@@ -1,9 +1,29 @@
 ---
-title: "About"
+title: "About Me"
 ---
 
-# Basic Methodology
+[Brandon Mat Conner](https://www.linkedin.com/in/matconner/)
 
-The rating methodology is pretty straightforward. I use a ridge regression to adjust the main team stats (pace, rebound rate, turnover rate, assist rate, rating) for things like opponent, home court, travel, and days of rest. The general structure owes a lot to this article from Bud Davis: [Opponent-Adjusted Stats Using Ridge Regression](https://blog.collegefootballdata.com/opponent-adjusted-stats-ridge-regression/)
+East Texan. University of Texas grad. FP&A Analyst. Dad joke enthusiast. Bad pun aficionado. Co-host of the [Bless Dem Boyz](https://open.spotify.com/show/1L5rQCtc2d8WZyIBFcMGqN?si=b0a10b3cc1384c47) podcast. Wordle/Spelling Bee/Connections/Crossword player. Mediocre [chess player](https://www.chess.com/member/ballfromgrace). French/Italian [Duolingo learner](https://www.duolingo.com/profile/BallFromGrace).
 
-That's the overall gist. There's also a few other pieces that get adjusted along the way, which I'll expound upon below.
+#### My Teams:
+
+-   Dallas Cowboys
+
+-   Texas Rangers
+
+-   Memphis Grizzlies
+
+-   Dallas Stars
+
+-   Texas Longhorns
+
+-   AS Roma
+
+#### Other Projects:
+
+-   [9 Innings in Los Angeles](https://open.spotify.com/show/0LzxRCJuhqvzMMktIpRvTR?si=80c6d46df122487d): A fictional baseball podcast
+
+-   [Ryan and the Dark Sword](https://www.amazon.com/Ryan-Dark-Sword-Thayer-Saga/dp/B08B33YCVV/ref=sr_1_1?crid=VVBYEMVMO1UY&dib=eyJ2IjoiMSJ9.nozvua0_IS1rK5_PjxQ2p6LOVqfkgyktfv2Ry8WScRLz_lscpoRKXOXpckHKwUkX6yco5CR7qJtk9ofH77UK2DBIqZGX784h-dSskyJB78-AUYmyYS_-Qg46ad_3oCOYcOj2ijXf0NKV_Zg7B-0uuw.rtOE_esa4sgDkJK8_IsE-EFYzj79dJHOUIwyyzq_fk0&dib_tag=se&keywords=ryan+and+the+dark+sword+brandon+conner&qid=1746999377&sprefix=ryan+and+the+dark+sword+brandon+conner%2Caps%2C110&sr=8-1)
+
+-   [Boojum](https://www.amazon.com/Boojum-Brandon-Conner/dp/B0D9MF4TTP/ref=sr_1_1?crid=TDQYMGGWIUIT&dib=eyJ2IjoiMSJ9.-h3prHTA9BzrRw3MXAoIzA.tAcLWetk5yhHQaW0CL7RLyQ-t9gxzOss8RdR-8LSDcw&dib_tag=se&keywords=boojum+brandon+conner&qid=1746999417&sprefix=boojum+brandon+conner%2Caps%2C94&sr=8-1)

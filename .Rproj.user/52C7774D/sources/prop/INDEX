@@ -1,5 +1,6 @@
 ~%2FDANTE%2F.gitignore="7F72CD32"
 ~%2FDANTE%2FBTRC%2F5.%20Create%20Ratings%20Table%20-%20WBB.R="84B6576A"
+~%2FDANTE%2FVRGL%2F2.%20In-Season%20Ratings%20-%20All%20-%20MBB.R="5A214AD9"
 ~%2FDANTE%2FVRGL%2F5.%20Create%20Ratings%20Table%20-%20MBB.R="1FF3AF37"
 ~%2FDANTE%2F_Helper%20Files%2FFunction%20Scripts%2Fcreate_ratings_table.R="B0AB177B"
 ~%2FDANTE%2F_Helper%20Files%2FFunction%20Scripts%2Fgt_dante_title.R="4C7E7A7A"
@@ -9,4 +10,6 @@
 ~%2FDANTE%2Fdocs%2Fabout.html="F9410D5B"
 ~%2FDANTE%2Fdocs%2Findex.html="81AB3396"
 ~%2FDANTE%2Findex.qmd="0E46284D"
+~%2FDANTE%2Fmethodology.qmd="F390E51F"
+~%2FDANTE%2Fthe_playlist.qmd="3CB6509C"
 ~%2FDANTE%2Fvrgl_ratings.qmd="F005C09C"

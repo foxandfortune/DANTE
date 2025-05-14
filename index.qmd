@@ -4,4 +4,58 @@ execute:
   echo: false
 ---
 
-This is a site for NCAA power ratings.
+Welcome to the DANTE ratings, a page dedicated to tracking team efficiency for men's and women's college basketball. Information on the methodology is provided below. For more about me, check the [About Me](https://foxandfortune.github.io/DANTE/about.html) section. For more about what I'm reading or listening to at the moment, check [The Playlist](https://foxandfortune.github.io/DANTE/the_playlist.html).
+
+Please note that currently only the 2024-25 season ratings are available. I am working to add more historical data in the future.
+
+### What are the DANTE Ratings?
+
+D.A.N.T.E. stands for **D**efense-**A**djusted **N**et **T**eam **E**fficiency. As the name (sort of) implies, the ratings are a measure of team strength adjusted for opponent, as well as a few other factors. It's similar to what you'll find on KenPom, but arrived at through a different method.
+
+The model uses ridge regression for these adjustments, and it owes a lot to this article from Bud Davis: [Opponent-Adjusted Stats Using Ridge Regression](https://blog.collegefootballdata.com/opponent-adjusted-stats-ridge-regression/)
+
+That's the overall gist. There's also a few other pieces that get adjusted along the way, which I'll expound upon below.
+
+### What is tracked?
+
+DANTE adjusts for opponent and home court for the following stats:
+
+-   **Pace:** Measured as possessions per 40 minutes.[^1]
+
+-   **Assist Rates:** The percentage of a team's made baskets that are assisted.
+
+-   **Turnover Rates:** Turnovers divided by number of possessions.
+
+-   **Rebound Rates:** Offensive rebounds divided by missed field goals.[^2]
+
+-   **True Shooting:** Made field goals, three point field goals, and free throws, divided by shots, adjusted for point value.
+
+-   **Team Efficiency:** Points scored per 100 possessions.
+
+[^1]: Most of the possession counts are tabulated manually by parsing the play-by-play delivered by hoopR for men's basketball and wehoop for women's. For games with issues with the play-by-play, I estimate possessions by using shots, offensive rebounds, and free throws.
+
+[^2]: The table lists these as "offensive" and "defensive," but a more apt label would likely be "team" and "opponent." Since the ratings are based on offensive efficiency, the model uses the offensive rebound rates. A team's ability to prevent an opponent, then, would show up as their "defensive" rating.
+
+It's worth noting that the efficiency ratings are adjusted for pace, opponent, home court, days of rest, and travel (based on team location). However, the ratings used to estimate point spreads, which may eventually make their way to the site, are also adjusted for the above team stats. I've found this makes the model slightly more accurate.
+
+### What else goes into the numbers?
+
+Prior to each season, I estimate a Bayesian prior for each stat based on the team's end of season rating, as well as the transfer and recruiting profile of each team, minus the players that left via graduation, the transfer portal, or the draft. For men's basketball, at least. Currently, women's basketball recruiting data isn't as readily available as I'd like. That's been updated recently, so maybe in three years or so I'll be able to improve those models as well.
+
+This prior is slowly faded through the year, but remains included in the number until the end. Once the year's done, I calculate the full season rating without the prior, which is what gets published for completed seasons.
+
+Each stat is also updated after every game, with more recent results given heavier weighting. I backtest most stats to estimate how quickly to fade each one. From there, they are blended with the prior to get a team rating after each game.
+
+### Does your model hate my team?
+
+Yes. Definitely. Your team is the absolute worst team the model has ever seen.
+
+### Why DANTE?
+
+Of course, I love a good backronym as much as the next internet analyst. This one actually grew out of a baseball ratings model I built a few years back, which I called (to myself) MInos' Tail. This was based on the character in the first canticle of Dante Aligheri's Divine Comedy,[^3] Minos, who would wrap his tail around himself to signal to the souls of the damned which circle they had been banished to in the afterlife.
+
+[^3]: Speaking of which, I just finished reading *Paradiso* earlier this year. 10/10 epic poem. Absolutely no notes.
+
+I decided I wanted to stick to that theme, and with college basketball split between men's and women's games, it made sense to name the two models after Dante's two guides through the afterlife, Virgil and Beatrice.[^4]
+
+[^4]: As of right now, VRGL and BTRC are not backronyms themselves. I know, I know. It's a real letdown.
