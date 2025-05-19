@@ -80,6 +80,7 @@ teams <- teams %>%
       is.na(conference_short_name) & team == 'West Georgia' ~ 'ASUN',
       is.na(conference_short_name) & team %in% c('Lindenwood',
                                                  'Southern Indiana') ~ 'OVC',
+      is.na(conference_short_name) & team == 'Mercyhurst' ~ 'NEC',
       TRUE ~ conference_short_name)) %>% 
   filter(!is.na(conference_short_name))
 
