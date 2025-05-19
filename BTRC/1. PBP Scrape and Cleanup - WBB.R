@@ -3,6 +3,7 @@ library(tidyverse)
 
 # Set working directory
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+setwd('..')
 
 `%!in%` = Negate(`%in%`)
 
@@ -10,7 +11,7 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 cur_yr <- 2025
 
 # Load full pbp and raw pbp, roster and team data ----------------------------------------------------
-pbp_full <- readRDS(glue::glue("Stats/PBP and Shot Data/pbp_wbb_{cur_yr}.rds"))
+pbp_full <- readRDS(glue::glue("BTRC/Stats/Team and Player Stats - WBB/PBP and Shot Data/pbp_wbb_{cur_yr}.rds"))
 
 pbp_raw <- wehoop::load_wbb_pbp(seasons = {cur_yr})
 
@@ -195,7 +196,7 @@ pbp_raw <- pbp_raw %>%
 
 # Fix shot clock below 0; use possession start, exclude fast break
 mean_sc <- pbp_raw %>%
-  #bind_rows(pbp_full) %>% 
+  bind_rows(pbp_full) %>% 
   filter(shot_clock >= 0, shooting_play == TRUE, is_fastbreak == FALSE) %>% 
   with_groups(.groups = poss_start, summarise, mean_sc = mean(shot_clock))
 
@@ -215,7 +216,7 @@ pbp_raw %>%
   filter(shooting_play == TRUE, shot_clock < 0)
 
 # Save roster ---------------
-saveRDS(roster, glue::glue("Stats/Rosters/roster_wbb_{cur_yr}.rds"))
+saveRDS(roster, glue::glue("BTRC/Stats/Team and Player Stats - WBB/Rosters/roster_wbb_{cur_yr}.rds"))
 
 # Add expected values to shots --------------------------------------------
 ## Shots with location -----------
@@ -318,11 +319,11 @@ library(xgboost)
 set.seed(421)
 
 # Models
-xfg_loc <- xgb.load(glue::glue("Stats/Models/xfg wbb {cur_yr}.model"))
+xfg_loc <- xgb.load(glue::glue("BTRC/Stats/Offseason Updates - WBB/Shooting Models/Models/xfg wbb {cur_yr}.model"))
 
-xfg_noloc <- xgb.load(glue::glue("Stats/Models/xfg noloc wbb {cur_yr}.model"))
+xfg_noloc <- xgb.load(glue::glue("BTRC/Stats/Offseason Updates - WBB/Shooting Models/Models/xfg noloc wbb {cur_yr}.model"))
 
-xfg_ft <- readRDS(glue::glue("Stats/Models/ft wbb {cur_yr}.rds"))
+xfg_ft <- readRDS(glue::glue("BTRC/Stats/Offseason Updates - WBB/Shooting Models/Models/ft wbb {cur_yr}.rds"))
 
 # Preds to location shots
 preds_loc <- stats::predict(
@@ -435,7 +436,7 @@ pbp_raw <- pbp_raw %>%
 pbp_full <- bind_rows(pbp_full,
                       pbp_raw)
 
-saveRDS(pbp_full, glue::glue("Stats/PBP and Shot Data/pbp_wbb_{cur_yr}.rds"))
+saveRDS(pbp_full, glue::glue("BTRC/Stats/Team and Player Stats - WBB/PBP and Shot Data/pbp_wbb_{cur_yr}.rds"))
 
 # Clear out extra objects ------------------------------
 pbp <- pbp_full
@@ -450,7 +451,7 @@ rm(all_preds, doubles, mean_sc,
 library(sp)
 
 # Load teams -----
-teams <- readRDS(glue::glue("Stats/Teams/team_database_wbb.rds"))
+teams <- readRDS(glue::glue("_Helper Files/Team Data/team_database_wbb.rds"))
 
 # Load schedule ------ 
 schedule <- wehoop::load_wbb_schedule(seasons = {cur_yr}) %>% 
@@ -643,8 +644,8 @@ summary %>%
   filter(is.na(is_home))
 
 # Load team venues for calculating travel -------------------
-all_venues <- readRDS("Stats/Teams/team_venues_wbb.rds") %>%
-  bind_rows(readRDS("Stats/Teams/neutral_sites_wbb.rds")) %>% 
+all_venues <- readRDS("_Helper Files/Team Data/team_venues_wbb.rds") %>%
+  bind_rows(readRDS("_Helper Files/Team Data/neutral_sites_wbb.rds")) %>% 
   mutate(latitude = as.numeric(latitude),
          longitude = as.numeric(longitude))
 
@@ -726,4 +727,4 @@ coords <- as.data.frame(coords)
 head(coords, 10)
 
 # Save --------------------------
-saveRDS(coords, glue::glue("Stats/Power Ratings/Raw Data/poss_stats_with_types_wbb_{cur_yr}.rds"))
+saveRDS(coords, glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Raw Data/poss_stats_with_types_wbb_{cur_yr}.rds"))
