@@ -4,6 +4,7 @@ library(gtExtras)
 
 # Set working directory
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+setwd('..')
 
 # Add NOT IN function:
 `%!in%` = Negate(`%in%`)
@@ -12,25 +13,25 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 season <- 2025
 
 # Dante header function
-gt_dante_title <- readRDS('Minos/Simulation Backup/Functions/gt_dante_title.rds')
+gt_dante_title <- readRDS('_Helper Files/Simulation Functions/gt_dante_title.rds')
 
 # Create Table Function -------------------------
 create_ratings_table <- readRDS('_Helper Files/Other/create_ratings_table.rds')
 
 # MBB Theme -------------------------
-rank_theme <- readRDS('_Helper Files/Other/rank_theme_mbb')
+rank_theme <- readRDS('_Helper Files/Other/rank_theme_mbb.rds')
 
 # Check to see if season is finished -------------
-season_comp_status <- hoopR::load_mbb_schedule(2025) %>% 
+season_comp_status <- hoopR::load_mbb_schedule({season}) %>% 
   filter(tournament_id == 22,
          str_detect(notes_headline, "National Championship")) %>% 
   pull(status_type_completed)
 
 # Load ratings 
 if(season_comp_status == TRUE){
-  ratings_all <- readRDS(glue::glue('Stats/Power Ratings/Team Ratings/Full Season/ratings_all_{season}.rds'))
+  ratings_all <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/Full Season/ratings_all_{season}.rds'))
 } else {
-  ratings_all <- readRDS(glue::glue('Stats/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_{season}.rds'))
+  ratings_all <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_{season}.rds'))
 }
 
 
@@ -43,33 +44,29 @@ ratings.rtg <- ratings_all$raw_rating
 
 # Load Teams
 teams <- readRDS('_Helper Files/Team Data/team_database.rds')
-conf <- cbbreadr::load_teams(2025) %>%
-  left_join(cbbreadr::load_conferences() %>% 
-              select(conference_id = id,
-                     short_name), by = 'conference_id') %>% 
-  transmute(team_id = as.numeric(source_id),
-            conference_short_name = short_name) %>% 
+
+conf <- readRDS(glue::glue('_Helper Files/Team Data/Conferences/mbb_conf_{season}.rds')) %>% 
+  left_join(read.csv('_Helper Files/Team Data/Conferences/cbb_conference_ids.csv') %>% 
+              select(conf_id, conference_short_name), by = 'conf_id') %>% 
+  transmute(team_id, 
+            conference_short_name) %>% 
   as.data.frame()
 
 team_logos <- hoopR::espn_mbb_teams(year = 2025) %>% 
-  select(team_id, logo) %>% 
-  left_join(conf, by = 'team_id')
-
-teams <- teams %>% 
-  left_join(team_logos %>% 
-              mutate(team_id = as.character(team_id)),
-            by = 'team_id') %>% 
-  filter(team_id != '107554') %>% 
+  transmute(team_id = as.character(team_id),
+            logo) %>% 
+  full_join(conf, by = 'team_id') %>% 
   mutate(logo = case_when(
     is.na(logo) ~ paste0('https://a.espncdn.com/i/teamlogos/ncaa/500/',
                          team_id,
                          '.png'),
-    TRUE ~ logo),
-    conference_short_name = case_when(
-      is.na(conference_short_name) & team == 'Queens University' ~ 'ASUN',
-      is.na(conference_short_name) & team %in% c('Lindenwood',
-                                                 'Southern Indiana') ~ 'OVC',
-      TRUE ~ conference_short_name)) %>% 
+    TRUE ~ logo))
+
+## Add logos and conferences to teams
+teams <- teams %>% 
+  left_join(team_logos,
+            by = 'team_id') %>% 
+  filter(team_id != '107554') %>% 
   filter(!is.na(conference_short_name))
 
 

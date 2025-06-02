@@ -1,5 +1,5 @@
 ---
-title: "MBB"
+title: "MBB Ratings"
 execute:
   echo: false
 ---
@@ -28,7 +28,7 @@ create_ratings_table <- readRDS('_Helper Files/Other/create_ratings_table.rds')
 rank_theme <- readRDS('_Helper Files/Other/rank_theme_mbb.rds')
 
 # Check to see if season is finished -------------
-season_comp_status <- hoopR::load_mbb_schedule(2025) %>% 
+season_comp_status <- hoopR::load_mbb_schedule({season}) %>% 
   filter(tournament_id == 22,
          str_detect(notes_headline, "National Championship")) %>% 
   pull(status_type_completed)
@@ -49,33 +49,28 @@ ratings.rtg <- ratings_all$raw_rating
 
 # Load Teams
 teams <- readRDS('_Helper Files/Team Data/team_database.rds')
-conf <- cbbreadr::load_teams(2025) %>%
-  left_join(cbbreadr::load_conferences() %>% 
-              select(conference_id = id,
-                     short_name), by = 'conference_id') %>% 
-  transmute(team_id = as.numeric(source_id),
-            conference_short_name = short_name) %>% 
+conf <- readRDS(glue::glue('_Helper Files/Team Data/Conferences/mbb_conf_{season}.rds')) %>% 
+  left_join(read.csv('_Helper Files/Team Data/Conferences/cbb_conference_ids.csv') %>% 
+              select(conf_id, conference_short_name), by = 'conf_id') %>% 
+  transmute(team_id, 
+            conference_short_name) %>% 
   as.data.frame()
 
-team_logos <- hoopR::espn_mbb_teams(year = 2025) %>% 
-  select(team_id, logo) %>% 
-  left_join(conf, by = 'team_id')
-
-teams <- teams %>% 
-  left_join(team_logos %>% 
-              mutate(team_id = as.character(team_id)),
-            by = 'team_id') %>% 
-  filter(team_id != '107554') %>% 
+team_logos <- hoopR::espn_mbb_teams(year = {season}) %>% 
+  transmute(team_id = as.character(team_id),
+            logo) %>% 
+  full_join(conf, by = 'team_id') %>% 
   mutate(logo = case_when(
     is.na(logo) ~ paste0('https://a.espncdn.com/i/teamlogos/ncaa/500/',
                          team_id,
                          '.png'),
-    TRUE ~ logo),
-    conference_short_name = case_when(
-      is.na(conference_short_name) & team == 'Queens University' ~ 'ASUN',
-      is.na(conference_short_name) & team %in% c('Lindenwood',
-                                                 'Southern Indiana') ~ 'OVC',
-      TRUE ~ conference_short_name)) %>% 
+    TRUE ~ logo))
+
+## Add logos and conferences to teams
+teams <- teams %>% 
+  left_join(team_logos,
+            by = 'team_id') %>% 
+  filter(team_id != '107554') %>% 
   filter(!is.na(conference_short_name))
 
 # Get base ratings for all stats + adjustment for pace -----------
@@ -175,7 +170,7 @@ tm.rtg <- ratings.rtg %>%
          DefRtg = DefRtg + base.rtg) 
 
 # Get results from season --------------------------------
-results <- hoopR::espn_mbb_standings(2025)
+results <- hoopR::espn_mbb_standings({season})
 
 ## Team W-L records --------------
 records <- results %>% 
@@ -199,7 +194,7 @@ reg_season_champ <- results %>%
             champs)
 
 ## Load scoreboard for Conference Tourney / National Champions -----------
-scoreboard <- hoopR::load_mbb_schedule(2025)
+scoreboard <- hoopR::load_mbb_schedule({season})
 
 ## Conference tournament ------------
 conf_tourn_champ <- scoreboard %>% 
@@ -293,12 +288,14 @@ gt_title <- gt_dante_title(title = glue::glue("{season} VRGL Ratings for Men's B
 # Create table -------------------------
 table <- create_ratings_table(ratings_tbl) %>% 
   tab_options(table.width = 1000,
-              container.width = 1000)
+              container.width = 1000)# %>% 
+  #opt_interactive() %>% 
+  #fmt_image(logo,
+  #          height = 30)
 
 
 ```
-Final ratings for the 2024-25 season.
+
+Final ratings for the `r glue::glue("{season-1}-{season - 2000}")` season.
 
 `r table`
-
-

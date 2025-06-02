@@ -145,6 +145,7 @@ create_ratings_table <- function(gtobject, ...){
       seed = '',
       conf_tourn = '', title = '',
       conference_short_name = 'Conf',
+      
       oreb_rt = 'OFF', dreb_rt = 'DEF',
       to_rt = 'OFF', to_opp_rt = 'DEF',
       tm_efg = 'OFF', opp_efg = 'DEF', ast_rt = 'OFF',
@@ -238,6 +239,6 @@ create_ratings_table <- function(gtobject, ...){
     )
 }
 
-saveRDS(create_ratings_table, 'Other/create_ratings_table.rds')
-saveRDS(rank_theme_mbb, 'Other/rank_theme_mbb.rds')
-saveRDS(rank_theme_wbb, 'Other/rank_theme_wbb.rds')
+saveRDS(create_ratings_table, '_Helper Files/Other/create_ratings_table.rds')
+saveRDS(rank_theme_mbb, '_Helper Files/Other/rank_theme_mbb.rds')
+saveRDS(rank_theme_wbb, '_Helper Files/Other/rank_theme_wbb.rds')
