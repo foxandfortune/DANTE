@@ -5,17 +5,17 @@ website:
   title: "DANTE: NCAA Ratings"
   navbar:
     left:
-      - href: index.qmd
+      - href: Pages/index.qmd
         text: "Home"
-      - href: vrgl_ratings.qmd
+      - href: Pages/vrgl_ratings.qmd
         text: "MBB Ratings"
       - href: btrc_ratings.qmd
         text: "WBB Ratings"
-      - href: about.qmd
+      - href: Pages/about.qmd
         text: "About"
-      - href: the_playlist.qmd
+      - href: Pages/the_playlist.qmd
         text: "The Playlist"
-    
+  
     right:
       - icon: linkedin
         href: https://www.linkedin.com/in/matconner/
