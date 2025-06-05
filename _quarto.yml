@@ -9,7 +9,7 @@ website:
         text: "Home"
       - href: Pages/vrgl_ratings.qmd
         text: "MBB Ratings"
-      - href: btrc_ratings.qmd
+      - href: Pages/btrc_ratings.qmd
         text: "WBB Ratings"
       - href: Pages/about.qmd
         text: "About"
