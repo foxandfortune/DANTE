@@ -12,7 +12,7 @@ setwd('..')
 setwd('..')
 
 # Set season/country/tier
-season <- 2025
+season <- 2024
 
 # Negate in formula
 `%!in%` = Negate(`%in%`)
@@ -61,10 +61,10 @@ res_all <- readRDS(glue::glue(
 list <- c('game_date', 'team_id', 'opp_id')
 
 # Set weight for testing; will run for weights 0.90 through 1.00 to start -----
-wgt_var <- 0.85
+wgt_var <- 0.98
 
 # Set lambda_adj
-lambda_adj <- 0.00
+lambda_adj <- 0.05
 
 # Create test.summary to start ----------
 test.summary <- data.frame()
@@ -149,7 +149,7 @@ res_all <- bind_rows(res_all,
                      res)
 
 print(res_all %>% 
-        arrange(rmse))
+        arrange(rmse, desc(corr)))
 
 ## Get best by year -----
 res_best <- res_all %>% 
