@@ -1,5 +1,5 @@
 ---
-title: "MBB Ratings - 2022"
+title: "MBB Ratings - 2021"
 execute:
   echo: false
 ---
@@ -16,7 +16,7 @@ library(gtExtras)
 `%!in%` = Negate(`%in%`)
 
 # Set season
-season <- 2022
+season <- 2021
 
 # Dante header function
 gt_dante_title <- readRDS(here::here('_Helper Files/Simulation Functions', 'gt_dante_title.rds'))
@@ -409,7 +409,7 @@ table <- create_ratings_table(ratings_tbl) %>%
 Final ratings for the `r glue::glue("{season-1}-{season - 2000}")` season.
 
 ::: {style="text-align: center;"}
-[***Other Seasons:***]{.underline} [2020-21](https://foxandfortune.github.io/DANTE/Pages/vrgl_ratings_2021.html "2021 MBB Ratings") **/** 2021-22 **/** [2022-23](https://foxandfortune.github.io/DANTE/Pages/vrgl_ratings_2023.html "2023 MBB Ratings") **/** [2023-24](https://foxandfortune.github.io/DANTE/Pages/vrgl_ratings_2024.html "2024 MBB Ratings") **/** [2024-25](https://foxandfortune.github.io/DANTE/Pages/vrgl_ratings.html "2025 MBB Ratings")
+[***Other Seasons:***]{.underline} 2020-21 **/** [2021-22](https://foxandfortune.github.io/DANTE/Pages/vrgl_ratings_2022.html "2022 MBB Ratings") **/** [2022-23](https://foxandfortune.github.io/DANTE/Pages/vrgl_ratings_2023.html "2023 MBB Ratings")**/** [2023-24](https://foxandfortune.github.io/DANTE/Pages/vrgl_ratings_2024.html "2024 MBB Ratings")**/** [2024-25](https://foxandfortune.github.io/DANTE/Pages/vrgl_ratings.html "2025 MBB Ratings")
 :::
 
 `r table`
