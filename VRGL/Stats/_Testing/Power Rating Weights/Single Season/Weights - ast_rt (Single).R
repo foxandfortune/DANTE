@@ -48,10 +48,10 @@ glimpse(summary)
 # Need for this verison: days_rest, travel -----
 ## Predictive stat -----
 # Shares (FT/Rim/NonRim/Three); Conversion (Rim/NonRim/Three)
-stat_name <- "oreb_rt"
+stat_name <- "ast_rt"
 
 ## Stat to be predicted ------
-stat_est <- "oreb_rt"
+stat_est <- "ast_rt"
 
 # Load prior results
 res_all <- readRDS(glue::glue(
@@ -61,10 +61,10 @@ res_all <- readRDS(glue::glue(
 list <- c('game_date', 'team_id', 'opp_id')
 
 # Set weight for testing; will run for weights 0.90 through 1.00 to start -----
-wgt_var <- 0.98
+wgt_var <- 0.97
 
 # Set lambda_adj
-lambda_adj <- 0.1
+lambda_adj <- 0
 
 # Create test.summary to start ----------
 test.summary <- data.frame()
