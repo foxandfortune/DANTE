@@ -12,7 +12,7 @@ setwd('..')
 setwd('..')
 
 # Set season/country/tier
-season <- 2024
+season <- 2025
 
 # Negate in formula
 `%!in%` = Negate(`%in%`)
@@ -64,7 +64,7 @@ list <- c('game_date', 'team_id', 'opp_id')
 wgt_var <- 0.97
 
 # Set lambda_adj
-lambda_adj <- 0
+lambda_adj <- 0.1
 
 # Create test.summary to start ----------
 test.summary <- data.frame()
