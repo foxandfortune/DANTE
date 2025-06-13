@@ -7,32 +7,30 @@ library(sp)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 setwd('..')
 setwd('..')
+setwd('..')
+setwd('..')
+setwd('..')
 
 # Set season/country/tier
-season <- 2023
+season <- 2025
 
 # Negate in formula
 `%!in%` = Negate(`%in%`)
 
 # Load teams and summary data -----
-teams <- readRDS(glue::glue("Teams/team_database.rds"))
+teams <- readRDS(glue::glue("_Helper Files/Team Data/team_database.rds"))
 
-summary <- readRDS(glue::glue("Power Ratings/Raw Data/poss_stats_with_types_{season}.rds")) %>% 
-  # Filter out teams in team dataset
-  #filter(team_id %in% teams$team_id) %>% 
+summary <- readRDS(glue::glue("VRGL/Stats/Team and Player Stats/Power Ratings/Raw Data/poss_stats_with_types_{season}.rds")) %>% 
   with_groups(game_id, mutate, tm_ct = n()) %>%
   # Only include games where both teams are in teams dataset
   filter(tm_ct == 2) %>% 
   select(-tm_ct) %>% 
-  as.data.frame()
+  as.data.frame() %>%
+  rename(opp_id = opponent_team_id)
 
 ### Check for NA values
 summary %>% 
   filter(is.na(days_rest))
-
-# Calculate shot share by type; shot conversions by type ---------
-summary <- summary %>%
-  rename(opp_id = opponent_team_id)
 
 # Get dates for testing --------
 dates <- summary %>%
@@ -42,7 +40,7 @@ dates <- summary %>%
   distinct()
 
 # Load create ratings function
-create_ratings <- readRDS("Tools/create_ratings_stat.rds")
+create_ratings <- readRDS("_Helper Files/Other/create_ratings_stat.rds")
 
 # Select stat name to project and team/home field factors --------- 
 glimpse(summary)
@@ -56,10 +54,8 @@ stat_name <- "to_rt"
 stat_est <- "to_rt"
 
 # Load prior results
-res <- readRDS(glue::glue(
-  "_Testing/Power Rating Weights/Results/single_season_{stat_name}_adj_lambda.rds"))
-
-print(res)
+res_all <- readRDS(glue::glue(
+  "VRGL/Stats/_Testing/Power Rating Weights/_Results/single_season_{stat_name}_res.rds"))
 
 ## Features ----------
 list <- c('game_date', 'team_id', 'opp_id')
@@ -68,7 +64,7 @@ list <- c('game_date', 'team_id', 'opp_id')
 wgt_var <- 0.97
 
 # Set lambda_adj
-lambda_adj <- 0.05
+lambda_adj <- 0.0
 
 # Create test.summary to start ----------
 test.summary <- data.frame()
@@ -141,42 +137,40 @@ test.summary <- test.summary %>%
   filter(!is.na(rtg_est))
 
 ## Add results to data frame --------
-#res <- data.frame(wgt = {wgt_var}, lambda_adj = {lambda_adj}, season = {season}, stat = {stat_name}, 
-#                  corr = round(c(cor(test.summary$rtg_act, test.summary$rtg_est)), 4),
-#                  rmse = round(sqrt(mean((test.summary$rtg_act - test.summary$rtg_est)^2)), 4))
-
-#print(res)
-
-res <- res %>% 
-  rbind(c(wgt = {wgt_var}, lambda_adj = {lambda_adj}, season = {season}, stat = {stat_name}, 
-          corr = round(c(cor(test.summary$rtg_act, test.summary$rtg_est)), 4),
-          rmse = round(sqrt(mean((test.summary$rtg_act - test.summary$rtg_est)^2)), 4)))
+res <- data.frame(season = {season}, stat = {stat_name},
+                  wgt = {wgt_var}, lambda_adj = {lambda_adj}, 
+                  corr = round(c(cor(test.summary$rtg_act, test.summary$rtg_est)), 4),
+                  rmse = round(sqrt(mean((test.summary$rtg_act - test.summary$rtg_est)^2)), 4))
 
 print(res)
 
-saveRDS(res,
-        glue::glue("_Testing/Power Rating Weights/Results/single_season_{stat_name}_adj_lambda.rds"))
+## Add to prior results
+res_all <- bind_rows(res_all,
+                     res)
 
+print(res_all %>% 
+        arrange(rmse, desc(corr)))
 
-test.summary %>% 
-  ggplot(aes(x = rtg_est, y = rtg_act)) + geom_point()+ geom_abline() + geom_smooth(method = lm)
+## Get best by year -----
+res_best <- res_all %>% 
+  with_groups(.groups = c(season),
+              mutate,
+              rank = dense_rank(rmse)) %>% 
+  arrange(rank, desc(corr)) %>% 
+  with_groups(.groups = season,
+              slice,
+              1) %>% 
+  select(-rank)
 
-test.summary %>% 
-  mutate(diff = rtg_act - rtg_est) %>% 
-  ggplot(aes(x = diff)) + geom_histogram()
+print(res_best)
 
-test.summary %>% 
-  mutate(diff = rtg_act - rtg_est) %>% 
-  summarise(avg = mean(diff),
-            mid = median(diff),
-            var = sd(diff))
+# Save files ------------
+## Results -------------
+saveRDS(res_all,
+        glue::glue(
+          "VRGL/Stats/_Testing/Power Rating Weights/_Results/single_season_{stat_name}_res.rds"))
 
-test.summary %>% 
-  mutate(diff = rtg_act - rtg_est) %>% 
-  with_groups(.groups = c(team_id), summarise,
-              games = n(),
-              var = sd(diff)) %>%
-  left_join(teams %>% 
-              select(team, team_id), by = "team_id") %>% 
-  arrange(var) %>% 
-  filter(team == "Gonzaga")
+## Weights (for creating power ratings) ------------
+saveRDS(res_best,
+        glue::glue(
+          "VRGL/Stats/Team and Player Stats/Power Ratings/Weights/single_season_{stat_name}_wgt.rds"))
