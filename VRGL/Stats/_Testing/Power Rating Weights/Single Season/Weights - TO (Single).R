@@ -12,7 +12,7 @@ setwd('..')
 setwd('..')
 
 # Set season/country/tier
-season <- 2025
+season <- 2024
 
 # Negate in formula
 `%!in%` = Negate(`%in%`)
