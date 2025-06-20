@@ -57,6 +57,8 @@ stat_est <- "rtg"
 res_all <- readRDS(glue::glue(
   "VRGL/Stats/_Testing/Power Rating Weights/_Results/single_season_{stat_name}_res.rds"))
 
+res_all
+
 ## Features ----------
 list <- c('game_date', 'team_id', 'opp_id', 
           'poss_per_40', 'to_rt', 'oreb_rt', 'ast_rt',
@@ -66,7 +68,7 @@ list <- c('game_date', 'team_id', 'opp_id',
 wgt_var <- 0.98
 
 ## Set the lambda adj ----------------
-lambda_adj <- 0.2
+lambda_adj <- 1.00
 
 # Create test.summary to start ----------
 test.summary <- data.frame()
@@ -374,12 +376,22 @@ data.diff <- test.summary %>%
 head(data.diff)
 cor(data.diff$error, data.diff$est_diff)
 
-data.diff %>% #mutate(est_diff = 1.3 * est_diff) %>%
+data.diff %>% mutate(est_diff = 1.3 * est_diff) %>%
   ggplot(aes(x = est_diff, y = act_diff)) + geom_point() + geom_smooth() +
   geom_abline(slope = 1, intercept = 0)
 
 model <- glm(act_diff ~ est_diff, data = data.diff)
 
+data.diff %>%
+  mutate(est_diff_13 = 1.3 * est_diff,
+         est_diff_116 = 1.16 * est_diff) %>%
+  summarise(
+    cor_13 = Metrics::rmse(est_diff_13, act_diff),
+    cor_116 = Metrics::rmse(est_diff_116, act_diff),
+    cor_reg = Metrics::rmse(est_diff, act_diff)
+  )
+
+Metrics::rmse()
 
 head(data.diff)
 summary(model)
