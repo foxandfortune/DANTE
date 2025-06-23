@@ -12,7 +12,7 @@ setwd('..')
 setwd('..')
 
 # Set season/country/tier
-season <- 2024
+season <- 2025
 
 # Negate in formula
 `%!in%` = Negate(`%in%`)
@@ -57,7 +57,8 @@ stat_est <- "rtg"
 res_all <- readRDS(glue::glue(
   "VRGL/Stats/_Testing/Power Rating Weights/_Results/single_season_{stat_name}_res.rds"))
 
-res_all
+print(res_all %>% 
+        arrange(rmse, desc(corr)))
 
 ## Features ----------
 list <- c('game_date', 'team_id', 'opp_id', 
@@ -65,10 +66,10 @@ list <- c('game_date', 'team_id', 'opp_id',
           'is_home', 'neutral_site', 'days_rest', 'travel')
 
 # Set weight for testing; will run for weights 0.90 through 1.00 to start -----
-wgt_var <- 0.98
+wgt_var <- 0.96
 
 ## Set the lambda adj ----------------
-lambda_adj <- 1.00
+lambda_adj <- 0.0
 
 # Create test.summary to start ----------
 test.summary <- data.frame()
@@ -384,7 +385,7 @@ model <- glm(act_diff ~ est_diff, data = data.diff)
 
 data.diff %>%
   mutate(est_diff_13 = 1.3 * est_diff,
-         est_diff_116 = 1.16 * est_diff) %>%
+         est_diff_116 = 1.1 * est_diff) %>%
   summarise(
     cor_13 = Metrics::rmse(est_diff_13, act_diff),
     cor_116 = Metrics::rmse(est_diff_116, act_diff),
