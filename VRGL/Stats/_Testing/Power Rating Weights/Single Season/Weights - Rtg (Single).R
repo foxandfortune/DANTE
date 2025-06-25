@@ -66,10 +66,10 @@ list <- c('game_date', 'team_id', 'opp_id',
           'is_home', 'neutral_site', 'days_rest', 'travel')
 
 # Set weight for testing; will run for weights 0.90 through 1.00 to start -----
-wgt_var <- 0.96
+wgt_var <- 0.97
 
 ## Set the lambda adj ----------------
-lambda_adj <- 0.0
+lambda_adj <- 0.25
 
 # Create test.summary to start ----------
 test.summary <- data.frame()
@@ -383,6 +383,8 @@ data.diff %>% mutate(est_diff = 1.3 * est_diff) %>%
 
 model <- glm(act_diff ~ est_diff, data = data.diff)
 
+summary(model)
+
 data.diff %>%
   mutate(est_diff_13 = 1.3 * est_diff,
          est_diff_116 = 1.1 * est_diff) %>%
@@ -392,9 +394,9 @@ data.diff %>%
     cor_reg = Metrics::rmse(est_diff, act_diff)
   )
 
-Metrics::rmse()
+
 
 head(data.diff)
-summary(model)
+
 
 
