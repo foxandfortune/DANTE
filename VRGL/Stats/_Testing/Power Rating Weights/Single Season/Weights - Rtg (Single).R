@@ -69,7 +69,7 @@ list <- c('game_date', 'team_id', 'opp_id',
 wgt_var <- 0.97
 
 ## Set the lambda adj ----------------
-lambda_adj <- 0.25
+lambda_adj <- 1.00
 
 # Create test.summary to start ----------
 test.summary <- data.frame()
@@ -387,7 +387,7 @@ summary(model)
 
 data.diff %>%
   mutate(est_diff_13 = 1.3 * est_diff,
-         est_diff_116 = 1.1 * est_diff) %>%
+         est_diff_116 = 1.16 * est_diff) %>%
   summarise(
     cor_13 = Metrics::rmse(est_diff_13, act_diff),
     cor_116 = Metrics::rmse(est_diff_116, act_diff),
