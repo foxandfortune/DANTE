@@ -69,7 +69,7 @@ list <- c('game_date', 'team_id', 'opp_id',
 wgt_var <- 0.97
 
 ## Set the lambda adj ----------------
-lambda_adj <- 1.00
+lambda_adj <- 0.95
 
 # Create test.summary to start ----------
 test.summary <- data.frame()
