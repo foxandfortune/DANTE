@@ -144,6 +144,7 @@ summary.ncaa_simulation <- function(object,
     subtitle = 'Based on DANTE ratings',
     title_font_size = 26,
     subtitle_font_size = 16,
+    filepath = '_Helper Files/Other/',
     type = {type},
     logo_height = 85)
   
@@ -353,46 +354,6 @@ summary.ncaa_simulation <- function(object,
 
 saveRDS(summary.ncaa_simulation, 'Simulation Backup/Functions/summary.ncaa_simulation.rds')
 
-# Dante title 
-gt_dante_title <- function(title,
-                           subtitle,
-                           value = NULL,
-                           logo_link = NULL,
-                           type = c('mbb', 'wbb'),
-                           title_font_size = 24,
-                           title_font_weight = 'bold',
-                           title_lineheight = 0.5,
-                           subtitle_font_size = 16,
-                           subtitle_font_weight = 'normal',
-                           subtitle_lineheight = 0.5,
-                           logo_height = 65) {
-  
-  # logo link is an optional parameter in case a user wants to plot a different logo (e.g. retro)
-  link <- if(!is.null(logo_link)) {
-    logo_link
-  } else if(type == 'wbb') {
-    paste0("data:", "image/png", ";base64,",base64enc::base64encode("Beatrice.png"))
-  } else if (type == 'mbb') {
-    paste0("data:", "image/png", ";base64,",base64enc::base64encode("Virgil 2.png"))
-  } 
-  
-  title_header <- glue::glue(
-    "<div style='display: flex; justify-content: space-between; align-items: center;'>
-     <div style='flex-grow: 1;'>
-       <span style='font-weight: {title_font_weight}; font-size: {title_font_size}px; line-height: {title_lineheight};'>{title}</span><br>
-       <span style='font-size: {subtitle_font_size}px; font-weight: {subtitle_font_weight}; line-height: {subtitle_lineheight};'>{subtitle}</span>
-     </div>
-     <div>
-       <img src='{link}' style='height: {logo_height}px; width: auto; vertical-align: middle; border-radius: 15px; border: 2px solid #000000'>
-     </div>
-   </div>"
-  )
-  
-  return(title_header)
-  
-}
-
-saveRDS(gt_dante_title, 'Minos/Simulation Backup/Functions/gt_dante_title.rds')
 
 # Taken from Thomas Mock's package gtExtras to avoid the dependency
 # on a non cran package.
@@ -457,3 +418,68 @@ table_colors_positive <- c("white",
 )
 
 saveRDS(table_colors_positive, 'Simulation Backup/Functions/table_colors_positive.rds')
+
+
+
+
+# WBB Team and color shades for MM results -----------------
+table_theme_wbb <- function(gt_object,...) {
+  
+  gt_object %>%
+    gt::opt_all_caps()  %>%
+    gt::opt_table_font(
+      font = list(
+        gt::google_font("Big Shoulders"),
+        gt::default_fonts()
+      ),
+      weight = 300
+    ) %>%
+    gt::tab_style(
+      style = gt::cell_borders(
+        sides = "top", color = "black", weight = gt::px(0)
+      ),
+      locations = gt::cells_column_labels(
+        columns = gt::everything()
+      )
+    ) %>%
+    gt::tab_style(
+      style = gt::cell_borders(
+        sides = "bottom", color = "black", weight = gt::px(1)
+      ),
+      locations = gt::cells_row_groups()
+    ) %>%
+    gt::tab_options(
+      column_labels.background.color = "lightgoldenrod",
+      heading.border.bottom.style = "none",
+      table.border.top.width = gt::px(3),
+      table.border.top.style = "none", #transparent
+      table.border.bottom.style = "none",
+      column_labels.font.weight = "normal",
+      column_labels.border.top.style = "none",
+      column_labels.border.bottom.width = gt::px(2),
+      column_labels.border.bottom.color = "black",
+      row_group.border.top.style = "none",
+      row_group.border.top.color = "black",
+      row_group.border.bottom.width = gt::px(1),
+      row_group.border.bottom.color = "ivory1",
+      stub.border.color = "ivory1",
+      stub.border.width = gt::px(0),
+      data_row.padding = gt::px(3),
+      source_notes.border.lr.style = "none",
+      source_notes.background.color = "black",
+      table.font.size = 20,
+      heading.align = "center",
+      heading.background.color = "cyan3",
+      ...
+    )
+}
+
+saveRDS(table_theme_wbb, 'Simulation Functions/table_theme_wbb.rds')
+
+# output of ggsci::rgb_material("light-blue") + "white"
+table_colors_positive_wbb <- c("white",
+                               "#E3F9F9", "#CAF4F4", "#B1EFEF", "#97EAEA", "#7EE5E5", "#65E1E1",
+                               "#4CDCDC", "#32D7D7", "#19D2D2", "#00CDCD"
+)
+
+saveRDS(table_colors_positive_wbb, 'Simulation Functions/table_colors_positive_wbb.rds')

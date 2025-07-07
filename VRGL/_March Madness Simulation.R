@@ -17,7 +17,7 @@ cur_yr <- 2025
 sim_method <- "to_reb_ast"
 
 # Load ratings ------------------
-ratings <- readRDS(glue::glue("Stats/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_{cur_yr}.rds"))
+ratings <- readRDS(glue::glue("VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_{cur_yr}.rds"))
 
 ratings <- list(
   pace = ratings$pace,
@@ -28,9 +28,6 @@ ratings <- list(
   
   disp_Rtg = 11
 )
-
-## Reset the working directory so the simulation can work ---------
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # Load functions ----------------------------------------------------------
 double_games <- readRDS("_Helper Files/Simulation Functions/double_games.rds")
@@ -51,10 +48,10 @@ fmt_pct_special <- readRDS('_Helper Files/Simulation Functions/fmt_pct_special.r
 gt_dante_title <- readRDS('_Helper Files/Simulation Functions/gt_dante_title.rds')
 
 # Load process_games and ratings based on sim method -------------------------------------------
-process_games <- readRDS(glue::glue("Simulation Backup/Functions/process_games_{sim_method}.rds"))
+process_games <- readRDS(glue::glue("_Helper Files/Simulation Functions/process_games_{sim_method}.rds"))
 
 # Load ratings and teams
-teams <- readRDS(glue::glue('March Madness Backup/tourney_teams_{cur_yr}.rds'))
+teams <- readRDS(glue::glue('_Helper Files/MM - Tourney and First Fours/MBB/tourney_teams_{cur_yr}.rds'))
 
 ##########################RUN SIMULATION #########################################################################
 # Set seed ----
@@ -67,7 +64,7 @@ object <- simulate_ncaa(ncaa_season =  {cur_yr},
                         left_bracket = c("West", "South"),
                         right_bracket = c("East", "Midwest"),
                         if_ended_today = FALSE,
-                        fresh_tourney = FALSE,
+                        fresh_tourney = TRUE,
                         ratings = {ratings},
                         simulations = 100,
                         mbb_wbb = 'MBB',

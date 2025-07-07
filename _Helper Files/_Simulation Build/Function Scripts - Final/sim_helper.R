@@ -1,17 +1,17 @@
 simulate_round <- function(sim_round,
                            sim_rounds,
-                           sims_per_round,
-                           schedule,
-                           simulations,
-                           rounds_to_sim,
-                           process_games,
-                           ...,
-                           tiebreaker_depth,
-                           test_round,
-                           .debug,
-                           playoff_seeds,
-                           p,
-                           sim_include) {
+                          sims_per_round,
+                          schedule,
+                          simulations,
+                          rounds_to_sim,
+                          process_games,
+                          ...,
+                          tiebreaker_depth,
+                          test_round,
+                          .debug,
+                          playoff_seeds,
+                          p,
+                          sim_include) {
   
   # iteration sims
   iter_sims <- sims_per_round * (sim_round - 1) + seq_len(sims_per_round)
@@ -196,13 +196,7 @@ simulate_round <- function(sim_round,
     tourney_teams <- teams %>%
       filter(is.na(exit)) %>%
       select(sim, region, seed, team_id, winner_to) %>%
-      arrange(sim, region, winner_to, seed) %>%
-      mutate(region = case_when(
-        round_num == 4 & region %in% left_bracket ~ "Left",
-        round_num == 4 & region %in% right_bracket ~ "Right",
-        round_num == 5 ~ "All",
-        TRUE ~ region
-      )) 
+      arrange(sim, region, winner_to, seed)
     
     # num teams tracker
     num_teams <- tourney_teams %>%
@@ -227,13 +221,7 @@ simulate_round <- function(sim_round,
         # teams playing this round
         add_teams <- tourney_teams %>% 
           arrange(sim, region, seed) %>% 
-          group_by(sim, region, winner_to) %>%
-          mutate(region = case_when(
-            round_num == 5 & region %in% left_bracket ~ "Left",
-            round_num == 5 & region %in% right_bracket ~ "Right",
-            round_num == 6 ~ "All",
-            TRUE ~ region
-          )) %>% 
+          group_by(sim, region, winner_to) %>% 
           mutate(round_rank = row_number()) %>% 
           ungroup()
         
@@ -341,4 +329,4 @@ simulate_round <- function(sim_round,
   list("teams" = teams, "games" = games)
 }
 
-saveRDS(simulate_round, '_Helper Files/Simulation Functions/simulate_round.rds')
+saveRDS(simulate_round, 'Simulation Backup/Functions/simulate_round.rds')

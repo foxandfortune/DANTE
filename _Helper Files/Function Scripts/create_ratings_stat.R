@@ -1,5 +1,3 @@
-
-
 # Create team power ratings --------------------
 create_ratings <- function(df, stat_name, name_list,
                            seed, wgt, lambda_adj){

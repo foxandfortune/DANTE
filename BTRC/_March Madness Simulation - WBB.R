@@ -17,7 +17,7 @@ cur_yr <- 2025
 sim_method <- "to_reb_ast"
 
 # Load ratings ------------------
-ratings <- readRDS(glue::glue("Stats/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_{cur_yr}.rds"))
+ratings <- readRDS(glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_wbb_{cur_yr}.rds"))
 
 ratings <- list(
   pace = ratings$pace,
@@ -28,9 +28,6 @@ ratings <- list(
   
   disp_Rtg = 11
 )
-
-## Reset the working directory so the simulation can work ---------
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # Load functions ----------------------------------------------------------
 double_games <- readRDS("_Helper Files/Simulation Functions/double_games.rds")
@@ -43,18 +40,18 @@ is_sequential <- readRDS("_Helper Files/Simulation Functions/is_sequential.rds")
 load_completed_games <- readRDS("_Helper Files/Simulation Functions/load_completed_games.rds")
 
 ## Viz functions --------------------------------------
-table_theme <- readRDS('_Helper Files/Simulation Functions/table_theme.rds')
-table_colors_positive <- readRDS('_Helper Files/Simulation Functions/table_colors_positive.rds')
+table_theme <- readRDS('_Helper Files/Simulation Functions/table_theme_wbb.rds')
+table_colors_positive <- readRDS('_Helper Files/Simulation Functions/table_colors_positive_wbb.rds')
 summary.ncaa_simulation <- readRDS('_Helper Files/Simulation Functions/summary.ncaa_simulation.rds')
 gt_fmt_pct_special <- readRDS('_Helper Files/Simulation Functions/gt_fmt_pct_special.rds')
 fmt_pct_special <- readRDS('_Helper Files/Simulation Functions/fmt_pct_special.rds')
 gt_dante_title <- readRDS('_Helper Files/Simulation Functions/gt_dante_title.rds')
 
 # Load process_games and ratings based on sim method -------------------------------------------
-process_games <- readRDS(glue::glue("Simulation Backup/Functions/process_games_{sim_method}.rds"))
+process_games <- readRDS(glue::glue("_Helper Files/Simulation Functions/process_games_{sim_method}.rds"))
 
 # Load ratings and teams
-teams <- readRDS(glue::glue('March Madness Backup/tourney_teams_{cur_yr}.rds'))
+teams <- readRDS(glue::glue('_Helper Files/MM - Tourney and First Fours/WBB/tourney_teams_{cur_yr}.rds'))
 
 ##########################RUN SIMULATION #########################################################################
 # Set seed ----
@@ -64,18 +61,18 @@ set.seed(421)
 object <- simulate_ncaa(ncaa_season =  {cur_yr},
                         process_games = {process_games},
                         playoff_seeds = 17,
-                        left_bracket = c("West", "South"),
-                        right_bracket = c("East", "Midwest"),
+                        left_bracket = c("Region 1", "Region 4"),
+                        right_bracket = c("Region 2", "Region 3"),
                         if_ended_today = FALSE,
-                        fresh_tourney = FALSE,
+                        fresh_tourney = TRUE,
                         ratings = {ratings},
                         simulations = 100,
-                        mbb_wbb = 'MBB',
+                        mbb_wbb = 'WBB',
                         sim_include = "POST")
 
 ## Save viz ----
 summary.ncaa_simulation(object,
-                        type = 'mbb')
+                        type = 'wbb')
 
 
 object$games %>% 

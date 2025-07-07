@@ -103,13 +103,12 @@ simulate_ncaa <- function(ncaa_season = NULL,
     simulations <- 1
   }
   
-  # rounds to sim
+  # weeks to sim
   rounds_to_sim <- schedule %>%
     filter(is.na(result)) %>%
     pull(round_no) %>%
     unique() %>%
     sort()
-  
   
   #### SET UP SIMULATIONS ####
   sim_rounds <- ceiling(simulations / sims_per_round)

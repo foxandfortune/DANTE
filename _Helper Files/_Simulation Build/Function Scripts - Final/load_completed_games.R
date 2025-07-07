@@ -12,11 +12,7 @@ load_completed_games <- function(season,
   
   # ONLY FOR TESTING
   sched <- sched %>% 
-    filter(str_detect(notes_headline, "First Four") |
-             str_detect(notes_headline, "1st Round") |
-             str_detect(notes_headline, "2nd Round") |
-             str_detect(notes_headline, "Sweet 16"))
-    #filter(!is.na(result))
+    filter(!is.na(result))
   
   # Load teams and tourney schedule 
   teams <- readRDS(glue::glue('_Helper Files/MM - Tourney and First Fours/{mbb_wbb}/tourney_teams_{season}.rds'))
@@ -85,38 +81,18 @@ load_completed_games <- function(season,
                   winner_seed == min(winner_seed) ~ TRUE,
                   TRUE ~ FALSE
                 )) %>% 
-    with_groups(.groups = winner_to,
-                mutate,
-                row = row_number()) %>% 
-    mutate(home_next = case_when(
-      round_no < 4 ~ home_next,
-      round_no >= 4 & row == 1 ~ TRUE,
-      TRUE ~ FALSE
-    )) %>% 
     arrange(region, winner_to)
   
   next_round <- tourney_structure %>% 
     filter(round_no == max(sched$round_no) + 1) %>% 
     left_join(next_round %>% 
-                filter(home_next == TRUE) %>%
-                mutate(region = case_when(
-                  round_no == 4 & region %in% left_bracket ~ 'Left',
-                  round_no == 4 & region %in% right_bracket ~ 'Right',
-                  round_no == 5 ~ 'All',
-                  TRUE ~ region
-                )) %>% 
+                filter(home_next == TRUE) %>% 
                 select(region, game = winner_to,
                        home_id = winner_id,
                        home_seed = winner_seed), by = c('region',
                                                     'game')) %>% 
     left_join(next_round %>% 
-                filter(home_next == FALSE) %>%
-                mutate(region = case_when(
-                  round_no == 4 & region %in% left_bracket ~ 'Left',
-                  round_no == 4 & region %in% right_bracket ~ 'Right',
-                  round_no == 5 ~ 'All',
-                  TRUE ~ region
-                )) %>% 
+                filter(home_next == FALSE) %>% 
                 select(region, game = winner_to,
                        away_id = winner_id,
                        away_seed = winner_seed), by = c('region',
