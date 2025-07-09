@@ -1,0 +1,9 @@
+---
+title: "Redirecting..."
+format: html
+page-layout: full
+---
+
+<meta http-equiv="refresh" content="0; url=Pages/">
+
+If you are not redirected automatically, [click here](Pages/).
