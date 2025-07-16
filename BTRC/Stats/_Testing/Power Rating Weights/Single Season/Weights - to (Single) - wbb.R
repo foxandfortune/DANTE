@@ -12,15 +12,15 @@ setwd('..')
 setwd('..')
 
 # Set season/country/tier
-season <- 2024
+season <- 2025
 
 # Negate in formula
 `%!in%` = Negate(`%in%`)
 
 # Load teams and summary data -----
-teams <- readRDS(glue::glue("_Helper Files/Team Data/team_database.rds"))
+teams <- readRDS(glue::glue("_Helper Files/Team Data/team_database_wbb.rds"))
 
-summary <- readRDS(glue::glue("VRGL/Stats/Team and Player Stats/Power Ratings/Raw Data/poss_stats_with_types_{season}.rds")) %>% 
+summary <- readRDS(glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Raw Data/poss_stats_with_types_wbb_{season}.rds")) %>% 
   with_groups(game_id, mutate, tm_ct = n()) %>%
   # Only include games where both teams are in teams dataset
   filter(tm_ct == 2) %>% 
@@ -55,16 +55,16 @@ stat_est <- "to_rt"
 
 # Load prior results
 res_all <- readRDS(glue::glue(
-  "VRGL/Stats/_Testing/Power Rating Weights/_Results/single_season_{stat_name}_res.rds"))
+  "BTRC/Stats/_Testing/Power Rating Weights/_Results/single_season_wbb_{stat_name}_res.rds"))
 
 ## Features ----------
 list <- c('game_date', 'team_id', 'opp_id')
 
 # Set weight for testing; will run for weights 0.90 through 1.00 to start -----
-wgt_var <- 0.97
+wgt_var <- 0.96
 
 # Set lambda_adj
-lambda_adj <- 0.1
+lambda_adj <- 0.15
 
 # Create test.summary to start ----------
 test.summary <- data.frame()
@@ -168,9 +168,10 @@ print(res_best)
 ## Results -------------
 saveRDS(res_all,
         glue::glue(
-          "VRGL/Stats/_Testing/Power Rating Weights/_Results/single_season_{stat_name}_res.rds"))
+          "BTRC/Stats/_Testing/Power Rating Weights/_Results/single_season_wbb_{stat_name}_res.rds"))
 
 ## Weights (for creating power ratings) ------------
 saveRDS(res_best,
         glue::glue(
-          "VRGL/Stats/Team and Player Stats/Power Ratings/Weights/single_season_{stat_name}_wgt.rds"))
+          "BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/single_season_wbb_{stat_name}_wgt.rds"))
+
