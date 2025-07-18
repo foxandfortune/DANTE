@@ -61,10 +61,10 @@ res_all <- readRDS(glue::glue(
 list <- c('game_date', 'team_id', 'opp_id')
 
 # Set weight for testing; will run for weights 0.90 through 1.00 to start -----
-wgt_var <- 0.97
+wgt_var <- 1.0
 
 # Set lambda_adj
-lambda_adj <- 0.1
+lambda_adj <- 0.0
 
 # Create test.summary to start ----------
 test.summary <- data.frame()
@@ -174,4 +174,3 @@ saveRDS(res_all,
 saveRDS(res_best,
         glue::glue(
           "BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/single_season_wbb_{stat_name}_wgt.rds"))
-
