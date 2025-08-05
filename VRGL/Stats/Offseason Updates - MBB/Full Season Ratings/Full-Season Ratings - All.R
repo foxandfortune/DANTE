@@ -5,6 +5,8 @@ library(glmnet)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 setwd('..')
 setwd('..')
+setwd('..')
+setwd('..')
 
 # Set season/country/tier
 season <- 2025
@@ -13,9 +15,10 @@ season <- 2025
 `%!in%` = Negate(`%in%`)
 
 # Load teams and summary data -----
-teams <- readRDS(glue::glue("Teams/team_database.rds"))
+teams <- readRDS(glue::glue("_Helper Files/Team Data/team_database.rds"))
 
-summary <- readRDS(glue::glue("Power Ratings/Raw Data/poss_stats_with_types_{season}.rds")) %>% 
+summary <- 
+  readRDS(glue::glue("VRGL/Stats/Team and Player Stats/Power Ratings/Raw Data/poss_stats_with_types_{season}.rds")) %>% 
   # Filter out teams in team dataset
   filter(team_id %in% teams$team_id & opponent_team_id %in% teams$team_id) %>% 
   with_groups(game_id, mutate, tm_ct = n()) %>%
@@ -35,26 +38,18 @@ stat_name <- "poss_per_40"
 list <- c('game_date', 'team_id', 'opp_id')
 
 ## Load weights -----
-wgt_var <- readRDS(glue::glue('Power Ratings/Weights/single_season_{stat_name}_weights.rds')) %>%
+wgt_var <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Weights/single_season_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>% 
-  mutate(rank = dense_rank(rmse)) %>% 
-  arrange(rank, desc(corr)) %>% 
-  slice(1) %>%
-  select(wgt) %>% 
-  as.double()
+  filter(year == season) %>%
+  pull(wgt)
 
 print(wgt_var)
 
 ## Load lambda adj -----
-lambda_adj <- readRDS(glue::glue('Power Ratings/Weights/single_season_{stat_name}_weights.rds')) %>%
+lambda_adj <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Weights/single_season_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>% 
-  mutate(rank = dense_rank(rmse)) %>% 
-  arrange(rank, desc(corr)) %>% 
-  slice(1) %>%
-  select(lambda_adj) %>% 
-  as.double()
+  filter(year == season) %>%
+  pull(lambda_adj)
 
 print(lambda_adj)
 
@@ -78,26 +73,18 @@ stat_name <- "ast_rt"
 list <- c('game_date', 'team_id', 'opp_id')
 
 ## Load weights -----
-wgt_var <- 0.98 #readRDS(glue::glue('Power Ratings/Weights/single_season_{stat_name}_weights.rds')) %>%
+wgt_var <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Weights/single_season_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>% 
-  mutate(rank = dense_rank(rmse)) %>% 
-  arrange(rank, desc(corr)) %>% 
-  slice(1) %>%
-  select(wgt) %>% 
-  as.double()
+  filter(year == season) %>%
+  pull(wgt)
 
 print(wgt_var)
 
 ## Load lambda adj -----
-lambda_adj <- 0 #readRDS(glue::glue('Power Ratings/Weights/single_season_{stat_name}_weights.rds')) %>%
+lambda_adj <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Weights/single_season_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>% 
-  mutate(rank = dense_rank(rmse)) %>% 
-  arrange(rank, desc(corr)) %>% 
-  slice(1) %>%
-  select(lambda_adj) %>% 
-  as.double()
+  filter(year == season) %>%
+  pull(lambda_adj)
 
 print(lambda_adj)
 
@@ -121,26 +108,18 @@ stat_name <- "oreb_rt"
 list <- c('game_date', 'team_id', 'opp_id')
 
 ## Load weights -----
-wgt_var <- 0.97 #readRDS(glue::glue('Power Ratings/Weights/single_season_{stat_name}_weights.rds')) %>%
+wgt_var <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Weights/single_season_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>% 
-  mutate(rank = dense_rank(rmse)) %>% 
-  arrange(rank, desc(corr)) %>% 
-  slice(1) %>%
-  select(wgt) %>% 
-  as.double()
+  filter(year == season) %>%
+  pull(wgt)
 
 print(wgt_var)
 
 ## Load lambda adj -----
-lambda_adj <- 0  #readRDS(glue::glue('Power Ratings/Weights/single_season_{stat_name}_weights.rds')) %>%
+lambda_adj <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Weights/single_season_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>% 
-  mutate(rank = dense_rank(rmse)) %>% 
-  arrange(rank, desc(corr)) %>% 
-  slice(1) %>%
-  select(lambda_adj) %>% 
-  as.double()
+  filter(year == season) %>%
+  pull(lambda_adj)
 
 print(lambda_adj)
 
@@ -164,26 +143,18 @@ stat_name <- "to_rt"
 list <- c('game_date', 'team_id', 'opp_id')
 
 ## Load weights -----
-wgt_var <- 0.96 #readRDS(glue::glue('Power Ratings/Weights/single_season_{stat_name}_weights.rds')) %>%
+wgt_var <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Weights/single_season_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>% 
-  mutate(rank = dense_rank(rmse)) %>% 
-  arrange(rank, desc(corr)) %>% 
-  slice(1) %>%
-  select(wgt) %>% 
-  as.double()
+  filter(year == season) %>%
+  pull(wgt)
 
 print(wgt_var)
 
 ## Load lambda adj -----
-lambda_adj <- 0 #readRDS(glue::glue('Power Ratings/Weights/single_season_{stat_name}_weights.rds')) %>%
+lambda_adj <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Weights/single_season_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>% 
-  mutate(rank = dense_rank(rmse)) %>% 
-  arrange(rank, desc(corr)) %>% 
-  slice(1) %>%
-  select(lambda_adj) %>% 
-  as.double()
+  filter(year == season) %>%
+  pull(lambda_adj)
 
 print(lambda_adj)
 
@@ -208,26 +179,18 @@ stat_name <- "efg_adj"
 list <- c('game_date', 'team_id', 'opp_id')
 
 ## Load weights -----
-wgt_var <- 0.99 #readRDS(glue::glue('Power Ratings/Weights/single_season_{stat_name}_weights.rds')) %>%
+wgt_var <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Weights/single_season_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>% 
-  mutate(rank = dense_rank(rmse)) %>% 
-  arrange(rank, desc(corr)) %>% 
-  slice(1) %>%
-  select(wgt) %>% 
-  as.double()
+  filter(year == season) %>%
+  pull(wgt)
 
 print(wgt_var)
 
 ## Load lambda adj -----
-lambda_adj <- 0 #readRDS(glue::glue('Power Ratings/Weights/single_season_{stat_name}_weights.rds')) %>%
+lambda_adj <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Weights/single_season_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>% 
-  mutate(rank = dense_rank(rmse)) %>% 
-  arrange(rank, desc(corr)) %>% 
-  slice(1) %>%
-  select(lambda_adj) %>% 
-  as.double()
+  filter(year == season) %>%
+  pull(lambda_adj)
 
 print(lambda_adj)
 
@@ -252,34 +215,21 @@ list <- c('game_date', 'team_id', 'opp_id',
           'poss_per_40', 'ast_rt', 'oreb_rt', 'to_rt',
           'is_home', 'neutral_site', 'days_rest', 'travel')
 
-# Load weights -----
-wgt_var <- 0.97 #readRDS(glue::glue('Power Ratings/Weights/single_season_{stat_name}_weights.rds')) %>%
-  mutate(wgt = as.double(wgt)) %>% 
+## Load weights -----
+wgt_var <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Weights/single_season_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  with_groups(.groups = year, mutate, rank = dense_rank(rmse)) %>% 
-  #filter(year == season) %>% 
-  filter(rank == 1, year != 2021) %>%
-  mutate(weight = .97^(season - as.numeric(year))) %>% 
-  summarise(wgt = weighted.mean(x = wgt, w = weight)) %>% 
-  select(wgt) %>% 
-  as.double()
+  filter(year == season) %>%
+  pull(wgt)
 
 print(wgt_var)
 
 ## Load lambda adj -----
-lambda_adj <- 0.75 #readRDS(glue::glue('Power Ratings/Weights/single_season_{stat_name}_weights.rds')) %>%
-  mutate(wgt = as.double(wgt), lambda_adj = as.double(lambda)) %>% 
+lambda_adj <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Weights/single_season_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year <= season) %>% 
-  with_groups(.groups = year, mutate, rank = dense_rank(rmse)) %>% 
-  filter(rank == 1) %>%
-  mutate(weight = .97^(season - as.numeric(year))) %>% 
-  summarise(lambda_adj = weighted.mean(x = lambda_adj, w = weight)) %>% 
-  select(lambda_adj) %>% 
-  as.double()
+  filter(year == season) %>%
+  pull(lambda_adj)
 
 print(lambda_adj)
-
 
 # Create Rtg ratings ---------------------
 raw.coeff.rtg <- create_ratings(df = summary,
@@ -317,34 +267,21 @@ list <- c('game_date', 'team_id', 'opp_id',
           'poss_per_40',
           'is_home', 'neutral_site', 'days_rest', 'travel')
 
-# Load weights -----
-wgt_var <- 0.97 #readRDS(glue::glue('Power Ratings/Weights/single_season_rtg_weights.rds')) %>%
-  mutate(wgt = as.double(wgt)) %>% 
+## Load weights -----
+wgt_var <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Weights/single_season_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  with_groups(.groups = year, mutate, rank = dense_rank(rmse)) %>% 
-  #filter(year == season) %>% 
-  filter(rank == 1) %>%
-  mutate(weight = .97^(season - as.numeric(year))) %>% 
-  summarise(wgt = weighted.mean(x = wgt, w = weight)) %>% 
-  select(wgt) %>% 
-  as.double()
+  filter(year == season) %>%
+  pull(wgt)
 
 print(wgt_var)
 
 ## Load lambda adj -----
-lambda_adj <- 0.75 #readRDS(glue::glue('Power Ratings/Weights/single_season_rtg_weights.rds')) %>%
-  mutate(wgt = as.double(wgt), lambda_adj = as.double(lambda)) %>% 
+lambda_adj <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Weights/single_season_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year <= season) %>% 
-  with_groups(.groups = year, mutate, rank = dense_rank(rmse)) %>% 
-  filter(rank == 1) %>%
-  mutate(weight = .97^(season - as.numeric(year))) %>% 
-  summarise(lambda_adj = weighted.mean(x = lambda_adj, w = weight)) %>% 
-  select(lambda_adj) %>% 
-  as.double()
+  filter(year == season) %>%
+  pull(lambda_adj)
 
 print(lambda_adj)
-
 
 # Create Rtg ratings ---------------------
 raw.coeff.rtg.raw <- create_ratings(df = summary,
