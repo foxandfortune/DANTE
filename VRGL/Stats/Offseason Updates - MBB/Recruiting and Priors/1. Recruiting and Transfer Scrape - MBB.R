@@ -4,13 +4,17 @@ library(tidyverse)
 
 # Set working directory
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+setwd('..')
+setwd('..')
+setwd('..')
+setwd('..')
 
 # Load teams
-teams.247 <- readRDS('Teams/teams247.rds')
+teams.247 <- readRDS('_Helper Files/Team Data/teams247.rds')
 
 # Scrape transfers by season --------------------
 ## Set season -----
-season <- 2018
+season <- 2025
 
 ## Create transfer data.frame ------
 transfer.df <- data.frame()
@@ -181,8 +185,8 @@ for(i in 1:length(teams.247$URL)){
   }
   
   if(i %% 10 == 0 | i == length(teams.247$URL)){
-    saveRDS(transfer.df, glue::glue("Recruiting/transfers_{season}.rds"))
-    saveRDS(commit.df, glue::glue("Recruiting/commits_{season}.rds"))
+    saveRDS(transfer.df, glue::glue("VRGL/Stats/Offseason Updates - MBB/Recruiting and Priors/Recruiting - MBB/transfers_{season}.rds"))
+    saveRDS(commit.df, glue::glue("VRGL/Stats/Offseason Updates - MBB/Recruiting and Priors/Recruiting - MBB/commits_{season}.rds"))
   }
   
   rm(temp.commit, temp.df.cmt, temp.df.tr,
@@ -193,5 +197,5 @@ for(i in 1:length(teams.247$URL)){
   
 }
 
-saveRDS(transfer.df, glue::glue("Recruiting/transfers_{season}.rds"))
-saveRDS(commit.df, glue::glue("Recruiting/commits_{season}.rds"))
+saveRDS(transfer.df, glue::glue("VRGL/Stats/Offseason Updates - MBB/Recruiting and Priors/Recruiting - MBB/transfers_{season}.rds"))
+saveRDS(commit.df, glue::glue("VRGL/Stats/Offseason Updates - MBB/Recruiting and Priors/Recruiting - MBB/commits_{season}.rds"))

@@ -6,7 +6,7 @@ library(tidyverse)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # Set season and create URL --------
-season <- 2018
+season <- 2025
 url <- glue::glue('https://www.hoopsrumors.com/{season}/06/official-early-entrants-list-for-{season}-nba-draft.html')
 #url <- 'https://www.hoopsrumors.com/2021/07/official-early-entrants-list-for-{season}-nba-draft.html'
 
@@ -42,5 +42,5 @@ draft_entrants <- draft_list %>%
 print(draft_entrants)
 
 # Save -------
-saveRDS(draft_entrants, glue::glue("Recruiting/draft_entrants_{season}.rds"))
+saveRDS(draft_entrants, glue::glue("Recruiting - MBB/draft_entrants_{season}.rds"))
 
