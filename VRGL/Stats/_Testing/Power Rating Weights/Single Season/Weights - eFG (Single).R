@@ -12,7 +12,7 @@ setwd('..')
 setwd('..')
 
 # Set season/country/tier
-season <- 2025
+season <- 2024
 
 # Negate in formula
 `%!in%` = Negate(`%in%`)
@@ -61,7 +61,7 @@ res_all <- readRDS(glue::glue(
 list <- c('game_date', 'team_id', 'opp_id')
 
 # Set weight for testing; will run for weights 0.90 through 1.00 to start -----
-wgt_var <- 0.98
+wgt_var <- 0.99
 
 # Set lambda_adj
 lambda_adj <- 0.05
