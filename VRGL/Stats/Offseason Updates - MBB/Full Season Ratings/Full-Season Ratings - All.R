@@ -9,7 +9,7 @@ setwd('..')
 setwd('..')
 
 # Set season/country/tier
-season <- 2025
+season <- 2024
 
 # Negate in formula
 `%!in%` = Negate(`%in%`)
@@ -29,7 +29,7 @@ summary <-
   rename(opp_id = opponent_team_id)
 
 # Load create ratings function
-create_ratings <- readRDS("Tools/create_ratings_stat.rds")
+create_ratings <- readRDS("_Helper Files/Other/create_ratings_stat.rds")
 
 # Pace (Possessions per 40 minutes) -----------------------------------
 stat_name <- "poss_per_40"
@@ -322,4 +322,4 @@ rtgs.all <- list(pace = {raw.coeff.pace},
 
 ## Save ratings --------
 saveRDS(rtgs.all,
-        glue::glue("Power Ratings/Team Ratings/Full Season/ratings_all_{season}.rds"))
+        glue::glue("VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/Full Season/ratings_all_{season}.rds"))
