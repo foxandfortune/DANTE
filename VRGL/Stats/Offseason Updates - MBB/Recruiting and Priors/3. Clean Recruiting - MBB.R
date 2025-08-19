@@ -3,6 +3,9 @@ library(tidyverse)
 # Set working directory
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 setwd('..')
+setwd('..')
+setwd('..')
+setwd('..')
 
 # Negate in formula
 `%!in%` = Negate(`%in%`)
@@ -12,11 +15,11 @@ cbbdata::cbd_login(username = 'foxandfortune',
                    password = 'Memphis#24')
 
 # Set season ---------
-cruit_yr <- 2018
+cruit_yr <- 2025
 
 # Load Teams 
-teams <- readRDS('Teams/team_database.rds')
-teams247 <- readRDS('Teams/teams247.rds')
+teams <- readRDS('_Helper Files/Team Data/team_database.rds')
+teams247 <- readRDS('_Helper Files/Team DAta/teams247.rds')
 teams_cbd <- as.data.frame(cbbdata::cbd_teams())
 
 ## Combine teams into simple table for joins
@@ -28,11 +31,14 @@ all_teams <- teams %>%
 
 
 # Load Commits/Transfers/Draft Entrants
-commits <- readRDS(glue::glue('Recruiting/commits_{cruit_yr}.rds'))
+commits <- readRDS(
+  glue::glue('VRGL/Stats/Offseason Updates - MBB/Recruiting and Priors/Recruiting - MBB/commits_{cruit_yr}.rds'))
 
-transfers <- readRDS(glue::glue('Recruiting/transfers_{cruit_yr}.rds'))
+transfers <- readRDS(
+  glue::glue('VRGL/Stats/Offseason Updates - MBB/Recruiting and Priors/Recruiting - MBB/transfers_{cruit_yr}.rds'))
 
-draftees  <- readRDS(glue::glue('Recruiting/draft_entrants_{cruit_yr}.rds'))
+draftees  <- readRDS(
+  glue::glue('VRGL/Stats/Offseason Updates - MBB/Recruiting and Priors/Recruiting - MBB/draft_entrants_{cruit_yr}.rds'))
 
 # Load rosters and player season stats -------------
 rosters.game <- cbbdata::cbd_torvik_player_season(year = {cruit_yr}) %>% 
@@ -120,7 +126,8 @@ head(commits)
 unique(commits$pos)
 
 ## Save adjusted commits
-saveRDS(commits, glue::glue('Recruiting/commits_clean_{cruit_yr}.rds'))
+saveRDS(commits,
+        glue::glue('VRGL/Stats/Offseason Updates - MBB/Recruiting and Priors/Recruiting - MBB/commits_clean_{cruit_yr}.rds'))
 
 # Graph distribution of transfers 
 transfers %>% 
@@ -169,8 +176,28 @@ transfers %>%
          match_name = str_remove_all(match_name, " Jr")) %>%
   # Start fixing names
   mutate(match_name = case_when(
-    str_detect(match_name, "Monty Scott") ~ "James Scott",
-    str_detect(match_name, " Japhet") ~ "Sam Japhet-Mathias",
+    str_detect(match_name, "Holiman") ~ "Adante' Holiman",
+    str_detect(match_name, " Mukeba") ~ "Allen David Mukeba",
+    str_detect(match_name, "Amare Marshall") ~ "Amar'e Marshall",
+    str_detect(match_name, " Haffner") ~ "Cameron Haffner",
+    str_detect(match_name, " Palesse") ~ "Cam Palesse",
+    str_detect(match_name, "Damarien Yates") ~ "Demarien Yates",
+    str_detect(match_name, "Manyiel") ~ "Dhiaukuei Manyiel Dut",
+    str_detect(match_name, "Dre Bullock") ~ "Quandre Bullock",
+    str_detect(match_name, " Federiko") ~ "Federiko Federiko",
+    str_detect(match_name, "Jacolb Cole") ~ "Jacolb Fredson-Cole",
+    str_detect(match_name, "Jaqualon Roberts") ~ 'Jaqualon "Jq" Roberts',
+    str_detect(match_name, " Monegro") ~ "Jefferson De La Cruz Monegro",
+    str_detect(match_name, " Cherry") ~ 'Jeremiah "Bear" Cherry',
+    str_detect(match_name, "Jorge Diaz") ~ "Jorge Diaz Graham",
+    str_detect(match_name, " Beadle") ~ "Joshua Beadle",
+    str_detect(match_name, " Ogarro") ~ "Joshua Ogarro",
+    str_detect(match_name, " Ola-Joseph") ~ "Joshua Ola-Joseph",
+    str_detect(match_name, "Matt Reed") ~ "Matthew Reed",
+    str_detect(match_name, "Rob Wright") ~ "Robert Wright",
+    str_detect(match_name, "Sam Onu") ~ "Samuel Onu",
+    str_detect(match_name, "Ubongabasi Etim") ~ "Ubong Abasi Etim",
+    str_detect(match_name, " Salaridze") ~ "Vladimer Salaridze",
     TRUE ~ match_name
   )) %>% 
   filter(match_name %!in% rosters.game$match_name) %>%
@@ -179,7 +206,7 @@ transfers %>%
 
   
 rosters.game %>% 
-  filter(str_detect(match_name, " Japhet")) %>%  
+  filter(str_detect(match_name, " Ennis")) %>%  
   select(match_name, Team) %>% 
   arrange(match_name)
 
@@ -208,8 +235,28 @@ transfers_clean <- transfers %>%
          match_name = str_remove_all(match_name, " Jr")) %>%
   # Start fixing names
   mutate(match_name = case_when(
-    str_detect(match_name, "Monty Scott") ~ "James Scott",
-    str_detect(match_name, " Japhet") ~ "Sam Japhet-Mathias",
+    str_detect(match_name, "Holiman") ~ "Adante' Holiman",
+    str_detect(match_name, " Mukeba") ~ "Allen David Mukeba",
+    str_detect(match_name, "Amare Marshall") ~ "Amar'e Marshall",
+    str_detect(match_name, " Haffner") ~ "Cameron Haffner",
+    str_detect(match_name, " Palesse") ~ "Cam Palesse",
+    str_detect(match_name, "Damarien Yates") ~ "Demarien Yates",
+    str_detect(match_name, "Manyiel") ~ "Dhiaukuei Manyiel Dut",
+    str_detect(match_name, "Dre Bullock") ~ "Quandre Bullock",
+    str_detect(match_name, " Federiko") ~ "Federiko Federiko",
+    str_detect(match_name, "Jacolb Cole") ~ "Jacolb Fredson-Cole",
+    str_detect(match_name, "Jaqualon Roberts") ~ 'Jaqualon "Jq" Roberts',
+    str_detect(match_name, " Monegro") ~ "Jefferson De La Cruz Monegro",
+    str_detect(match_name, " Cherry") ~ 'Jeremiah "Bear" Cherry',
+    str_detect(match_name, "Jorge Diaz") ~ "Jorge Diaz Graham",
+    str_detect(match_name, " Beadle") ~ "Joshua Beadle",
+    str_detect(match_name, " Ogarro") ~ "Joshua Ogarro",
+    str_detect(match_name, " Ola-Joseph") ~ "Joshua Ola-Joseph",
+    str_detect(match_name, "Matt Reed") ~ "Matthew Reed",
+    str_detect(match_name, "Rob Wright") ~ "Robert Wright",
+    str_detect(match_name, "Sam Onu") ~ "Samuel Onu",
+    str_detect(match_name, "Ubongabasi Etim") ~ "Ubong Abasi Etim",
+    str_detect(match_name, " Salaridze") ~ "Vladimer Salaridze",
     TRUE ~ match_name
   )) %>% 
   # Fix player positions
@@ -249,7 +296,8 @@ transfers_clean <- transfers_clean %>%
 head(transfers_clean)
 
 ## Save file -----------
-saveRDS(transfers_clean, glue::glue('Recruiting/transfers_clean_{cruit_yr}.rds'))
+saveRDS(transfers_clean,
+        glue::glue('VRGL/Stats/Offseason Updates - MBB/Recruiting and Priors/Recruiting - MBB/transfers_clean_{cruit_yr}.rds'))
 
 # Look at draft entrants -----------------------------
 ## Clean up school names -----------------
@@ -258,6 +306,7 @@ missing_schools <- draftees %>%
   mutate(school = case_when(
     school == "Detroit" ~ "Detroit Mercy",
     school == "St. Joseph’s" ~ "Saint Joseph's",
+    school == "St. John’s" ~ "St. John's",
     school == "UNC" ~ "North Carolina",
     school == "Saint Mary’s" ~ "Saint Mary's",
     school == "Saint Joseph’s" ~ "Saint Joseph's",
@@ -279,7 +328,7 @@ missing_schools <- draftees %>%
          school != "IMG Academy") %>% 
   select(school) %>% 
   distinct()
-
+teams %>% filter(str_detect(team, "John"))
 print(missing_schools)
 
 
@@ -287,6 +336,7 @@ draftees %>%
   mutate(school = case_when(
     school == "Detroit" ~ "Detroit Mercy",
     school == "St. Joseph’s" ~ "Saint Joseph's",
+    school == "St. John’s" ~ "St. John's",
     school == "UNC" ~ "North Carolina",
     school == "Saint Mary’s" ~ "Saint Mary's",
     school == "Saint Joseph’s" ~ "Saint Joseph's",
@@ -321,7 +371,7 @@ draftees %>%
          school %!in% missing_schools$school)
 
 rosters.game %>% 
-  filter(str_detect(match_name, "Ayinde")) %>% 
+  filter(str_detect(match_name, "Omar")) %>% 
   select(match_name, team) %>% 
   arrange(match_name)
 
@@ -335,6 +385,7 @@ draftees_clean <- draftees %>%
   mutate(school = case_when(
     school == "Detroit" ~ "Detroit Mercy",
     school == "St. Joseph’s" ~ "Saint Joseph's",
+    school == "St. John’s" ~ "St. John's",
     school == "UNC" ~ "North Carolina",
     school == "Saint Mary’s" ~ "Saint Mary's",
     school == "Saint Joseph’s" ~ "Saint Joseph's",
@@ -379,7 +430,8 @@ head(draftees_clean)
 unique(draftees_clean$pos)
 
 ## Save file
-saveRDS(draftees_clean, glue::glue('Recruiting/draft_entrants_clean_{cruit_yr}.rds'))
+saveRDS(draftees_clean,
+        glue::glue('VRGL/Stats/Offseason Updates - MBB/Recruiting and Priors/Recruiting - MBB/draft_entrants_clean_{cruit_yr}.rds'))
 
 # Get seniors that did not enter draft ----------------------------
 graduates <- rosters.game %>%
@@ -406,6 +458,7 @@ graduates %>%
 unique(graduates$pos)
 
 ## Save graduating seniors ----------------
-saveRDS(graduates, glue::glue('Recruiting/graduates_clean_{cruit_yr}.rds'))
+saveRDS(graduates,
+        glue::glue('VRGL/Stats/Offseason Updates - MBB/Recruiting and Priors/Recruiting - MBB/graduates_clean_{cruit_yr}.rds'))
 
 
