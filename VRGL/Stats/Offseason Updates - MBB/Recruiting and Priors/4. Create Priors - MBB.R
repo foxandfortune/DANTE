@@ -3,26 +3,31 @@ library(rstanarm)
 library(bayesplot)
 library(tidyverse)
 
+#devtools::install_github("andreweatherman/cbbdata")
+
 # Set working directory
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+setwd('..')
+setwd('..')
+setwd('..')
 setwd('..')
 
 # Negate in formula
 `%!in%` = Negate(`%in%`)
 
 # Set season for priors 
-prior_season <- 2024
+prior_season <- 2026
 
 # Set minimum year for now 
-min_season <- 2020
+min_season <- 2021
 
 # Log in to CBB Data ---------
 cbbdata::cbd_login(username = 'foxandfortune',
                    password = 'Memphis#24')
 
 # Load Teams 
-teams <- readRDS('Teams/team_database.rds')
-teams247 <- readRDS('Teams/teams247.rds')
+teams <- readRDS('_Helper Files/Team Data/team_database.rds')
+teams247 <- readRDS('_Helper Files/Team Data/teams247.rds')
 teams_cbd <- as.data.frame(cbbdata::cbd_teams())
 
 ## Combine teams into simple table for joins
@@ -33,12 +38,12 @@ all_teams <- teams %>%
   left_join(teams247, by = c("Team"))
 
 # Load models 
-all_models <- readRDS('Models/all_priors_models.rds')
+all_models <- readRDS('VRGL/Stats/Offseason Updates - MBB/Recruiting and Priors/Recruiting - MBB/_all_priors_models.rds')
 
 # Create list of files in directory -----------------
-files.ratings = unlist(map(list.files(path = 'Power Ratings/Team Ratings/Full Season',
+files.ratings = unlist(map(list.files(path = 'VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/Full Season',
                                       pattern = '.rds'),
-                           ~glue::glue("Power Ratings/Team Ratings/Full Season/", ., sep = "")))
+                           ~glue::glue("VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/Full Season/", ., sep = "")))
 
 ## Set up blank data frames --------
 rating.pace <- data.frame()
@@ -220,17 +225,17 @@ rating.raw_rtg <- rating.raw_rtg %>%
   filter(season >= {min_season - 2})
 
 # Load Commits/Transfers/Draft Entrants -----------------
-files.commits <- unlist(map(list.files(path = 'Recruiting', pattern = 'commits_clean'),
-                            ~glue::glue("Recruiting/", ., sep = "")))
+files.commits <- unlist(map(list.files(path = 'VRGL/Stats/Offseason Updates - MBB/Recruiting and Priors/Recruiting - MBB', pattern = 'commits_clean'),
+                            ~glue::glue("VRGL/Stats/Offseason Updates - MBB/Recruiting and Priors/Recruiting - MBB/", ., sep = "")))
 
-files.transfers <- unlist(map(list.files(path = 'Recruiting', pattern = 'transfers_clean'),
-                              ~glue::glue("Recruiting/", ., sep = "")))
+files.transfers <- unlist(map(list.files(path = 'VRGL/Stats/Offseason Updates - MBB/Recruiting and Priors/Recruiting - MBB', pattern = 'transfers_clean'),
+                              ~glue::glue("VRGL/Stats/Offseason Updates - MBB/Recruiting and Priors/Recruiting - MBB/", ., sep = "")))
 
-files.draftees <- unlist(map(list.files(path = 'Recruiting', pattern = 'draft_entrants_clean'),
-                             ~glue::glue("Recruiting/", ., sep = "")))
+files.draftees <- unlist(map(list.files(path = 'VRGL/Stats/Offseason Updates - MBB/Recruiting and Priors/Recruiting - MBB', pattern = 'draft_entrants_clean'),
+                             ~glue::glue("VRGL/Stats/Offseason Updates - MBB/Recruiting and Priors/Recruiting - MBB/", ., sep = "")))
 
-files.graduates <- unlist(map(list.files(path = 'Recruiting', pattern = 'graduates_clean'),
-                              ~glue::glue("Recruiting/", ., sep = "")))
+files.graduates <- unlist(map(list.files(path = 'VRGL/Stats/Offseason Updates - MBB/Recruiting and Priors/Recruiting - MBB', pattern = 'graduates_clean'),
+                              ~glue::glue("VRGL/Stats/Offseason Updates - MBB/Recruiting and Priors/Recruiting - MBB/", ., sep = "")))
 
 
 commits <- map_df(files.commits, readRDS) %>% 
@@ -321,6 +326,8 @@ summary.commit <- commits %>%
               min_ = min(avg_rtg), max_ = max(avg_rtg),
               rtg_scaled = (avg_rtg - min_) / (max_ - min_))
 
+head(summary.commit)
+
 ## Transfers ---------
 summary.transfers <- transfers %>% 
   replace(is.na(.), 0) %>% 
@@ -351,6 +358,8 @@ summary.transfers <- transfers %>%
               min_ = min(avg_rtg), max_ = max(avg_rtg),
               rtg_scaled = (avg_rtg - min_) / (max_ - min_))
 
+head(summary.transfers)
+
 ## Create the data base for models ------------------
 offseason_summary <- summary.team %>% 
   mutate(status = case_when(
@@ -366,6 +375,8 @@ offseason_summary <- summary.team %>%
             by = c("season", "team_id"),
             suffix = c("_cmt", "_tfr")) %>% 
   replace(is.na(.), 0)
+
+head(offseason_summary)
 
 # Build models-------------------------------------------------------------------
 ## Pace--------------------------------------------------------------------------
@@ -440,7 +451,7 @@ pace_priors_off <- data.frame(obs = pace_post.tm) %>%
               select(team_id, ortg_prior = ortg)) %>% 
   select(team_id, ortg, ortg_prior)
   
-print(pace_priors_off)
+print(pace_priors_off, n = 50)
 
 ### Opponent ------------
 print(all_models$pace_def)
@@ -1462,7 +1473,7 @@ priors.all <- list(pace = {priors.pace},
 
 ## Save ratings --------
 saveRDS(priors.all,
-        glue::glue("Power Ratings/Team Ratings/Priors/priors_{prior_season}.rds"))
+        glue::glue("VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/Priors/priors_{prior_season}.rds"))
 
 
 
