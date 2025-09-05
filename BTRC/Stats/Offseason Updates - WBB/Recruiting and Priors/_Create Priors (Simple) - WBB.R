@@ -6,23 +6,26 @@ library(tidyverse)
 # Set working directory
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 setwd('..')
+setwd('..')
+setwd('..')
+setwd('..')
 
 # Negate in formula
 `%!in%` = Negate(`%in%`)
 
 # Set season for priors 
-prior_season <- 2025
+prior_season <- 2026
 
 # Set minimum year for now 
 min_season <- 2021
 
 # Load Teams 
-all_teams <- readRDS('Teams/team_database_wbb.rds')
+all_teams <- readRDS('_Helper Files/Team Data/team_database_wbb.rds')
 
 # Create list of files in directory -----------------
-files.ratings = unlist(map(list.files(path = 'Power Ratings/Team Ratings/Full Season',
+files.ratings = unlist(map(list.files(path = 'BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Full Season',
                                       pattern = '.rds'),
-                           ~glue::glue("Power Ratings/Team Ratings/Full Season/", ., sep = "")))
+                           ~glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Full Season/", ., sep = "")))
 
 ## Set up blank data frames --------
 rating.pace <- data.frame()
@@ -36,7 +39,7 @@ rating.raw_rtg <- data.frame()
 for(i in files.ratings){
   temp <- readRDS(i)
   
-  yr <- as.numeric(str_remove(str_remove_all(i, '.*all_'), ".rds"))
+  yr <- as.numeric(str_remove(str_remove_all(i, '.*all_wbb_'), ".rds"))
   
   rating.pace <- bind_rows(rating.pace,
                            data.frame(temp$pace) %>% 
