@@ -72,7 +72,9 @@ object <- simulate_ncaa(ncaa_season =  {cur_yr},
 
 ## Save viz ----
 summary.ncaa_simulation(object,
-                        type = 'mbb')
+                        type = 'mbb') %>% 
+  gtExtras::gtsave_extra(glue::glue('March Madness Backup/Visualizations/pre_tourney_{cur_yr}.png'),
+                         vwidth = 2350)
 
 
 object$games %>% 
