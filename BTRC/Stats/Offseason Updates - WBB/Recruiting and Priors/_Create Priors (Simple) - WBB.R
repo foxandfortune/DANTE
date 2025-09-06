@@ -1166,7 +1166,7 @@ priors.all <- list(pace = {priors.pace},
 
 ## Save ratings --------
 saveRDS(priors.all,
-        glue::glue("Power Ratings/Team Ratings/Priors/priors_wbb_{prior_season}.rds"))
+        glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Priors/priors_wbb_{prior_season}.rds"))
 
 
 
