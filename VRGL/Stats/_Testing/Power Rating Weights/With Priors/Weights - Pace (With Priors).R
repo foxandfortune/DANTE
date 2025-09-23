@@ -7,19 +7,20 @@ library(sp)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 setwd('..')
 setwd('..')
+setwd('..')
+setwd('..')
+setwd('..')
 
 # Set season/country/tier
-season <- 2024
+season <- 2025
 
 # Negate in formula
 `%!in%` = Negate(`%in%`)
 
 # Load teams and summary data -----
-teams <- readRDS(glue::glue("Teams/team_database.rds"))
+teams <- readRDS(glue::glue("_Helper Files/Team Data/team_database.rds"))
 
-summary <- readRDS(glue::glue("Power Ratings/Raw Data/poss_stats_with_types_{season}.rds")) %>% 
-  # Filter out teams in team dataset
-  #filter(team_id %in% teams$team_id) %>% 
+summary <- readRDS(glue::glue("VRGL/Stats/Team and Player Stats/Power Ratings/Raw Data/poss_stats_with_types_{season}.rds")) %>% 
   with_groups(game_id, mutate, tm_ct = n()) %>%
   # Only include games where both teams are in teams dataset
   filter(tm_ct == 2) %>% 
@@ -32,7 +33,7 @@ summary %>%
   filter(is.na(days_rest))
 
 # Load priors ---------------
-priors.all <- readRDS(glue::glue('Power Ratings/Team Ratings/Priors/priors_{season}.rds'))
+priors.all <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/Priors/priors_{season}.rds'))
 
 ## Set priors for testing ------------
 priors.test <- priors.all$pace
@@ -94,21 +95,21 @@ dates.early <- dates %>%
   pull(game_date)
 
 # Load create ratings function
-create_ratings <- readRDS("Tools/create_ratings_stat.rds")
+create_ratings <- readRDS("_Helper Files/Other/create_ratings_stat.rds")
 
 # Set stat for testing ----------
 stat_name <- "poss_per_40"
 
 # Load prior results
-res <- readRDS(glue::glue(
-  "_Testing/Power Rating Weights/Results/with_priors_{stat_name}_res.rds"))
+res_all <- readRDS(glue::glue(
+  "VRGL/Stats/_Testing/Power Rating Weights/_Results/with_priors_{stat_name}_res.rds"))
 
 ## Features ----------
 list <- c('game_date', 'team_id', 'opp_id')
 
 # Set weight parameters for priors ------------------------
-prior_wgt <- 0.9
-prior_min <- 0.0
+prior_wgt <- 0.65
+prior_min <- 0.1
 max_games <- max_games_sched - 0
 
 weight.df <- data.frame(game_no = seq.int(from = 1,
@@ -227,51 +228,67 @@ test.summary <- test.summary %>%
 test.early <- test.summary %>% 
   filter(game_date %in% dates.early)
 
-## Add results to data frame --------
-#res <- data.frame(
-#  stat = {stat_name}, season = {season}, 
-#  prior_wgt = {prior_wgt},
-#  prior_min = {prior_min},
-#  max_games = {max_games},
-#  corr = round(c(cor(test.summary$rtg_act, test.summary$rtg_est)), 4),
-#  rmse = round(Metrics::rmse(test.summary$rtg_act, test.summary$rtg_est), 4))
+# Add results back to prior results ----------------
+res <- data.frame(
+  stat = {stat_name}, season = {season},
+  prior_wgt = {prior_wgt},
+  prior_min = {prior_min},
+  max_games = {max_games},
+  corr = round(c(cor(test.summary$rtg_act, test.summary$rtg_est)), 4),
+  rmse = round(Metrics::rmse(test.summary$rtg_act, test.summary$rtg_est), 4))
 
-#res.early <- data.frame(data.frame(
-#  stat = {stat_name}, season = {season}, 
-#  prior_wgt = {prior_wgt},
-#  prior_min = {prior_min},
-#  max_games = {max_games},
-#  corr = round(c(cor(test.early$rtg_act, test.early$rtg_est)), 4),
-#  rmse = round(Metrics::rmse(test.early$rtg_act, test.early$rtg_est), 4)))
-
-#print(res)
-
-res <- res %>% 
-  bind_rows(data.frame(
-    stat = {stat_name}, season = {season}, 
-    prior_wgt = {prior_wgt},
-    prior_min = {prior_min},
-    max_games = {max_games},
-    corr = round(c(cor(test.summary$rtg_act, test.summary$rtg_est)), 4),
-    rmse = round(Metrics::rmse(test.summary$rtg_act, test.summary$rtg_est), 4)))
-
-res.early <- res.early %>% 
-  bind_rows(data.frame(data.frame(
-    stat = {stat_name}, season = {season}, 
-    prior_wgt = {prior_wgt},
-    prior_min = {prior_min},
-    max_games = {max_games},
-    corr = round(c(cor(test.early$rtg_act, test.early$rtg_est)), 4),
-    rmse = round(Metrics::rmse(test.early$rtg_act, test.early$rtg_est), 4))))
+res_early <- data.frame(
+  stat = {stat_name}, season = {season}, 
+  prior_wgt = {prior_wgt},
+  prior_min = {prior_min},
+  max_games = {max_games},
+  corr = round(c(cor(test.early$rtg_act, test.early$rtg_est)), 4),
+  rmse = round(Metrics::rmse(test.early$rtg_act, test.early$rtg_est), 4))
 
 print(res)
-print(res.early)
 
-saveRDS(res,
-        glue::glue("_Testing/Power Rating Weights/Results/with_priors_{stat_name}_res.rds"))
+## Add to prior results
+res_all <- bind_rows(res_all,
+                     res) %>% 
+  distinct()
 
-saveRDS(res.early,
-        glue::glue("_Testing/Power Rating Weights/Results/with_priors_{stat_name}_res_early.rds"))
+res_all_early <- bind_rows(res_all_early,
+                           res_early)
+
+
+print(res_all %>% arrange(rmse))
+print(res_all_early)
+
+## Get best by year -----
+res_best <- res_all %>% 
+  with_groups(.groups = c(season),
+              mutate,
+              rank = dense_rank(rmse)) %>% 
+  arrange(rank, desc(corr)) %>% 
+  with_groups(.groups = season,
+              slice,
+              1) %>% 
+  select(-rank)
+
+print(res_best)
+
+# Save files ------------
+## Results -------------
+saveRDS(res_all,
+        glue::glue(
+          "VRGL/Stats/_Testing/Power Rating Weights/_Results/with_priors_{stat_name}_res.rds"))
+
+## Early results
+saveRDS(res_all_early,
+        glue::glue(
+          "VRGL/Stats/_Testing/Power Rating Weights/_Results/with_priors_{stat_name}_res_early.rds"))
+
+
+## Weights (for creating power ratings) ------------
+saveRDS(res_best,
+        glue::glue(
+          "VRGL/Stats/Team and Player Stats/Power Ratings/Weights/with_priors_{stat_name}_wgt.rds"))
+
 
 
 
