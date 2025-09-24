@@ -104,13 +104,19 @@ stat_name <- "poss_per_40"
 res_all <- readRDS(glue::glue(
   "VRGL/Stats/_Testing/Power Rating Weights/_Results/with_priors_{stat_name}_res.rds"))
 
+res_all_early <- readRDS(glue::glue(
+  "VRGL/Stats/_Testing/Power Rating Weights/_Results/with_priors_{stat_name}_res_early.rds"))
+
+print(res_all %>% 
+        arrange(rmse))
+
 ## Features ----------
 list <- c('game_date', 'team_id', 'opp_id')
 
 # Set weight parameters for priors ------------------------
 prior_wgt <- 0.65
-prior_min <- 0.1
-max_games <- max_games_sched - 0
+prior_min <- 0.05
+max_games <- max_games_sched - 3
 
 weight.df <- data.frame(game_no = seq.int(from = 1,
                                           to = max_games,
