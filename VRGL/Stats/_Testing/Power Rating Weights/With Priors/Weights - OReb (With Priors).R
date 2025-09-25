@@ -119,7 +119,7 @@ list <- c('game_date', 'team_id', 'opp_id')
 # Set weight parameters for priors ------------------------
 prior_wgt <- 0.9
 prior_min <- 0.05
-max_games <- max_games_sched - 0
+max_games <- max_games_sched - 2
 
 weight.df <- data.frame(game_no = seq.int(from = 1,
                                           to = max_games,
