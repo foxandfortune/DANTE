@@ -7,19 +7,20 @@ library(sp)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 setwd('..')
 setwd('..')
+setwd('..')
+setwd('..')
+setwd('..')
 
 # Set season/country/tier
-season <- 2024
+season <- 2025
 
 # Negate in formula
 `%!in%` = Negate(`%in%`)
 
 # Load teams and summary data -----
-teams <- readRDS(glue::glue("Teams/team_database.rds"))
+teams <- readRDS(glue::glue("_Helper Files/Team Data/team_database.rds"))
 
-summary <- readRDS(glue::glue("Power Ratings/Raw Data/poss_stats_with_types_{season}.rds")) %>% 
-  # Filter out teams in team dataset
-  #filter(team_id %in% teams$team_id) %>% 
+summary <- readRDS(glue::glue("VRGL/Stats/Team and Player Stats/Power Ratings/Raw Data/poss_stats_with_types_{season}.rds")) %>% 
   with_groups(game_id, mutate, tm_ct = n()) %>%
   # Only include games where both teams are in teams dataset
   filter(tm_ct == 2) %>% 
@@ -32,7 +33,7 @@ summary %>%
   filter(is.na(days_rest))
 
 # Load priors ---------------
-priors.all <- readRDS(glue::glue('Power Ratings/Team Ratings/Priors/priors_{season}.rds'))
+priors.all <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/Priors/priors_{season}.rds'))
 
 ## Set priors for testing ------------
 priors.test <- priors.all$rtg
@@ -45,7 +46,10 @@ priors.test <- priors.test %>%
   filter(row == max_row) %>% 
   select(-contains("row"))
 
-priors.test %>% filter(name == "team_id_91")  
+priors.test %>% with_groups(.groups = name,
+                            summarise,
+                            n = n()) %>% 
+  filter(n > 1)
 
 # Create system for building prior weight data frame ----------
 schedule <- hoopR::load_mbb_schedule(seasons = {season})
@@ -81,7 +85,6 @@ max_games_sched <- games_to_play %>%
   distinct() %>% 
   pull(games_to_play)
 
-print(max_games_sched)
 
 # Get dates for testing --------
 dates <- summary %>%
@@ -95,18 +98,20 @@ dates.early <- dates %>%
   pull(game_date)
 
 # Load create ratings function
-create_ratings <- readRDS("Tools/create_ratings_stat.rds")
+create_ratings <- readRDS("_Helper Files/Other/create_ratings_stat.rds")
 
 # Set stat for testing ----------
 stat_name <- "rtg"
 
 # Load prior results
-res <- readRDS(glue::glue(
-  "_Testing/Power Rating Weights/Results/with_priors_{stat_name}_res.rds"))
+res_all <- readRDS(glue::glue(
+  "VRGL/Stats/_Testing/Power Rating Weights/_Results/with_priors_{stat_name}_res.rds"))
 
-res.early <- readRDS(glue::glue(
-  "_Testing/Power Rating Weights/Results/with_priors_{stat_name}_res_early.rds"))
+res_all_early <- readRDS(glue::glue(
+  "VRGL/Stats/_Testing/Power Rating Weights/_Results/with_priors_{stat_name}_res_early.rds"))
 
+print(res_all %>% 
+        arrange(rmse))
 
 ## Features ----------
 list.pace <- c('game_date', 'team_id', 'opp_id')
@@ -118,9 +123,9 @@ list.rtg <- c('game_date', 'team_id', 'opp_id',
               'is_home', 'neutral_site', 'days_rest', 'travel')
 
 # Set weight parameters for priors ------------------------
-prior_wgt <- 0.95
-prior_min <- 0.15
-max_games <- max_games_sched - 3
+prior_wgt <- 0.99
+prior_min <- 0
+max_games <- max_games_sched
 
 weight.df <- data.frame(game_no = seq.int(from = 1,
                                           to = max_games,
@@ -397,74 +402,108 @@ test.summary <- test.summary %>%
 test.early <- test.summary %>% 
   filter(game_date %in% dates.early)
 
-## Add results to data frame --------
-#res <- data.frame(
-#  stat = {stat_name}, season = {season}, 
-#  prior_wgt = {prior_wgt},
-#  prior_min = {prior_min},
-#  max_games = {max_games},
-#  corr = round(c(cor(test.summary$rtg_act, test.summary$rtg_est)), 4),
-#  rmse = round(Metrics::rmse(test.summary$rtg_act, test.summary$rtg_est), 4))
+# Add results back to prior results ----------------
+res <- data.frame(
+  stat = {stat_name}, season = {season},
+  prior_wgt = {prior_wgt},
+  prior_min = {prior_min},
+  max_games = {max_games},
+  corr = round(c(cor(test.summary$rtg_act, test.summary$rtg_est)), 4),
+  rmse = round(Metrics::rmse(test.summary$rtg_act, test.summary$rtg_est), 4))
 
-#res.early <- data.frame(data.frame(
-#  stat = {stat_name}, season = {season}, 
-#  prior_wgt = {prior_wgt},
-#  prior_min = {prior_min},
-#  max_games = {max_games},
-#  corr = round(c(cor(test.early$rtg_act, test.early$rtg_est)), 4),
-#  rmse = round(Metrics::rmse(test.early$rtg_act, test.early$rtg_est), 4)))
-
-#print(res)
-#print(res.early)
-
-res <- res %>% 
-  bind_rows(data.frame(
-    stat = {stat_name}, season = {season}, 
-    prior_wgt = {prior_wgt},
-    prior_min = {prior_min},
-    max_games = {max_games},
-    corr = round(c(cor(test.summary$rtg_act, test.summary$rtg_est)), 4),
-    rmse = round(Metrics::rmse(test.summary$rtg_act, test.summary$rtg_est), 4)))
-
-res.early <- res.early %>% 
-  bind_rows(data.frame(data.frame(
-    stat = {stat_name}, season = {season}, 
-    prior_wgt = {prior_wgt},
-    prior_min = {prior_min},
-    max_games = {max_games},
-    corr = round(c(cor(test.early$rtg_act, test.early$rtg_est)), 4),
-    rmse = round(Metrics::rmse(test.early$rtg_act, test.early$rtg_est), 4))))
+res_early <- data.frame(
+  stat = {stat_name}, season = {season}, 
+  prior_wgt = {prior_wgt},
+  prior_min = {prior_min},
+  max_games = {max_games},
+  corr = round(c(cor(test.early$rtg_act, test.early$rtg_est)), 4),
+  rmse = round(Metrics::rmse(test.early$rtg_act, test.early$rtg_est), 4))
 
 print(res)
-print(res.early)
 
-saveRDS(res,
-        glue::glue("_Testing/Power Rating Weights/Results/with_priors_{stat_name}_res.rds"))
+## Add to prior results
+res_all <- bind_rows(res_all,
+                     res) %>% 
+  distinct()
 
-saveRDS(res.early,
-        glue::glue("_Testing/Power Rating Weights/Results/with_priors_{stat_name}_res_early.rds"))
+res_all_early <- bind_rows(res_all_early,
+                           res_early)
+
+
+print(res_all %>% arrange(rmse, desc(corr)))
+print(res_all_early %>% arrange(rmse))
+
+## Get best by year -----
+res_best <- res_all %>% 
+  with_groups(.groups = c(season),
+              mutate,
+              rank = dense_rank(rmse)) %>% 
+  arrange(rank, desc(corr)) %>% 
+  with_groups(.groups = season,
+              slice,
+              1) %>% 
+  select(-rank)
+
+print(res_best)
+
+# Save files ------------
+## Results -------------
+saveRDS(res_all,
+        glue::glue(
+          "VRGL/Stats/_Testing/Power Rating Weights/_Results/with_priors_{stat_name}_res.rds"))
+
+## Early results
+saveRDS(res_all_early,
+        glue::glue(
+          "VRGL/Stats/_Testing/Power Rating Weights/_Results/with_priors_{stat_name}_res_early.rds"))
+
+
+## Weights (for creating power ratings) ------------
+saveRDS(res_best,
+        glue::glue(
+          "VRGL/Stats/Team and Player Stats/Power Ratings/Weights/with_priors_{stat_name}_wgt.rds"))
 
 
 
-test.summary %>% 
-  ggplot(aes(x = rtg_est, y = rtg_act)) + geom_point()+ geom_abline() + geom_smooth(method = lm)
 
-test.summary %>% 
-  mutate(diff = rtg_act - rtg_est) %>% 
-  ggplot(aes(x = diff)) + geom_histogram()
 
-test.summary %>% 
-  mutate(diff = rtg_act - rtg_est) %>% 
-  summarise(avg = mean(diff),
-            mid = median(diff),
-            var = sd(diff))
 
-test.summary %>% 
-  mutate(diff = rtg_act - rtg_est) %>% 
-  with_groups(.groups = c(team_id), summarise,
-              games = n(),
-              var = sd(diff)) %>%
-  left_join(teams %>% 
-              select(team, team_id), by = "team_id") %>% 
-  arrange(var) %>% 
-  filter(team == "Gonzaga")
+data.diff <- test.summary %>% 
+  left_join(test.summary %>% 
+              select(game_id,
+                     opp_id = team_id,
+                     opp_act = rtg_act,
+                     opp_est = rtg_est), by = c("game_id",
+                                                "opp_id")) %>% 
+  mutate(error = rtg_act - rtg_est,
+         opp_error = opp_act - opp_est,
+         act_diff = rtg_act - opp_act,
+         est_diff = rtg_est - opp_est,
+         total_error = act_diff - est_diff) %>% 
+  select(game_date, team_id, opp_id,
+         rtg_act, rtg_est, error,
+         opp_act, opp_est,opp_error,
+         act_diff, est_diff,
+         total_error) %>% 
+  mutate(error_pct = error / total_error)
+
+
+head(data.diff)
+cor(data.diff$error, data.diff$est_diff)
+
+data.diff %>% mutate(est_diff = 1.1 * est_diff) %>%
+  ggplot(aes(x = est_diff, y = act_diff)) + geom_point() + geom_smooth() +
+  geom_abline(slope = 1, intercept = 0)
+
+model <- glm(act_diff ~ est_diff, data = data.diff)
+
+summary(model)
+
+data.diff %>%
+  mutate(est_diff_13 = 1.29 * est_diff,
+         est_diff_116 = 1.16 * est_diff) %>%
+  summarise(
+    cor_13 = Metrics::rmse(est_diff_13, act_diff),
+    cor_116 = Metrics::rmse(est_diff_116, act_diff),
+    cor_reg = Metrics::rmse(est_diff, act_diff)
+  )
