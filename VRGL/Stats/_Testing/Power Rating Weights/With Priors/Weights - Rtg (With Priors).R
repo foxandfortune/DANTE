@@ -123,7 +123,7 @@ list.rtg <- c('game_date', 'team_id', 'opp_id',
               'is_home', 'neutral_site', 'days_rest', 'travel')
 
 # Set weight parameters for priors ------------------------
-prior_wgt <- 0.99
+prior_wgt <- 0.97
 prior_min <- 0
 max_games <- max_games_sched
 
@@ -491,7 +491,7 @@ data.diff <- test.summary %>%
 head(data.diff)
 cor(data.diff$error, data.diff$est_diff)
 
-data.diff %>% mutate(est_diff = 1.1 * est_diff) %>%
+data.diff %>% mutate(est_diff = 1.3 * est_diff) %>%
   ggplot(aes(x = est_diff, y = act_diff)) + geom_point() + geom_smooth() +
   geom_abline(slope = 1, intercept = 0)
 
@@ -500,7 +500,7 @@ model <- glm(act_diff ~ est_diff, data = data.diff)
 summary(model)
 
 data.diff %>%
-  mutate(est_diff_13 = 1.29 * est_diff,
+  mutate(est_diff_13 = 1.3 * est_diff,
          est_diff_116 = 1.16 * est_diff) %>%
   summarise(
     cor_13 = Metrics::rmse(est_diff_13, act_diff),
