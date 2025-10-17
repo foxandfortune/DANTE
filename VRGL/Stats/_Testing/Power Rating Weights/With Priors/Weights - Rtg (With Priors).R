@@ -124,7 +124,7 @@ list.rtg <- c('game_date', 'team_id', 'opp_id',
 
 # Set weight parameters for priors ------------------------
 prior_wgt <- 0.97
-prior_min <- 0
+prior_min <- 0.1
 max_games <- max_games_sched
 
 weight.df <- data.frame(game_no = seq.int(from = 1,
