@@ -29,6 +29,7 @@ cbbdata::cbd_login(username = 'foxandfortune',
 teams <- readRDS('_Helper Files/Team Data/team_database.rds')
 teams247 <- readRDS('_Helper Files/Team Data/teams247.rds')
 teams_cbd <- as.data.frame(cbbdata::cbd_teams())
+team_conf <- readRDS(glue::glue('_Helper Files/Team Data/Conferences/mbb_conf_{prior_season}.rds'))
 
 ## Combine teams into simple table for joins
 all_teams <- teams %>% 
@@ -494,8 +495,27 @@ priors.pace <- pace_priors_off %>%
   select(name, value)
 
 # Add back teams missing 
+other_missing <- team_conf %>% 
+  filter(team_id %!in% pace_priors_def$team_id,
+         team_id %!in% missing_ids) %>% 
+  pull(team_id)
+
+# New teams for power ratings -----
+new.pace.teams <- rating.pace %>% 
+  filter(team_id %in% other_missing) %>% 
+  with_groups(.groups = team_id,
+              filter,
+              season == max(season)) %>% 
+  select(-season) %>% 
+  pivot_longer(cols = c(ortg, drtg)) %>% 
+  mutate(name = case_when(
+    name == 'ortg' ~ paste0("team_id_", team_id),
+    name == 'drtg' ~ paste0("opp_id_", team_id)),
+    value = 0.8 * value) %>% 
+  select(-team_id)
+
 priors.pace.missing <- pace_data %>% 
-  filter(team_id %in% missing_ids) %>% 
+  filter(team_id %in% missing_ids | team_id %in% other_missing) %>% 
   mutate(name = paste0("team_id_", team_id),
          value = 0.8 * ortg + 0.2 * ortg_l1) %>% 
   select(name, value) %>% 
@@ -503,7 +523,8 @@ priors.pace.missing <- pace_data %>%
               filter(team_id %in% missing_ids) %>% 
               mutate(name = paste0("opp_id_", team_id),
                      value = 0.8 * drtg + 0.2 * drtg_l1) %>% 
-              select(name, value))
+              select(name, value)) %>% 
+  bind_rows(new.pace.teams)
 
 
 ## Get Intercept ---------
@@ -526,7 +547,7 @@ head(priors.pace, 12)
 # Clean the environment 
 rm(train_data, test_data,
    model.pace.tm, model.pace.opp,
-   missing_ids,
+   missing_ids, other_missing, new.pace.teams,
    pace_post.tm, pace_post.opp,
    pace_priors_off, pace_priors_def,
    priors.pace.missing, prior.factor.pace,
@@ -647,6 +668,25 @@ priors.ast <- ast_priors_off %>%
   select(name, value)
 
 # Add back teams missing 
+other_missing <- team_conf %>% 
+  filter(team_id %!in% ast_priors_def$team_id,
+         team_id %!in% missing_ids) %>% 
+  pull(team_id)
+
+# New teams for power ratings -----
+new.ast.teams <- rating.ast %>% 
+  filter(team_id %in% other_missing) %>% 
+  with_groups(.groups = team_id,
+              filter,
+              season == max(season)) %>% 
+  select(-season) %>% 
+  pivot_longer(cols = c(ortg, drtg)) %>% 
+  mutate(name = case_when(
+    name == 'ortg' ~ paste0("team_id_", team_id),
+    name == 'drtg' ~ paste0("opp_id_", team_id)),
+    value = 0.2 * value) %>% 
+  select(-team_id)
+
 priors.ast.missing <- ast_data %>% 
   filter(team_id %in% missing_ids) %>% 
   mutate(name = paste0("team_id_", team_id),
@@ -656,7 +696,8 @@ priors.ast.missing <- ast_data %>%
               filter(team_id %in% missing_ids) %>% 
               mutate(name = paste0("opp_id_", team_id),
                      value = 0.8 * drtg + 0.2 * drtg_l1) %>% 
-              select(name, value))
+              select(name, value)) %>% 
+  bind_rows(new.ast.teams)
 
 
 ## Get Intercept ---------
@@ -802,6 +843,26 @@ priors.reb <- reb_priors_off %>%
   select(name, value)
 
 # Add back teams missing 
+other_missing <- team_conf %>% 
+  filter(team_id %!in% reb_priors_def$team_id,
+         team_id %!in% missing_ids) %>% 
+  pull(team_id)
+
+# New teams for power ratings -----
+new.reb.teams <- rating.oreb %>% 
+  filter(team_id %in% other_missing) %>% 
+  with_groups(.groups = team_id,
+              filter,
+              season == max(season)) %>% 
+  select(-season) %>% 
+  pivot_longer(cols = c(ortg, drtg)) %>% 
+  mutate(name = case_when(
+    name == 'ortg' ~ paste0("team_id_", team_id),
+    name == 'drtg' ~ paste0("opp_id_", team_id)),
+    value = 0.8 * value) %>% 
+  select(-team_id)
+
+
 priors.reb.missing <- reb_data %>% 
   filter(team_id %in% missing_ids) %>% 
   mutate(name = paste0("team_id_", team_id),
@@ -811,7 +872,8 @@ priors.reb.missing <- reb_data %>%
               filter(team_id %in% missing_ids) %>% 
               mutate(name = paste0("opp_id_", team_id),
                      value = 0.8 * drtg + 0.2 * drtg_l1) %>% 
-              select(name, value))
+              select(name, value)) %>% 
+  bind_rows(new.reb.teams)
 
 ## Get Intercept ---------
 prior.factor.reb <- factors.oreb %>% 
@@ -957,6 +1019,25 @@ priors.to <- to_priors_off %>%
   select(name, value)
 
 # Add back teams missing 
+other_missing <- team_conf %>% 
+  filter(team_id %!in% to_priors_def$team_id,
+         team_id %!in% missing_ids) %>% 
+  pull(team_id)
+
+# New teams for power ratings -----
+new.to.teams <- rating.to %>% 
+  filter(team_id %in% other_missing) %>% 
+  with_groups(.groups = team_id,
+              filter,
+              season == max(season)) %>% 
+  select(-season) %>% 
+  pivot_longer(cols = c(ortg, drtg)) %>% 
+  mutate(name = case_when(
+    name == 'ortg' ~ paste0("team_id_", team_id),
+    name == 'drtg' ~ paste0("opp_id_", team_id)),
+    value = 0.8 * value) %>% 
+  select(-team_id)
+
 priors.to.missing <- to_data %>% 
   filter(team_id %in% missing_ids) %>% 
   mutate(name = paste0("team_id_", team_id),
@@ -966,7 +1047,8 @@ priors.to.missing <- to_data %>%
               filter(team_id %in% missing_ids) %>% 
               mutate(name = paste0("opp_id_", team_id),
                      value = 0.8 * drtg + 0.2 * drtg_l1) %>% 
-              select(name, value))
+              select(name, value)) %>% 
+  bind_rows(new.to.teams)
 
 ## Get Intercept ---------
 prior.factor.to <- factors.to %>% 
@@ -1112,6 +1194,25 @@ priors.rtg <- rtg_priors_off %>%
   select(name, value)
 
 # Add back teams missing 
+other_missing <- team_conf %>% 
+  filter(team_id %!in% rtg_priors_def$team_id,
+         team_id %!in% missing_ids) %>% 
+  pull(team_id)
+
+# New teams for power ratings -----
+new.rtg.teams <- rating.rtg %>% 
+  filter(team_id %in% other_missing) %>% 
+  with_groups(.groups = team_id,
+              filter,
+              season == max(season)) %>% 
+  select(-season) %>% 
+  pivot_longer(cols = c(ortg, drtg)) %>% 
+  mutate(name = case_when(
+    name == 'ortg' ~ paste0("team_id_", team_id),
+    name == 'drtg' ~ paste0("opp_id_", team_id)),
+    value = 0.8 * value) %>% 
+  select(-team_id)
+
 priors.rtg.missing <- rtg_data %>% 
   filter(team_id %in% missing_ids) %>% 
   mutate(name = paste0("team_id_", team_id),
@@ -1121,7 +1222,8 @@ priors.rtg.missing <- rtg_data %>%
               filter(team_id %in% missing_ids) %>% 
               mutate(name = paste0("opp_id_", team_id),
                      value = 0.8 * drtg + 0.2 * drtg_l1) %>% 
-              select(name, value))
+              select(name, value)) %>% 
+  bind_rows(new.rtg.teams)
 
 ## Get Intercept ---------
 prior.factor.rtg <- factors.rtg %>% 
@@ -1268,6 +1370,25 @@ priors.efg <- efg_priors_off %>%
   select(name, value)
 
 # Add back teams missing 
+other_missing <- team_conf %>% 
+  filter(team_id %!in% efg_priors_def$team_id,
+         team_id %!in% missing_ids) %>% 
+  pull(team_id)
+
+# New teams for power ratings -----
+new.efg.teams <- rating.efg %>% 
+  filter(team_id %in% other_missing) %>% 
+  with_groups(.groups = team_id,
+              filter,
+              season == max(season)) %>% 
+  select(-season) %>% 
+  pivot_longer(cols = c(ortg, drtg)) %>% 
+  mutate(name = case_when(
+    name == 'ortg' ~ paste0("team_id_", team_id),
+    name == 'drtg' ~ paste0("opp_id_", team_id)),
+    value = 0.8 * value) %>% 
+  select(-team_id)
+
 priors.efg.missing <- efg_data %>% 
   filter(team_id %in% missing_ids) %>% 
   mutate(name = paste0("team_id_", team_id),
@@ -1277,7 +1398,8 @@ priors.efg.missing <- efg_data %>%
               filter(team_id %in% missing_ids) %>% 
               mutate(name = paste0("opp_id_", team_id),
                      value = 0.8 * drtg + 0.2 * drtg_l1) %>% 
-              select(name, value))
+              select(name, value)) %>% 
+  bind_rows(new.efg.teams)
 
 ## Get Intercept ---------
 prior.factor.efg <- factors.efg %>% 
@@ -1425,6 +1547,25 @@ priors.rtg_raw <- rtg_raw_priors_off %>%
   select(name, value)
 
 # Add back teams missing 
+other_missing <- team_conf %>% 
+  filter(team_id %!in% rtg_raw_priors_def$team_id,
+         team_id %!in% missing_ids) %>% 
+  pull(team_id)
+
+# New teams for power ratings -----
+new.rtg_raw.teams <- rating.raw_rtg %>% 
+  filter(team_id %in% other_missing) %>% 
+  with_groups(.groups = team_id,
+              filter,
+              season == max(season)) %>% 
+  select(-season) %>% 
+  pivot_longer(cols = c(ortg, drtg)) %>% 
+  mutate(name = case_when(
+    name == 'ortg' ~ paste0("team_id_", team_id),
+    name == 'drtg' ~ paste0("opp_id_", team_id)),
+    value = 0.8 * value) %>% 
+  select(-team_id)
+
 priors.rtg_raw.missing <- rtg_raw_data %>% 
   filter(team_id %in% missing_ids) %>% 
   mutate(name = paste0("team_id_", team_id),
@@ -1434,7 +1575,8 @@ priors.rtg_raw.missing <- rtg_raw_data %>%
               filter(team_id %in% missing_ids) %>% 
               mutate(name = paste0("opp_id_", team_id),
                      value = 0.8 * drtg + 0.2 * drtg_l1) %>% 
-              select(name, value))
+              select(name, value)) %>% 
+  bind_rows(new.rtg_raw.teams)
 
 ## Get Intercept ---------
 prior.factor.rtg_raw <- factors.raw_rtg %>% 
