@@ -1,16 +1,11 @@
----
-title: "MBB Ratings"
-execute:
-  echo: false
----
-
-```{r}
-#| output: false
 library(tidyverse)
 library(hoopR)
 library(cbbreadr)
 library(gt)
 library(gtExtras)
+
+# Add NOT IN function:
+`%!in%` = Negate(`%in%`)
 
 # Add NOT IN function:
 `%!in%` = Negate(`%in%`)
@@ -24,21 +19,21 @@ gt_dante_title <- readRDS(here::here('_Helper Files/Simulation Functions', 'gt_d
 # Create Table Function -------------------------
 create_ratings_table <- readRDS(here::here('_Helper Files/Other/create_ratings_table_preseason.rds'))
 
-# MBB Theme -------------------------
-rank_theme <- readRDS(here::here('_Helper Files/Other/rank_theme_mbb.rds'))
+# WBB Theme -------------------------
+rank_theme <- readRDS(here::here('_Helper Files/Other/rank_theme_wbb.rds'))
 
 # Check to see if season is finished -------------
 season_comp_status <- FALSE
-#season_comp_status <- hoopR::load_mbb_schedule({season}) %>% 
+#season_comp_status <- wehoop::load_wbb_schedule({season}) %>% 
 #  filter(tournament_id == 22,
 #         str_detect(notes_headline, "National Championship")) %>% 
 #  pull(status_type_completed)
 
 # Load ratings 
 if(season_comp_status == TRUE){
-  ratings_all <- readRDS(here::here(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/Full Season/ratings_all_{season}.rds')))
+  ratings_all <- readRDS(here::here(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Full Season/ratings_all_wbb_{season}.rds')))
 } else {
-  ratings_all <- readRDS(here::here(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_{season}.rds')))
+  ratings_all <- readRDS(here::here(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_wbb_{season}.rds')))
 }
 
 ratings.pace <- ratings_all$pace
@@ -49,15 +44,15 @@ ratings.efg <- ratings_all$efg
 ratings.rtg <- ratings_all$raw_rating
 
 # Load Teams
-teams <- readRDS(here::here('_Helper Files/Team Data/team_database.rds'))
-conf <- readRDS(here::here(glue::glue('_Helper Files/Team Data/Conferences/mbb_conf_{season}.rds'))) %>% 
+teams <- readRDS(here::here('_Helper Files/Team Data/team_database_wbb.rds'))
+conf <- readRDS(here::here(glue::glue('_Helper Files/Team Data/Conferences/wbb_conf_{season}.rds'))) %>% 
   left_join(read.csv(here::here('_Helper Files/Team Data/Conferences/cbb_conference_ids.csv')) %>% 
               select(conf_id, conference_short_name), by = 'conf_id') %>% 
   transmute(team_id, 
             conference_short_name) %>% 
   as.data.frame()
 
-team_logos <- hoopR::espn_mbb_teams(year = {season-1}) %>% 
+team_logos <- wehoop::espn_wbb_teams(year = {season}) %>% 
   transmute(team_id = as.character(team_id),
             logo) %>% 
   full_join(conf, by = 'team_id') %>% 
@@ -83,6 +78,7 @@ base.reb <- ratings.reb$value[ratings.reb$name == "(Intercept)"]
 base.efg <- ratings.efg$value[ratings.efg$name == "(Intercept)"]
 base.rtg <- ratings.rtg$value[ratings.rtg$name == "(Intercept)"]
 
+
 # Make team ratings tables for each stat ----
 ## Pace -------------
 tm.pace <- ratings.pace %>% 
@@ -101,7 +97,7 @@ tm.pace <- ratings.pace %>%
   mutate(pace = (OffRtg + DefRtg) / 2) %>% 
   select(-c(OffRtg, DefRtg))
 
-## Assist rate -------------
+## Assist Rate ---------------
 tm.ast <- ratings.ast %>% 
   filter(str_detect(name, "team_id_")) %>% 
   mutate(team_id = str_remove_all(name, c("team_id_")),
@@ -110,7 +106,7 @@ tm.ast <- ratings.ast %>%
   select(team_id, OffRtg) %>% 
   mutate(OffRtg = OffRtg + base.ast)
 
-## Turnover rate -------------
+## Turnover Rate -----------------
 tm.to <- ratings.to %>% 
   filter(str_detect(name, "team_id_")) %>% 
   mutate(team_id = str_remove_all(name, c("team_id_")),
@@ -125,7 +121,7 @@ tm.to <- ratings.to %>%
   mutate(OffRtg = OffRtg + base.to,
          DefRtg = DefRtg + base.to) 
 
-## Rebound rate ---------------
+## Rebound rate -----------------
 tm.reb <- ratings.reb %>% 
   filter(str_detect(name, "team_id_")) %>% 
   mutate(team_id = str_remove_all(name, c("team_id_")),
@@ -140,7 +136,7 @@ tm.reb <- ratings.reb %>%
   mutate(OffRtg = OffRtg + base.reb,
          DefRtg = DefRtg + base.reb)
 
-## Effective FG % / True Shooting ----------
+## True shooting/EFG -----------------
 tm.efg <- ratings.efg %>% 
   filter(str_detect(name, "team_id_")) %>% 
   mutate(team_id = str_remove_all(name, c("team_id_")),
@@ -155,7 +151,7 @@ tm.efg <- ratings.efg %>%
   mutate(OffRtg = OffRtg + base.efg,
          DefRtg = DefRtg + base.efg)
 
-## Rating -------------
+## Team rating ---------------
 tm.rtg <- ratings.rtg %>% 
   filter(str_detect(name, "team_id_")) %>% 
   mutate(team_id = str_remove_all(name, c("team_id_")),
@@ -170,7 +166,8 @@ tm.rtg <- ratings.rtg %>%
   mutate(OffRtg = OffRtg + base.rtg,
          DefRtg = DefRtg + base.rtg) 
 
-# Create full ratings table ---------------------------------------------- 
+
+# Create full ratings table ----------------------------------------------
 ratings_tbl <- tm.pace %>% 
   left_join(tm.ast, by = 'team_id') %>%
   rename(ast_rt = OffRtg) %>% 
@@ -192,8 +189,7 @@ ratings_tbl <- tm.pace %>%
   left_join(teams %>% 
               select(team_id, team,
                      logo, conference_short_name), by = "team_id") %>% 
-  arrange(desc(netrtg)) %>%
-  filter(!is.na(logo)) %>% 
+  arrange(desc(netrtg)) %>% 
   filter(!is.na(conference_short_name)) %>% 
   mutate(rank = dense_rank(desc(netrtg))) %>% 
   select(rank, logo, team, 
@@ -204,27 +200,13 @@ ratings_tbl <- tm.pace %>%
          ortg, drtg, netrtg)
 
 # Make table header ------------------
-gt_title <- gt_dante_title(title = glue::glue("{season} VRGL Ratings for Men's Basketball"),
+gt_title <- gt_dante_title(title = glue::glue("{season} BTRC Ratings for Women's Basketball"),
                            subtitle = "Defense-Adjusted Net Team Efficiency (D.A.N.T.E.)",
                            filepath = '',
-                           type = "mbb",
+                           type = "wbb",
                            logo_height = 75)
 
 # Create table -------------------------
 table <- create_ratings_table(ratings_tbl) %>% 
-  tab_options(table.width = 1000,
-              container.width = 1000)# %>% 
-  #opt_interactive() %>% 
-  #fmt_image(logo,
-  #          height = 30)
-
-
-```
-
-Preseason ratings for the `r glue::glue("{season-1}-{season - 2000}")` season.
-
-::: {style="text-align: center;"}
-[***Other Seasons:***]{.underline} [2020-21](https://foxandfortune.github.io/DANTE/Pages/vrgl_ratings_2021.html "2021 MBB Ratings") **/** [2021-22](https://foxandfortune.github.io/DANTE/Pages/vrgl_ratings_2022.html "2022 MBB Ratings") **/** [2022-23](https://foxandfortune.github.io/DANTE/Pages/vrgl_ratings_2023.html "2023 MBB Ratings") **/** [2023-24](https://foxandfortune.github.io/DANTE/Pages/vrgl_ratings_2024.html "2024 MBB Ratings") **/** [2024-25](https://foxandfortune.github.io/DANTE/Pages/vrgl_ratings_2025.html "2025 MBB Ratings") **/** 2025-26
-:::
-
-`r table`
+  tab_options(table.width = 1200,
+              container.width = 1200)

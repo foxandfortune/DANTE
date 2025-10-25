@@ -1,11 +1,3 @@
----
-title: "MBB Ratings"
-execute:
-  echo: false
----
-
-```{r}
-#| output: false
 library(tidyverse)
 library(hoopR)
 library(cbbreadr)
@@ -213,18 +205,4 @@ gt_title <- gt_dante_title(title = glue::glue("{season} VRGL Ratings for Men's B
 # Create table -------------------------
 table <- create_ratings_table(ratings_tbl) %>% 
   tab_options(table.width = 1000,
-              container.width = 1000)# %>% 
-  #opt_interactive() %>% 
-  #fmt_image(logo,
-  #          height = 30)
-
-
-```
-
-Preseason ratings for the `r glue::glue("{season-1}-{season - 2000}")` season.
-
-::: {style="text-align: center;"}
-[***Other Seasons:***]{.underline} [2020-21](https://foxandfortune.github.io/DANTE/Pages/vrgl_ratings_2021.html "2021 MBB Ratings") **/** [2021-22](https://foxandfortune.github.io/DANTE/Pages/vrgl_ratings_2022.html "2022 MBB Ratings") **/** [2022-23](https://foxandfortune.github.io/DANTE/Pages/vrgl_ratings_2023.html "2023 MBB Ratings") **/** [2023-24](https://foxandfortune.github.io/DANTE/Pages/vrgl_ratings_2024.html "2024 MBB Ratings") **/** [2024-25](https://foxandfortune.github.io/DANTE/Pages/vrgl_ratings_2025.html "2025 MBB Ratings") **/** 2025-26
-:::
-
-`r table`
+              container.width = 1000)

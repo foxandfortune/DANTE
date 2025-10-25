@@ -20,22 +20,23 @@ library(gtExtras)
 `%!in%` = Negate(`%in%`)
 
 # Set season
-season <- 2025
+season <- 2026
 
 # Dante header function
 gt_dante_title <- readRDS(here::here('_Helper Files/Simulation Functions', 'gt_dante_title.rds'))
 
 # Create Table Function -------------------------
-create_ratings_table <- readRDS(here::here('_Helper Files/Other/create_ratings_table.rds'))
+create_ratings_table <- readRDS(here::here('_Helper Files/Other/create_ratings_table_preseason.rds'))
 
 # WBB Theme -------------------------
 rank_theme <- readRDS(here::here('_Helper Files/Other/rank_theme_wbb.rds'))
 
 # Check to see if season is finished -------------
-season_comp_status <- wehoop::load_wbb_schedule({season}) %>% 
-  filter(tournament_id == 22,
-         str_detect(notes_headline, "National Championship")) %>% 
-  pull(status_type_completed)
+season_comp_status <- FALSE
+#season_comp_status <- wehoop::load_wbb_schedule({season}) %>% 
+#  filter(tournament_id == 22,
+#         str_detect(notes_headline, "National Championship")) %>% 
+#  pull(status_type_completed)
 
 # Load ratings 
 if(season_comp_status == TRUE){
@@ -175,64 +176,6 @@ tm.rtg <- ratings.rtg %>%
          DefRtg = DefRtg + base.rtg) 
 
 
-# Get results from season --------------------------------
-results <- wehoop::espn_wbb_standings({season})
-
-## Team W-L records --------------
-records <- results %>% 
-  transmute(team_id = as.character(team_id),
-            total)
-
-## Regular season champions / leaders (10 + Conf games played) -----------
-reg_season_champ <- results %>% 
-  mutate(team_id = as.character(team_id)) %>%  
-  filter(vsconf_gamesbehind == 0,
-         vsconf_wins + vsconf_losses >= 10) %>% 
-  select(team_id, team, total, vsconf) %>% 
-  left_join(teams %>% 
-              select(team_id, conf = conference_short_name),
-            by = 'team_id') %>% 
-  arrange(conf) %>% 
-  with_groups(.groups = conf,
-              mutate,
-              champs = n()) %>% 
-  transmute(team_id = as.character(team_id),
-            champs)
-
-## Load scoreboard for Conference Tourney / National Champions -----------
-scoreboard <- wehoop::load_wbb_schedule({season})
-
-## Conference tournament ------------
-conf_tourn_champ <- scoreboard %>% 
-  filter(conference_competition == TRUE,
-         str_detect(notes_headline, 'Final')) %>% 
-  transmute(tournament_id,
-            conf_id = home_conference_id,
-            win_id = case_when(
-              away_score > home_score ~ as.character(away_id),
-              home_score > away_score ~ as.character(home_id)
-            )) %>% 
-  select(win_id, conf_id)
-
-## Tournament Seeds -------------
-seeds <- scoreboard %>% 
-  filter(tournament_id == 22) %>% 
-  select(team_id = home_id, seed = home_current_rank) %>% 
-  bind_rows(scoreboard %>% 
-              filter(tournament_id == 22) %>% 
-              select(team_id = away_id, seed = away_current_rank)) %>% 
-  distinct() %>% 
-  mutate(team_id = as.character(team_id))
-
-## National Champion ------------
-national_champ <- scoreboard %>% 
-  filter(tournament_id == 22,
-         str_detect(notes_headline, 'National Championship')) %>% 
-  transmute(win_id = case_when(
-    home_score > away_score ~ as.character(home_id),
-    away_score > home_score ~ as.character(away_id)
-  ))
-
 # Create full ratings table ----------------------------------------------
 ratings_tbl <- tm.pace %>% 
   left_join(tm.ast, by = 'team_id') %>%
@@ -256,29 +199,10 @@ ratings_tbl <- tm.pace %>%
               select(team_id, team,
                      logo, conference_short_name), by = "team_id") %>% 
   arrange(desc(netrtg)) %>% 
-  left_join(seeds, by = 'team_id') %>% 
-  left_join(records, by = 'team_id') %>% 
-  left_join(reg_season_champ, by = 'team_id') %>% 
-  left_join(conf_tourn_champ, by = c('team_id' = 'win_id')) %>% 
-  mutate(title = case_when(
-    team_id %in% national_champ$win_id ~ 'trophy',
-    TRUE ~ ''),
-    seed = case_when(
-      is.na(seed) ~ "",
-      !is.na(seed) ~ paste0("(",seed,")")),
-    reg_season = case_when(
-      champs == 1 ~ 'star',
-      champs > 1 ~ 'star-half',
-      TRUE ~ ''),
-    conf_tourn = case_when(
-      !is.na(conf_id) ~ 'trophy',
-      TRUE ~ ''
-    )) %>%
   filter(!is.na(conference_short_name)) %>% 
   mutate(rank = dense_rank(desc(netrtg))) %>% 
-  select(rank, logo, team, seed,
-         reg_season, conf_tourn, title,
-         conference_short_name, total,
+  select(rank, logo, team, 
+         conference_short_name, 
          pace, oreb_rt, dreb_rt,
          to_rt, to_opp_rt, ast_rt,
          tm_efg, opp_efg,
@@ -299,10 +223,10 @@ table <- create_ratings_table(ratings_tbl) %>%
 
 ```
 
-Final ratings for the `r glue::glue("{season-1}-{season - 2000}")` season.
+Preseason ratings for the `r glue::glue("{season-1}-{season - 2000}")` season.
 
 ::: {style="text-align: center;"}
-[***Other Seasons:***]{.underline} [2020-21](https://foxandfortune.github.io/DANTE/Pages/btrc_ratings_2021.html "2021 WBB Ratings") **/** [2021-22](https://foxandfortune.github.io/DANTE/Pages/btrc_ratings_2022.html "2022 WBB Ratings") **/** [2022-23](https://foxandfortune.github.io/DANTE/Pages/btrc_ratings_2023.html "2023 WBB Ratings") **/** [2023-24](https://foxandfortune.github.io/DANTE/Pages/btrc_ratings_2024.html "2024 WBB Ratings") **/** 2024-25
+[***Other Seasons:***]{.underline} [2020-21](https://foxandfortune.github.io/DANTE/Pages/btrc_ratings_2021.html "2021 WBB Ratings") **/** [2021-22](https://foxandfortune.github.io/DANTE/Pages/btrc_ratings_2022.html "2022 WBB Ratings") **/** [2022-23](https://foxandfortune.github.io/DANTE/Pages/btrc_ratings_2023.html "2023 WBB Ratings") **/** [2023-24](https://foxandfortune.github.io/DANTE/Pages/btrc_ratings_2024.html "2024 WBB Ratings") **/** [2024-25](https://foxandfortune.github.io/DANTE/Pages/btrc_ratings_2025.html "2025 WBB Ratings") **/** 2025-26
 :::
 
 `r table`

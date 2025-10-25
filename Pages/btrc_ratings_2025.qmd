@@ -302,7 +302,7 @@ table <- create_ratings_table(ratings_tbl) %>%
 Final ratings for the `r glue::glue("{season-1}-{season - 2000}")` season.
 
 ::: {style="text-align: center;"}
-[***Other Seasons:***]{.underline} [2020-21](https://foxandfortune.github.io/DANTE/Pages/btrc_ratings_2021.html "2021 WBB Ratings") **/** [2021-22](https://foxandfortune.github.io/DANTE/Pages/btrc_ratings_2022.html "2022 WBB Ratings") **/** [2022-23](https://foxandfortune.github.io/DANTE/Pages/btrc_ratings_2023.html "2023 WBB Ratings") **/** [2023-24](https://foxandfortune.github.io/DANTE/Pages/btrc_ratings_2024.html "2024 WBB Ratings") **/** 2024-25
+[***Other Seasons:***]{.underline} [2020-21](https://foxandfortune.github.io/DANTE/Pages/btrc_ratings_2021.html "2021 WBB Ratings") **/** [2021-22](https://foxandfortune.github.io/DANTE/Pages/btrc_ratings_2022.html "2022 WBB Ratings") **/** [2022-23](https://foxandfortune.github.io/DANTE/Pages/btrc_ratings_2023.html "2023 WBB Ratings") **/** [2023-24](https://foxandfortune.github.io/DANTE/Pages/btrc_ratings_2024.html "2024 WBB Ratings") **/** 2024-25 **/** [2025-26](https://foxandfortune.github.io/DANTE/Pages/btrc_ratings.html "2026 WBB Ratings")
 :::
 
 `r table`
