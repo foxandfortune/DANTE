@@ -269,7 +269,7 @@ simulate_round_week <- function(sim_round,
     select(sim, everything())
   
   # load tournament teams
-  teams <- readRDS('Season Simulation Backup/team_database.rds') %>% 
+  teams <- readRDS('_Helper Files/Team Data/team_database.rds') %>% 
     mutate(team_id = as.integer(team_id))
   teams <- teams[rep(seq_len(nrow(teams)), iter_sims_num), ] %>%
     mutate(sim = rep(iter_sims, each = nrow(teams))) %>%
@@ -566,7 +566,7 @@ simulate_round_week <- function(sim_round,
   list("teams" = teams, "games" = games)
 }
 
-saveRDS(simulate_round_week, 'Simulation Backup/Functions/simulate_round_wk.rds')
+saveRDS(simulate_round_week, 'simulate_round_wk.rds')
 
 # Compute ranks -----------------------------
 compute_league_ranks <- function(games,

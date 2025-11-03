@@ -9,7 +9,7 @@ get_odds <- function(df,
   }
   
   odds <- data.frame()
-  books <- readRDS('Season Simulation Backup/books.rds')
+  books <- readRDS('_Helper Files/Other/books.rds')
   
   
   for(i in 1:length(df$game_date)){
@@ -108,4 +108,4 @@ get_odds <- function(df,
   return(odds)
 }
 
-saveRDS(get_odds, 'Simulation Backup/Functions/get_odds.rds')
+saveRDS(get_odds, '_Helper Files/Simulation Functions/get_odds.rds')

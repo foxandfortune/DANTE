@@ -2,7 +2,7 @@ library(geonames)
 library(tidyverse)
 
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-setwd('..')
+#setwd('..')
 
 # Negate in formula
 `%!in%` = Negate(`%in%`)
@@ -16,7 +16,7 @@ venues <- readRDS("team_venues.rds") %>%
   distinct()
 
 # Get schedule
-schedule <- hoopR::load_mbb_schedule(seasons = c(2025))
+schedule <- hoopR::load_mbb_schedule(seasons = c(2026))
 
 missing_venues <- schedule %>% 
   filter(venue_id %!in% venues$venue_id, !is.na(venue_id)) %>% 

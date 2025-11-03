@@ -9,13 +9,13 @@ setwd('..')
 `%!in%` = Negate(`%in%`)
 
 # Set reference year
-cur_yr <- 2025
+cur_yr <- 2026
 
 # Sim method ------------------------
 sim_method <- "to_oreb_ast"
 
 # Load ratings ------------------
-ratings <- readRDS(glue::glue("Stats/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_{cur_yr}.rds"))
+ratings <- readRDS(glue::glue("VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_{cur_yr}.rds"))
 ratings_no_prior <- readRDS(glue::glue("Stats/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_no_prior_{cur_yr}.rds"))
 
 ratings <- list(
@@ -39,20 +39,20 @@ ratings_no_prior <- list(
 )
 
 # Load teams -------------------
-teams <- readRDS(glue::glue('Stats/Teams/team_database.rds')) %>% 
+teams <- readRDS(glue::glue('_Helper Files/Team Data/team_database.rds')) %>% 
   mutate(team_id = as.integer(team_id))
 
 ## Reset the working directory so the simulation can work ---------
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # Load functions ----------------------------------------------------------
-double_games <- readRDS("Simulation Backup/Functions/double_games_wk.rds")
-compute_league_ranks <- readRDS("Simulation Backup/Functions/compute_league_ranks.rds")
-simulate_round <- readRDS("Simulation Backup/Functions/simulate_round_wk.rds")
-simulate_ncaa <- readRDS("Simulation Backup/Functions/simulate_ncaa_wk.rds")
-report <- readRDS("Simulation Backup/Functions/report.rds")
-is_single_digit_numeric <- readRDS("Simulation Backup/Functions/is_single_digit_numeric.rds")
-is_sequential <- readRDS("Simulation Backup/Functions/is_sequential.rds")
+double_games <- readRDS("_Helper Files/Simulation Functions/double_games_wk.rds")
+compute_league_ranks <- readRDS("_Helper Files/Simulation Functions/compute_league_ranks.rds")
+simulate_round <- readRDS("_Helper Files/Simulation Functions/simulate_round_wk.rds")
+simulate_ncaa <- readRDS("_Helper Files/Simulation Functions/simulate_ncaa_wk.rds")
+report <- readRDS("_Helper Files/Simulation Functions/report.rds")
+is_single_digit_numeric <- readRDS("_Helper Files/Simulation Functions/is_single_digit_numeric.rds")
+is_sequential <- readRDS("_Helper Files/Simulation Functions/is_sequential.rds")
 
 ## Viz functions --------------------------------------
 #table_theme <- readRDS('Simulation Backup/Functions/table_theme.rds')
@@ -62,7 +62,7 @@ is_sequential <- readRDS("Simulation Backup/Functions/is_sequential.rds")
 #fmt_pct_special <- readRDS('Simulation Backup/Functions/fmt_pct_special.rds')
 
 # Load process_games and ratings based on sim method -------------------------------------------
-process_games <- readRDS(glue::glue("Simulation Backup/Functions/process_games_wk_{sim_method}.rds"))
+process_games <- readRDS(glue::glue("_Helper Files/Simulation Functions/process_games_wk_{sim_method}.rds"))
 
 # Load schedule -----------------
 schedule <- hoopR::load_mbb_schedule(seasons = {cur_yr}) %>% 
@@ -74,7 +74,7 @@ schedule <- hoopR::load_mbb_schedule(seasons = {cur_yr}) %>%
 unique(schedule$game_date)
 
 ## Adjusted schedule -----------
-adj_schedule <- readRDS(glue::glue('Season Simulation Backup/schedule_adj_{cur_yr}.rds'))
+adj_schedule <- readRDS(glue::glue("VRGL/Stats/Season Schedules/schedule_adj_{cur_yr}.rds"))
 
 ## Add travel/rest to schedule ---------
 schedule <- schedule %>% 
@@ -129,8 +129,8 @@ object_no_prior <- simulate_ncaa(ncaa_season =  {cur_yr},
 library(jsonlite)
 
 ## Load odds functions ---------
-get_odds <- readRDS('Simulation Backup/Functions/get_odds.rds')
-double_odds <- readRDS('Simulation Backup/Functions/double_odds_wk.rds')
+get_odds <- readRDS('_Helper Files/Simulation Functions/get_odds.rds')
+double_odds <- readRDS('_Helper Files/Other/double_odds_wk.rds')
 game_ids <- schedule %>% 
   select(game_id, game_date, team_id = home_id) %>% 
   bind_rows(schedule %>% 
@@ -150,7 +150,7 @@ dates <- schedule %>%
 odds <- get_odds(dates,
                  bk_name = "Consensus",
                  league_nm = 'ncaab')
- 
+
 # Team bets ---------------------------------------------
 team_bets <- as.data.frame(object$games) %>% 
   double_odds() %>% 

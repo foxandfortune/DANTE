@@ -5,20 +5,19 @@ library(sp)
 # Set working directory
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 setwd('..')
-setwd('..')
 
 # Add NOT IN function:
 `%!in%` = Negate(`%in%`)
 
 # Set reference year
-cur_yr <- 2025
+cur_yr <- 2026
 
 # Load teams and venue data -----
-teams <- readRDS(glue::glue("Stats/Teams/team_database.rds"))
+teams <- readRDS(glue::glue("_Helper Files/Team Data/team_database.rds"))
 
 # Load team venues for calculating travel -------------------
-all_venues <- readRDS("Stats/Teams/team_venues.rds") %>%
-  bind_rows(readRDS("Stats/Teams/neutral_sites.rds")) %>% 
+all_venues <- readRDS("_Helper Files/Team Data/team_venues.rds") %>%
+  bind_rows(readRDS("_Helper Files/Team Data/neutral_sites.rds")) %>% 
   mutate(latitude = as.numeric(latitude),
          longitude = as.numeric(longitude))
 
@@ -144,4 +143,4 @@ schedule_adj %>%
            is.na(home_dist) | is.na(away_dist))
 
 # Save --------------------------
-saveRDS(schedule_adj, glue::glue("Minos/Season Simulation Backup/schedule_adj_{cur_yr}.rds"))
+saveRDS(schedule_adj, glue::glue("VRGL/Stats/Season Schedules/schedule_adj_{cur_yr}.rds"))
