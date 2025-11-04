@@ -42,9 +42,6 @@ ratings_no_prior <- list(
 teams <- readRDS(glue::glue('_Helper Files/Team Data/team_database.rds')) %>% 
   mutate(team_id = as.integer(team_id))
 
-## Reset the working directory so the simulation can work ---------
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-
 # Load functions ----------------------------------------------------------
 double_games <- readRDS("_Helper Files/Simulation Functions/double_games_wk.rds")
 compute_league_ranks <- readRDS("_Helper Files/Simulation Functions/compute_league_ranks.rds")
@@ -54,12 +51,6 @@ report <- readRDS("_Helper Files/Simulation Functions/report.rds")
 is_single_digit_numeric <- readRDS("_Helper Files/Simulation Functions/is_single_digit_numeric.rds")
 is_sequential <- readRDS("_Helper Files/Simulation Functions/is_sequential.rds")
 
-## Viz functions --------------------------------------
-#table_theme <- readRDS('Simulation Backup/Functions/table_theme.rds')
-#table_colors_positive <- readRDS('Simulation Backup/Functions/table_colors_positive.rds')
-#summary.ncaa_simulation <- readRDS('Simulation Backup/Functions/summary.ncaa_simulation.rds')
-#gt_fmt_pct_special <- readRDS('Simulation Backup/Functions/gt_fmt_pct_special.rds')
-#fmt_pct_special <- readRDS('Simulation Backup/Functions/fmt_pct_special.rds')
 
 # Load process_games and ratings based on sim method -------------------------------------------
 process_games <- readRDS(glue::glue("_Helper Files/Simulation Functions/process_games_wk_{sim_method}.rds"))
@@ -100,7 +91,7 @@ schedule <- schedule %>%
 
 ##########################RUN SIMULATION #########################################################################
 ## Set seed ------------------
-set.seed(214)
+set.seed(421)
 
 ## Run it -------------------------------------
 object <- simulate_ncaa(ncaa_season =  {cur_yr},
@@ -113,7 +104,7 @@ object <- simulate_ncaa(ncaa_season =  {cur_yr},
                      sim_include = "REG")
 
 ## Set seed ------------------
-set.seed(214)
+set.seed(421)
 
 ## Run again without priors -------------------------------------
 object_no_prior <- simulate_ncaa(ncaa_season =  {cur_yr},
@@ -424,7 +415,7 @@ all_results <- all_results %>%
 
 ## Save -----
 saveRDS(all_bets,
-        glue::glue('Season Simulation Backup/Bets/{cur_yr}/all_bets_{max(schedule$game_date)}.rds'))
+        glue::glue('VRGL/Stats/Season Schedules/Results/{cur_yr}/all_bets_{max(schedule$game_date)}.rds'))
 
 saveRDS(all_results,
-        glue::glue('Season Simulation Backup/Bets/{cur_yr}/all_results_{max(schedule$game_date)}.rds'))
+        glue::glue('VRGL/Stats/Season Schedules/Results/{cur_yr}/all_results_{max(schedule$game_date)}.rds'))
