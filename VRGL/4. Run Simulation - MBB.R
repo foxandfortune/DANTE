@@ -132,11 +132,6 @@ dates <- schedule %>%
   select(game_date) %>% 
   distinct()
 
-#i <- 1
-#bk_name <- "Consensus"
-#league_nm <- "ncaab"
-#df <- dates
-
 ## Get odds ----------
 odds <- get_odds(dates,
                  bk_name = "Consensus",
