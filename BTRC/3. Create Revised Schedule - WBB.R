@@ -1,24 +1,23 @@
-library(hoopR)
+library(wehoop)
 library(tidyverse)
 library(sp)
 
 # Set working directory
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 setwd('..')
-setwd('..')
 
 # Add NOT IN function:
 `%!in%` = Negate(`%in%`)
 
 # Set reference year
-cur_yr <- 2025
+cur_yr <- 2026
 
 # Load teams and venue data -----
-teams <- readRDS(glue::glue("Stats/Teams/team_database.rds"))
+teams <- readRDS(glue::glue("_Helper Files/Team Data/team_database_wbb.rds"))
 
 # Load team venues for calculating travel -------------------
-all_venues <- readRDS("Stats/Teams/team_venues.rds") %>%
-  bind_rows(readRDS("Stats/Teams/neutral_sites.rds")) %>% 
+all_venues <- readRDS("_Helper Files/Team Data/team_venues_wbb.rds") %>%
+  bind_rows(readRDS("_Helper Files/Team Data/neutral_sites_wbb.rds")) %>% 
   mutate(latitude = as.numeric(latitude),
          longitude = as.numeric(longitude))
 
@@ -35,7 +34,7 @@ team_coords <- all_venues %>%
   select(-row)
 
 # Load schedule ------ 
-schedule <- hoopR::load_mbb_schedule(seasons = {cur_yr}) %>% 
+schedule <- wehoop::load_wbb_schedule(seasons = {cur_yr}) %>% 
   as.data.frame() %>% 
   # Filter for teams in database
   filter(home_id %in% teams$team_id | away_id %in% teams$team_id) %>% 
@@ -82,6 +81,8 @@ coords %>%
   # If missing values, check for missing venues
   #select(venue_id) %>% 
   #distinct()
+
+#coords <- coords %>% filter(game_id != '401825703')
 
 ### Check for duplicates ---------------------
 duplicates <- coords %>% 
@@ -144,4 +145,5 @@ schedule_adj %>%
            is.na(home_dist) | is.na(away_dist))
 
 # Save --------------------------
-saveRDS(schedule_adj, glue::glue("Minos/Season Simulation Backup/schedule_adj_{cur_yr}.rds"))
+saveRDS(schedule_adj, glue::glue("BTRC/Stats/Season Schedules/schedule_adj_wbb_{cur_yr}.rds"))
+
