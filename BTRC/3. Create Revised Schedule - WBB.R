@@ -82,7 +82,7 @@ coords %>%
   #select(venue_id) %>% 
   #distinct()
 
-#coords <- coords %>% filter(game_id != '401825703')
+coords <- coords %>% filter(game_id != '401825703')
 
 ### Check for duplicates ---------------------
 duplicates <- coords %>% 

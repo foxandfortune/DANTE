@@ -363,7 +363,7 @@ all_results <- as.data.frame(object$games) %>%
                           select(game_date, team_id = away_id, game_id)),
             by = c("team_id", "game_date")) %>% 
   select(-game_date) %>% 
-  left_join(hoopR::load_mbb_schedule() %>% 
+  left_join(wehoop::load_wbb_schedule() %>% 
               select(game_id, game_date = game_date_time), by = "game_id") %>% 
   relocate(c(game_date, game_date, game_id)) %>% 
   arrange(game_date, game_id)
@@ -394,7 +394,7 @@ all_results_no_prior <- as.data.frame(object_no_prior$games) %>%
                           select(game_date, team_id = away_id, game_id)),
             by = c("team_id", "game_date")) %>% 
   select(-game_date) %>% 
-  left_join(hoopR::load_mbb_schedule() %>% 
+  left_join(wehoop::load_wbb_schedule() %>% 
               select(game_id, game_date = game_date_time), by = "game_id") %>% 
   relocate(c(game_date, game_date, game_id)) %>% 
   arrange(game_date, game_id)
@@ -410,7 +410,7 @@ all_results <- all_results %>%
 
 ## Save -----
 saveRDS(all_bets,
-        glue::glue('Season Simulation Backup/Bets/{cur_yr}/all_bets_{max(schedule$game_date)}.rds'))
+        glue::glue('BTRC/Stats/Season Schedules/Results/{cur_yr}/all_bets_{max(schedule$game_date)}.rds'))
 
 saveRDS(all_results,
-        glue::glue('Season Simulation Backup/Bets/{cur_yr}/all_results_{max(schedule$game_date)}.rds'))
+        glue::glue('BTRC/Stats/Season Schedules/Results/{cur_yr}/all_results_{max(schedule$game_date)}.rds'))
