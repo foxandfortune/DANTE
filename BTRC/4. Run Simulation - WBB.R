@@ -91,7 +91,7 @@ schedule <- schedule %>%
 
 ##########################RUN SIMULATION #########################################################################
 ## Set seed ------------------
-set.seed(214)
+set.seed(421)
 
 ## Run it -------------------------------------
 object <- simulate_ncaa(ncaa_season =  {cur_yr},
