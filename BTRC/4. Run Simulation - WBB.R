@@ -104,7 +104,7 @@ object <- simulate_ncaa(ncaa_season =  {cur_yr},
                      sim_include = "REG")
 
 ## Set seed ------------------
-set.seed(214)
+set.seed(421)
 
 ## Run again without priors -------------------------------------
 object_no_prior <- simulate_ncaa(ncaa_season =  {cur_yr},
