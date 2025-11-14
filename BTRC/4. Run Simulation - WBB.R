@@ -54,7 +54,6 @@ is_sequential <- readRDS("_Helper Files/Simulation Functions/is_sequential.rds")
 # Load process_games and ratings based on sim method -------------------------------------------
 process_games <- readRDS(glue::glue("_Helper Files/Simulation Functions/process_games_wk_{sim_method}.rds"))
 
-
 # Load schedule -----------------
 schedule <- wehoop::load_wbb_schedule(seasons = {cur_yr}) %>% 
   filter(status_type_completed == FALSE,

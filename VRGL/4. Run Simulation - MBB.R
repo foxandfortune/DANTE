@@ -51,7 +51,6 @@ report <- readRDS("_Helper Files/Simulation Functions/report.rds")
 is_single_digit_numeric <- readRDS("_Helper Files/Simulation Functions/is_single_digit_numeric.rds")
 is_sequential <- readRDS("_Helper Files/Simulation Functions/is_sequential.rds")
 
-
 # Load process_games and ratings based on sim method -------------------------------------------
 process_games <- readRDS(glue::glue("_Helper Files/Simulation Functions/process_games_wk_{sim_method}.rds"))
 
