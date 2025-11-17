@@ -3,14 +3,15 @@ library(tidyverse)
 
 # Set working directory
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+setwd('..')
 
 # Set season
-cur_yr <- 2025
+cur_yr <- 2026
 
 `%!in%` = Negate(`%in%`)
 
 # Load full pbp and raw pbp, roster and team data ----------------------------------------------------
-pbp_full <- readRDS(glue::glue("Stats/PBP and Shot Data/pbp_{cur_yr}.rds"))
+pbp_full <- readRDS(glue::glue("VRGL/Stats/Team and Player Stats/PBP and Shot Data/pbp_{cur_yr}.rds"))
 
 pbp_raw <- hoopR::load_mbb_pbp(seasons = {cur_yr}) #%>% 
   #mutate(type_id = case_when(
@@ -196,7 +197,7 @@ pbp_raw <- pbp_raw %>%
 
 # Fix shot clock below 0; use possession start, exclude fast break
 mean_sc <- pbp_raw %>%
-  bind_rows(pbp_full) %>% 
+  #bind_rows(pbp_full) %>% 
   filter(shot_clock >= 0, shooting_play == TRUE, is_fastbreak == FALSE) %>% 
   with_groups(.groups = poss_start, summarise, mean_sc = mean(shot_clock))
 
@@ -216,7 +217,7 @@ pbp_raw %>%
   filter(shooting_play == TRUE, shot_clock < 0)
 
 # Save roster ---------------
-saveRDS(roster, glue::glue("Stats/Rosters/roster_{cur_yr}.rds"))
+saveRDS(roster, glue::glue("VRGL/Stats/Team and Player Stats/Rosters/roster_{cur_yr}.rds"))
 
 # Add expected values to shots --------------------------------------------
 ## Shots with location -----------

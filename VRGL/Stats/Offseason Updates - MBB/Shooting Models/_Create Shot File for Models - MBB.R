@@ -7,21 +7,19 @@ library(tidyverse)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # Set season
-cur_yr <- 2020
+cur_yr <- 2025
 
 # Load full pbp and raw pbp, roster and team data ----------------------------------------------------
 pbp_raw <- hoopR::load_mbb_pbp(seasons = c({cur_yr},
                                            {cur_yr-1},
                                            {cur_yr-2},
-                                           {cur_yr-3},
-                                           {cur_yr-4}))
+                                           {cur_yr-3}))
 
 # Load roster
 roster <- hoopR::load_mbb_player_box(seasons = c({cur_yr},
                                                  {cur_yr-1},
                                                  {cur_yr-2},
-                                                 {cur_yr-3},
-                                                 {cur_yr-4}))
+                                                 {cur_yr-3}))
 
 # Check for missing play types ------------
 playtypes <- pbp_raw %>% 
