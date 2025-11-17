@@ -8,7 +8,7 @@ setwd('..')
 `%!in%` = Negate(`%in%`)
 
 # Set season
-cur_yr <- 2025
+cur_yr <- 2026
 
 # Load full pbp and raw pbp, roster and team data ----------------------------------------------------
 pbp_full <- readRDS(glue::glue("BTRC/Stats/Team and Player Stats - WBB/PBP and Shot Data/pbp_wbb_{cur_yr}.rds"))
@@ -36,11 +36,6 @@ pbp_raw <- pbp_raw %>%
 
 playtypes %>% 
   print(n = Inf)
-
-pbp_raw %>% 
-  filter(type_id == "0" | is.na(type_id)) %>% 
-  select(game_id) %>% 
-  distinct()
 
 pbp_raw <- pbp_raw %>% 
   filter(type_id != 0)
@@ -505,7 +500,7 @@ minutes <- schedule %>%
   filter(game_id %in% pbp$game_id) %>% 
   select(game_id, status_period) %>% 
   distinct() %>% 
-  mutate(mins = 40 + (5 * (status_period - 2))) %>% 
+  mutate(mins = 40 + (5 * (status_period - 4))) %>% 
   select(game_id, mins)
 
 # Get points per possession by team for games with adequate information -----------

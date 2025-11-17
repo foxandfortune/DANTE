@@ -197,7 +197,7 @@ pbp_raw <- pbp_raw %>%
 
 # Fix shot clock below 0; use possession start, exclude fast break
 mean_sc <- pbp_raw %>%
-  #bind_rows(pbp_full) %>% 
+  bind_rows(pbp_full) %>% 
   filter(shot_clock >= 0, shooting_play == TRUE, is_fastbreak == FALSE) %>% 
   with_groups(.groups = poss_start, summarise, mean_sc = mean(shot_clock))
 
@@ -318,11 +318,11 @@ library(dials)
 library(xgboost)
 
 # Models
-xfg_loc <- xgb.load(glue::glue("Stats/Models/xfg {cur_yr}.model"))
+xfg_loc <- xgb.load(glue::glue("VRGL/Stats/Offseason Updates - MBB/Shooting Models/Models/xfg {cur_yr}.model"))
 
-xfg_noloc <- xgb.load(glue::glue("Stats/Models/xfg noloc {cur_yr}.model"))
+xfg_noloc <- xgb.load(glue::glue("VRGL/Stats/Offseason Updates - MBB/Shooting Models/Models/xfg noloc {cur_yr}.model"))
 
-xfg_ft <- readRDS(glue::glue("Stats/Models/ft {cur_yr}.rds"))
+xfg_ft <- readRDS(glue::glue("VRGL/Stats/Offseason Updates - MBB/Shooting Models/Models/ft {cur_yr}.rds"))
 
 # Preds to location shots
 set.seed(421)
@@ -433,7 +433,7 @@ pbp_raw <- pbp_raw %>%
 pbp_full <- bind_rows(pbp_full,
                       pbp_raw)
 
-saveRDS(pbp_full, glue::glue("Stats/PBP and Shot Data/pbp_{cur_yr}.rds"))
+saveRDS(pbp_full, glue::glue("VRGL/Stats/Team and Player Stats/PBP and Shot Data/pbp_{cur_yr}.rds"))
 
 # Clear out extra objects ------------------------------
 pbp <- pbp_full
@@ -448,7 +448,7 @@ rm(all_preds, doubles, mean_sc,
 library(sp)
 
 # Load teams -----
-teams <- readRDS(glue::glue("Stats/Teams/team_database.rds"))
+teams <- readRDS(glue::glue("_Helper Files/Team Data/team_database.rds"))
 
 # Load schedule ------ 
 schedule <- hoopR::load_mbb_schedule(seasons = {cur_yr}) %>% 
@@ -642,8 +642,8 @@ summary %>%
   filter(is.na(conference_competition))
 
 # Load team venues for calculating travel -------------------
-all_venues <- readRDS("Stats/Teams/team_venues.rds") %>%
-  bind_rows(readRDS("Stats/Teams/neutral_sites.rds")) %>% 
+all_venues <- readRDS("_Helper Files/Team Data/team_venues.rds") %>%
+  bind_rows(readRDS("_Helper Files/Team Data/neutral_sites.rds")) %>% 
   mutate(latitude = as.numeric(latitude),
          longitude = as.numeric(longitude))
 
@@ -727,4 +727,4 @@ coords <- as.data.frame(coords)
 head(coords, 10)
 
 # Save --------------------------
-saveRDS(coords, glue::glue("Stats/Power Ratings/Raw Data/poss_stats_with_types_{cur_yr}.rds"))
+saveRDS(coords, glue::glue("VRGL/Stats/Team and Player Stats/Power Ratings/Raw Data/poss_stats_with_types_{cur_yr}.rds"))

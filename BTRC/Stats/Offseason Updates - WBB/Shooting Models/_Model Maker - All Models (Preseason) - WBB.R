@@ -16,10 +16,10 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 options(scipen = 999999)
 
 # Set reference year
-cur_yr <- 2025
+cur_yr <- 2026
 
 # Load data
-all_shots <- readRDS(glue::glue("Shot Files/pbp_raw_current.rds"))
+all_shots <- readRDS(glue::glue("pbp_raw_current.rds"))
 
 unique(all_shots$season)
 
@@ -27,14 +27,11 @@ unique(all_shots$season)
 all_shots <- all_shots %>% 
   filter(season >= {cur_yr - 4})
 
-# Move working directory up ----
-setwd('..')
-
 ######################## xgboost for location ########################
 set.seed(421)
 
 # Load xgboost best model
-best_model <- readRDS(glue::glue("Models/xfg_xgboost.rds"))
+best_model <- readRDS(glue::glue("Models/xfg_xgboost_wbb.rds"))
 
 # Set parameters with results from best model
 # Include how man rounds to train for
@@ -122,7 +119,7 @@ xfg_model <- xgboost::xgboost(
 )
 
 # Save model for each year
-xgb.save(xfg_model, glue::glue("Models/xfg {cur_yr}.model"))
+xgb.save(xfg_model, glue::glue("Models/xfg wbb {cur_yr}.model"))
 
 rm(best_model, params, 
    shots_model, train_data, train_labels,
@@ -132,7 +129,7 @@ rm(best_model, params,
 set.seed(421)
 
 # Load xgboost best model
-best_model <- readRDS(glue::glue("Models/xfg_xgboost_no_loc.rds"))
+best_model <- readRDS(glue::glue("Models/xfg_xgboost_no_loc_wbb.rds"))
 
 # Set paramangers with results from best model
 # Include how man rounds to train for
@@ -218,7 +215,7 @@ xfg_model <- xgboost::xgboost(
 )
 
 # Save model for each year
-xgb.save(xfg_model, glue::glue("Models/xfg noloc {cur_yr}.model"))
+xgb.save(xfg_model, glue::glue("Models/xfg noloc wbb {cur_yr}.model"))
 
 rm(best_model, params, 
    shots_model, train_data, train_labels,
@@ -247,4 +244,4 @@ ft_model <- fts %>%
 ft_model
 
 # Save
-saveRDS(ft_model, glue::glue("Models/ft {cur_yr}.rds"))
+saveRDS(ft_model, glue::glue("Models/ft wbb {cur_yr}.rds"))

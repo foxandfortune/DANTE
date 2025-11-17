@@ -7,21 +7,19 @@ library(tidyverse)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # Set season
-cur_yr <- 2024
+cur_yr <- 2025
 
 # Load full pbp and raw pbp, roster and team data ----------------------------------------------------
 pbp_raw <- wehoop::load_wbb_pbp(seasons = c({cur_yr},
                                             {cur_yr-1},
                                             {cur_yr-2},
-                                            {cur_yr-3},
-                                            {cur_yr-4}))
+                                            {cur_yr-3}))
 
 # Load roster
 roster <- wehoop::load_wbb_player_box(seasons = c({cur_yr},
                                                   {cur_yr-1},
                                                   {cur_yr-2},
-                                                  {cur_yr-3},
-                                                  {cur_yr-4}))
+                                                  {cur_yr-3}))
 
 # Check for missing play types ------------
 playtypes <- pbp_raw %>% 
@@ -213,4 +211,4 @@ pbp_raw %>%
   filter(shooting_play == TRUE, shot_clock < 0)
 
 ## Save file for model ----------------
-saveRDS(pbp_raw, 'Shot Files/pbp_raw_current.rds')
+saveRDS(pbp_raw, 'pbp_raw_current.rds')

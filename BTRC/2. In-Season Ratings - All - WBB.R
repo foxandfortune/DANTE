@@ -12,10 +12,10 @@ season <- 2025
 `%!in%` = Negate(`%in%`)
 
 # Load teams -----
-teams <- readRDS(glue::glue("Teams/team_database_wbb.rds"))
+teams <- readRDS(glue::glue("_Helper Files/Team Data/team_database_wbb.rds"))
 
 # Load summary data ----------
-summary <- readRDS(glue::glue("Power Ratings/Raw Data/poss_stats_with_types_wbb_{season}.rds")) %>% 
+summary <- readRDS(glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Raw Data/poss_stats_with_types_wbb_{season}.rds")) %>% 
   # Filter out teams in team dataset
   filter(team_id %in% teams$team_id & opponent_team_id %in% teams$team_id) %>% 
   with_groups(game_id, mutate, tm_ct = n()) %>%
@@ -25,51 +25,8 @@ summary <- readRDS(glue::glue("Power Ratings/Raw Data/poss_stats_with_types_wbb_
   as.data.frame() %>% 
   rename(opp_id = opponent_team_id)
 
-## Get games played/to be played for each team -----
-games_played <- summary %>% 
-  mutate(name = paste0("team_id_", team_id)) %>% 
-  with_groups(.groups = name,
-              summarise,
-              games_played = n_distinct(game_id)) %>% 
-  bind_rows(summary %>% 
-              mutate(name = paste0("opp_id_", opp_id)) %>% 
-              with_groups(.groups = name,
-                          summarise,
-                          games_played = n_distinct(game_id)))
-
-## To be played
-schedule <- wehoop::load_wbb_schedule(seasons = {season})
-
-schedule <- schedule %>% 
-  select(game_date, game_id, team_id = home_id, opp_id = away_id) %>% 
-  bind_rows(schedule %>% 
-              select(game_date, game_id, team_id = away_id, opp_id = home_id))
-
-
-games_to_play <- schedule %>% 
-  mutate(name = paste0('team_id_', team_id)) %>% 
-  with_groups(.groups = name,
-              summarise,
-              games_to_play = n_distinct(game_id)) %>% 
-  bind_rows(schedule %>% 
-              mutate(name = paste0('opp_id_', opp_id)) %>% 
-              with_groups(.groups = name,
-                          summarise,
-                          games_to_play = n_distinct(game_id)))
-
-
-# Create weights for priors
-max_games <- games_to_play %>% 
-  filter(!str_detect(name, '-1'), !str_detect(name, '-2')) %>% 
-  filter(games_to_play == max(games_to_play)) %>% 
-  select(-name) %>% 
-  distinct() %>% 
-  pull(games_to_play)
-
-print(max_games)
-
 # Load priors ---------------
-priors.all <- readRDS(glue::glue('Power Ratings/Team Ratings/Priors/priors_wbb_{season}.rds'))
+priors.all <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Priors/priors_wbb_{season}.rds'))
 
 priors.pace <- priors.all$pace
 priors.ast <- priors.all$ast
@@ -80,59 +37,22 @@ priors.efg <- priors.all$efg
 priors.rtg_raw <- priors.all$raw_rating
 
 # Load create ratings function
-create_ratings <- readRDS("Tools/create_ratings_stat.rds")
-
-summary %>% 
-  mutate(team_name = paste0('team_id_', team_id),
-         opp_name = paste0('opp_id_', opp_id)) %>% 
-  select(game_id, game_date,
-         team_id, team_name, opp_id, opp_name,
-         days_rest, is_home, neutral_site, travel,
-         poss_per_40, ast_rt, oreb_rt, to_rt, rtg, efg_adj) %>%
-  # Add pace priors
-  left_join(priors.pace, by = c("team_name" = "name")) %>% 
-  rename(team_pace = value) %>% 
-  left_join(priors.pace, by = c("opp_name" = "name")) %>% 
-  rename(opp_pace = value) %>%
-  # Add assist priors
-  left_join(priors.ast, by = c("team_name" = "name")) %>% 
-  rename(team_ast = value) %>% 
-  left_join(priors.ast, by = c("opp_name" = "name")) %>% 
-  rename(opp_ast = value) %>%
-  # Add oreb priors
-  left_join(priors.oreb, by = c("team_name" = "name")) %>% 
-  rename(team_oreb = value) %>% 
-  left_join(priors.oreb, by = c("opp_name" = "name")) %>% 
-  rename(opp_oreb = value) %>%
-  # Add turnover priors
-  left_join(priors.to, by = c("team_name" = "name")) %>% 
-  rename(team_to = value) %>% 
-  left_join(priors.to, by = c("opp_name" = "name")) %>% 
-  rename(opp_to = value) %>%
-  # Add rating priors
-  left_join(priors.rtg, by = c("team_name" = "name")) %>% 
-  rename(team_rtg = value) %>% 
-  left_join(priors.rtg, by = c("opp_name" = "name")) %>% 
-  rename(opp_rtg = value) %>%
-  # Add efg priors
-  left_join(priors.efg, by = c("team_name" = "name")) %>% 
-  rename(team_efg = value) %>% 
-  left_join(priors.efg, by = c("opp_name" = "name")) %>% 
-  rename(opp_efg = value)
-  
-
-
-
-
-
-
-
-
-
+create_ratings <- readRDS("_Helper Files/Other/create_ratings_stat.rds")
 
 
 # Pace (Possessions per 40 minutes) -----------------------------------
 stat_name <- "poss_per_40"
+
+## Weights ----------
+weights <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/single_season_wbb_{stat_name}_wgt.rds')) %>%
+  rename(year = season) %>% 
+  mutate(season_dist = abs(year - season)) %>% 
+  filter(season_dist == min(season_dist))
+
+weights_prior <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Weights/with_priors_{stat_name}_wgt.rds')) %>%
+  rename(year = season) %>% 
+  mutate(season_dist = abs(year - season)) %>% 
+  filter(season_dist == min(season_dist))
 
 ## Features ----------
 list <- c('game_date', 'team_id', 'opp_id')
@@ -140,22 +60,22 @@ list <- c('game_date', 'team_id', 'opp_id')
 ## Weight data frame ----------------
 weight.df <- data.frame(game_no = seq.int(from = 1,
                                           # Adjust max games as needed
-                                          to = max_games - 0,
+                                          to = {weights_prior$max_games},
                                           by = 1)) %>%
-  mutate(weight = 0.7 ^ game_no,
+  mutate(weight = {weights_prior$prior_wgt} ^ game_no,
          weight = weight / sum(weight),
          # Adjust by prior minimum as needed
-         cum_weight = cumsum(weight) * (1 - 0.10)) %>% 
+         cum_weight = cumsum(weight) * (1 - weights_prior$prior_min)) %>% 
   mutate(row = row_number()) %>% 
   select(row, cum_weight)
 
 ## Load weights -----
-wgt_var <- 0.87
+wgt_var <- weights$wgt
 
 print(wgt_var)
 
 ## Load lambda adj -----
-lambda_adj <- 0
+lambda_adj <- weights$lambda_adj
 
 print(lambda_adj)
 
@@ -200,28 +120,39 @@ rm(stat_name, list, wgt_var,
 # Assist Rate -----------------------------------
 stat_name <- "ast_rt"
 
+## Weights ----------
+weights <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/single_season_wbb_{stat_name}_wgt.rds')) %>%
+  rename(year = season) %>% 
+  mutate(season_dist = abs(year - season)) %>% 
+  filter(season_dist == min(season_dist))
+
+weights_prior <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Weights/with_priors_{stat_name}_wgt.rds')) %>%
+  rename(year = season) %>% 
+  mutate(season_dist = abs(year - season)) %>% 
+  filter(season_dist == min(season_dist))
+
 ## Features ----------
 list <- c('game_date', 'team_id', 'opp_id')
 
 ## Weight data frame ----------------
 weight.df <- data.frame(game_no = seq.int(from = 1,
                                           # Adjust max games as needed
-                                          to = max_games - 0,
+                                          to = {weights_prior$max_games},
                                           by = 1)) %>%
-  mutate(weight = 0.9 ^ game_no,
+  mutate(weight = {weights_prior$prior_wgt} ^ game_no,
          weight = weight / sum(weight),
          # Adjust by prior minimum as needed
-         cum_weight = cumsum(weight) * (1 - 0.10)) %>% 
+         cum_weight = cumsum(weight) * (1 - weights_prior$prior_min)) %>% 
   mutate(row = row_number()) %>% 
   select(row, cum_weight)
 
 ## Load weights -----
-wgt_var <- 0.98
+wgt_var <- weights$wgt
 
 print(wgt_var)
 
 ## Load lambda adj -----
-lambda_adj <- 0
+lambda_adj <- weights$lambda_adj
 
 print(lambda_adj)
 
@@ -265,28 +196,39 @@ rm(stat_name, list, wgt_var,
 # Offensive rebound rate -----------------------------------
 stat_name <- "oreb_rt"
 
+## Weights ----------
+weights <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/single_season_wbb_{stat_name}_wgt.rds')) %>%
+  rename(year = season) %>% 
+  mutate(season_dist = abs(year - season)) %>% 
+  filter(season_dist == min(season_dist))
+
+weights_prior <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Weights/with_priors_{stat_name}_wgt.rds')) %>%
+  rename(year = season) %>% 
+  mutate(season_dist = abs(year - season)) %>% 
+  filter(season_dist == min(season_dist))
+
 ## Features ----------
 list <- c('game_date', 'team_id', 'opp_id')
 
 ## Weight data frame ----------------
 weight.df <- data.frame(game_no = seq.int(from = 1,
                                           # Adjust max games as needed
-                                          to = max_games - 2,
+                                          to = {weights_prior$max_games},
                                           by = 1)) %>%
-  mutate(weight = 0.9 ^ game_no,
+  mutate(weight = {weights_prior$prior_wgt} ^ game_no,
          weight = weight / sum(weight),
          # Adjust by prior minimum as needed
-         cum_weight = cumsum(weight) * (1 - 0.15)) %>% 
+         cum_weight = cumsum(weight) * (1 - weights_prior$prior_min)) %>% 
   mutate(row = row_number()) %>% 
   select(row, cum_weight)
 
 ## Load weights -----
-wgt_var <- 0.97
+wgt_var <- weights$wgt
 
 print(wgt_var)
 
 ## Load lambda adj -----
-lambda_adj <- 0
+lambda_adj <- weights$lambda_adj
 
 print(lambda_adj)
 
@@ -331,28 +273,39 @@ rm(stat_name, list, wgt_var,
 # Turnover Rate -----------------------------------
 stat_name <- "to_rt"
 
+## Weights ----------
+weights <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/single_season_wbb_{stat_name}_wgt.rds')) %>%
+  rename(year = season) %>% 
+  mutate(season_dist = abs(year - season)) %>% 
+  filter(season_dist == min(season_dist))
+
+weights_prior <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Weights/with_priors_{stat_name}_wgt.rds')) %>%
+  rename(year = season) %>% 
+  mutate(season_dist = abs(year - season)) %>% 
+  filter(season_dist == min(season_dist))
+
 ## Features ----------
 list <- c('game_date', 'team_id', 'opp_id')
 
 ## Weight data frame ----------------
 weight.df <- data.frame(game_no = seq.int(from = 1,
                                           # Adjust max games as needed
-                                          to = max_games - 0,
+                                          to = {weights_prior$max_games},
                                           by = 1)) %>%
-  mutate(weight = 0.83 ^ game_no,
+  mutate(weight = {weights_prior$prior_wgt} ^ game_no,
          weight = weight / sum(weight),
          # Adjust by prior minimum as needed
-         cum_weight = cumsum(weight) * (1 - 0.10)) %>% 
+         cum_weight = cumsum(weight) * (1 - weights_prior$prior_min)) %>% 
   mutate(row = row_number()) %>% 
   select(row, cum_weight)
 
 ## Load weights -----
-wgt_var <- 0.96
+wgt_var <- weights$wgt
 
 print(wgt_var)
 
 ## Load lambda adj -----
-lambda_adj <- 0
+lambda_adj <- weights$lambda_adj
 
 print(lambda_adj)
 
@@ -395,31 +348,41 @@ rm(stat_name, list, wgt_var,
 # Effective FG % -----------------------------------
 stat_name <- "efg_adj"
 
+## Weights ----------
+weights <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/single_season_wbb_{stat_name}_wgt.rds')) %>%
+  rename(year = season) %>% 
+  mutate(season_dist = abs(year - season)) %>% 
+  filter(season_dist == min(season_dist))
+
+weights_prior <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Weights/with_priors_{stat_name}_wgt.rds')) %>%
+  rename(year = season) %>% 
+  mutate(season_dist = abs(year - season)) %>% 
+  filter(season_dist == min(season_dist))
+
 ## Features ----------
 list <- c('game_date', 'team_id', 'opp_id')
 
 ## Weight data frame ----------------
 weight.df <- data.frame(game_no = seq.int(from = 1,
                                           # Adjust max games as needed
-                                          to = max_games - 0,
+                                          to = {weights_prior$max_games},
                                           by = 1)) %>%
-  mutate(weight = 0.7 ^ game_no,
+  mutate(weight = {weights_prior$prior_wgt} ^ game_no,
          weight = weight / sum(weight),
          # Adjust by prior minimum as needed
-         cum_weight = cumsum(weight) * (1 - 0.10)) %>% 
+         cum_weight = cumsum(weight) * (1 - weights_prior$prior_min)) %>% 
   mutate(row = row_number()) %>% 
   select(row, cum_weight)
 
 ## Load weights -----
-wgt_var <- 0.99
+wgt_var <- weights$wgt
 
 print(wgt_var)
 
 ## Load lambda adj -----
-lambda_adj <- 0
+lambda_adj <- weights$lambda_adj
 
 print(lambda_adj)
-
 
 ## Create EFG % ratings ---------------------
 raw.coeff.efg <- create_ratings(df = summary,
@@ -461,31 +424,42 @@ rm(stat_name, list, wgt_var,
 # Team Ratings -----------------------------------------
 stat_name <- "rtg"
 
-## Weight data frame ----------------
-weight.df <- data.frame(game_no = seq.int(from = 1,
-                                          # Adjust max games as needed
-                                          to = max_games - 3,
-                                          by = 1)) %>%
-  mutate(weight = 0.95 ^ game_no,
-         weight = weight / sum(weight),
-         # Adjust by prior minimum as needed
-         cum_weight = cumsum(weight) * (1 - 0.15)) %>% 
-  mutate(row = row_number()) %>% 
-  select(row, cum_weight)
+## Weights ----------
+weights <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/single_season_wbb_{stat_name}_wgt.rds')) %>%
+  rename(year = season) %>% 
+  mutate(season_dist = abs(year - season)) %>% 
+  filter(season_dist == min(season_dist))
 
+weights_prior <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Weights/with_priors_{stat_name}_wgt.rds')) %>%
+  rename(year = season) %>% 
+  mutate(season_dist = abs(year - season)) %>% 
+  filter(season_dist == min(season_dist))
 
 ## Features ----------
 list <- c('game_date', 'team_id', 'opp_id',
           'poss_per_40', 'ast_rt', 'oreb_rt', 'to_rt',
           'is_home', 'neutral_site', 'days_rest', 'travel')
 
-# Load weights -----
-wgt_var <- 0.97
+
+## Weight data frame ----------------
+weight.df <- data.frame(game_no = seq.int(from = 1,
+                                          # Adjust max games as needed
+                                          to = {weights_prior$max_games},
+                                          by = 1)) %>%
+  mutate(weight = {weights_prior$prior_wgt} ^ game_no,
+         weight = weight / sum(weight),
+         # Adjust by prior minimum as needed
+         cum_weight = cumsum(weight) * (1 - weights_prior$prior_min)) %>% 
+  mutate(row = row_number()) %>% 
+  select(row, cum_weight)
+
+## Load weights -----
+wgt_var <- weights$wgt
 
 print(wgt_var)
 
 ## Load lambda adj -----
-lambda_adj <- 0.75 
+lambda_adj <- weights$lambda_adj
 
 print(lambda_adj)
 
@@ -587,13 +561,13 @@ list <- c('game_date', 'team_id', 'opp_id',
           'poss_per_40',
           'is_home', 'neutral_site', 'days_rest', 'travel')
 
-# Load weights -----
-wgt_var <- 0.97 
+## Load weights -----
+wgt_var <- weights$wgt
 
 print(wgt_var)
 
 ## Load lambda adj -----
-lambda_adj <- 0.75 
+lambda_adj <- weights$lambda_adj
 
 print(lambda_adj)
 
