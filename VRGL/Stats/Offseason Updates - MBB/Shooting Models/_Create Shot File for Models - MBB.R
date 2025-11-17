@@ -211,4 +211,4 @@ pbp_raw %>%
   filter(shooting_play == TRUE, shot_clock < 0)
 
 ## Save file for model ----------------
-saveRDS(pbp_raw, 'Shot Files/pbp_raw_current.rds')
+saveRDS(pbp_raw, 'pbp_raw_current.rds')

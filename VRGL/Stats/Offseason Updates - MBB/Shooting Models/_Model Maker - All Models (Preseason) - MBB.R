@@ -16,19 +16,16 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 options(scipen = 999999)
 
 # Set reference year
-cur_yr <- 2025
+cur_yr <- 2026
 
 # Load data
-all_shots <- readRDS(glue::glue("Shot Files/pbp_raw_current.rds"))
+all_shots <- readRDS(glue::glue("pbp_raw_current.rds"))
 
 unique(all_shots$season)
 
 ## Filter for prior four seasons
 all_shots <- all_shots %>% 
   filter(season >= {cur_yr - 4})
-
-# Move working directory up ----
-setwd('..')
 
 ######################## xgboost for location ########################
 set.seed(421)
