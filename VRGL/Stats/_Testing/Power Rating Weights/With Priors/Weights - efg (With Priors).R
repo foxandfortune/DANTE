@@ -36,7 +36,7 @@ summary %>%
 priors.all <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/Priors/priors_{season}.rds'))
 
 ## Set priors for testing ------------
-priors.test <- priors.all$to
+priors.test <- priors.all$efg
 
 priors.test <- priors.test %>%
   with_groups(.groups = name,
@@ -101,7 +101,7 @@ dates.early <- dates %>%
 create_ratings <- readRDS("_Helper Files/Other/create_ratings_stat.rds")
 
 # Set stat for testing ----------
-stat_name <- "to_rt"
+stat_name <- "efg_adj"
 
 # Load prior results
 res_all <- readRDS(glue::glue(
@@ -117,9 +117,9 @@ print(res_all %>%
 list <- c('game_date', 'team_id', 'opp_id')
 
 # Set weight parameters for priors ------------------------
-prior_wgt <- 0.85
-prior_min <- 0.05
-max_games <- max_games_sched - 2
+prior_wgt <- 1
+prior_min <- 0.0
+max_games <- max_games_sched - 0
 
 weight.df <- data.frame(game_no = seq.int(from = 1,
                                           to = max_games,
