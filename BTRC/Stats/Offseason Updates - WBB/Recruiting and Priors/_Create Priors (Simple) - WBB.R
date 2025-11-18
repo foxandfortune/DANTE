@@ -907,8 +907,6 @@ test_data <- efg_data %>%
 unique(test_data$season)
 
 ### Team ----------
-print(all_models$efg_off)
-
 model.efg.tm <- rstanarm::stan_glm(formula = ortg_next ~ ortg + factor(team_id),
                                    data = train_data, 
                                    iter = 5000,
@@ -1077,8 +1075,6 @@ print(rtg_raw_priors_off)
 head(test_data)
 
 ### Opponent ------------
-print(all_models$rtg_raw_def)
-
 model.rtg_raw.opp <- rstanarm::stan_glm(formula = drtg_next ~ drtg + factor(team_id),
                                         data = train_data,
                                         iter = 5000, 
