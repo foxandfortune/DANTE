@@ -16,7 +16,7 @@ sim_method <- "to_oreb_ast"
 
 # Load ratings ------------------
 ratings <- readRDS(glue::glue("VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_{cur_yr}.rds"))
-ratings_no_prior <- readRDS(glue::glue("Stats/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_no_prior_{cur_yr}.rds"))
+ratings_no_prior <- readRDS(glue::glue("VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_no_prior_{cur_yr}.rds"))
 
 ratings <- list(
   pace = ratings$pace,
