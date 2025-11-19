@@ -397,12 +397,12 @@ list <- c('game_date', 'team_id', 'opp_id')
 ## Weight data frame ----------------
 weight.df <- data.frame(game_no = seq.int(from = 1,
                                           # Adjust max games as needed
-                                          to = {30},
+                                          to = {weights_prior$max_games},
                                           by = 1)) %>%
-  mutate(weight = {0.7} ^ game_no,
+  mutate(weight = {weights_prior$prior_wgt} ^ game_no,
          weight = weight / sum(weight),
          # Adjust by prior minimum as needed
-         cum_weight = cumsum(weight) * (1 - 0.10)) %>% 
+         cum_weight = cumsum(weight) * (1 - weights_prior$prior_min)) %>% 
   mutate(row = row_number()) %>% 
   select(row, cum_weight)
 

@@ -6,7 +6,7 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 setwd('..')
 
 # Set season/country/tier
-season <- 2025
+season <- 2026
 
 # Negate in formula
 `%!in%` = Negate(`%in%`)
@@ -24,6 +24,39 @@ summary <- readRDS(glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Rati
   select(-tm_ct) %>% 
   as.data.frame() %>% 
   rename(opp_id = opponent_team_id)
+
+## Get games played/to be played for each team -----
+games_played <- summary %>% 
+  mutate(name = paste0("team_id_", team_id)) %>% 
+  with_groups(.groups = name,
+              summarise,
+              games_played = n_distinct(game_id)) %>% 
+  bind_rows(summary %>% 
+              mutate(name = paste0("opp_id_", opp_id)) %>% 
+              with_groups(.groups = name,
+                          summarise,
+                          games_played = n_distinct(game_id)))
+
+### To be played -----------------------
+schedule <- wehoop::load_wbb_schedule(seasons = {season})
+
+schedule <- schedule %>% 
+  select(game_date, game_id, team_id = home_id, opp_id = away_id) %>% 
+  bind_rows(schedule %>% 
+              select(game_date, game_id, team_id = away_id, opp_id = home_id))
+
+
+games_to_play <- schedule %>% 
+  mutate(name = paste0('team_id_', team_id)) %>% 
+  with_groups(.groups = name,
+              summarise,
+              games_to_play = n_distinct(game_id)) %>% 
+  bind_rows(schedule %>% 
+              mutate(name = paste0('opp_id_', opp_id)) %>% 
+              with_groups(.groups = name,
+                          summarise,
+                          games_to_play = n_distinct(game_id)))
+
 
 # Load priors ---------------
 priors.all <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Priors/priors_wbb_{season}.rds'))
@@ -107,8 +140,8 @@ ratings.pace <- priors.pace %>%
     is.na(value_prior) ~ value_curr,
     str_detect(name, "team_id_") | str_detect(name, "opp_id_") ~ 
       cum_weight * value_curr + (1 - cum_weight) * value_prior,
-    TRUE ~ (0.9 + 0.1 * games_played / max_games) * value_curr + 
-      (0.1 - 0.1 * games_played / max_games) * value_prior)) %>%
+    TRUE ~ (0.9 + 0.1 * games_played / weights_prior$max_games) * value_curr + 
+      (0.1 - 0.1 * games_played / weights_prior$max_games) * value_prior)) %>%
   select(name, value)
 
 head(ratings.pace)
@@ -183,8 +216,8 @@ ratings.ast <- priors.ast %>%
     is.na(value_prior) ~ value_curr,
     str_detect(name, "team_id_") | str_detect(name, "opp_id_") ~ 
       cum_weight * value_curr + (1 - cum_weight) * value_prior,
-    TRUE ~ (0.9 + 0.1 * games_played / max_games) * value_curr + 
-      (0.1 - 0.1 * games_played / max_games) * value_prior)) %>% 
+    TRUE ~ (0.9 + 0.1 * games_played / weights_prior$max_games) * value_curr + 
+      (0.1 - 0.1 * games_played / weights_prior$max_games) * value_prior)) %>% 
   select(name, value)
 
 head(ratings.ast)
@@ -260,8 +293,8 @@ ratings.oreb <- priors.oreb %>%
     is.na(value_prior) ~ value_curr,
     str_detect(name, "team_id_") | str_detect(name, "opp_id_") ~ 
       cum_weight * value_curr + (1 - cum_weight) * value_prior,
-    TRUE ~ (0.9 + 0.1 * games_played / max_games) * value_curr + 
-      (0.1 - 0.1 * games_played / max_games) * value_prior)) %>% 
+    TRUE ~ (0.9 + 0.1 * games_played / weights_prior$max_games) * value_curr + 
+      (0.1 - 0.1 * games_played / weights_prior$max_games) * value_prior)) %>% 
   select(name, value)
 
 head(ratings.oreb)
@@ -335,8 +368,8 @@ ratings.to <- priors.to %>%
     is.na(value_prior) ~ value_curr,
     str_detect(name, "team_id_") | str_detect(name, "opp_id_") ~ 
       cum_weight * value_curr + (1 - cum_weight) * value_prior,
-    TRUE ~ (0.9 + 0.1 * games_played / max_games) * value_curr + 
-      (0.1 - 0.1 * games_played / max_games) * value_prior)) %>% 
+    TRUE ~ (0.9 + 0.1 * games_played / weights_prior$max_games) * value_curr + 
+      (0.1 - 0.1 * games_played / weights_prior$max_games) * value_prior)) %>% 
   select(name, value)
 
 head(ratings.to)
@@ -410,8 +443,8 @@ ratings.efg <- priors.efg %>%
     is.na(value_prior) ~ value_curr,
     str_detect(name, "team_id_") | str_detect(name, "opp_id_") ~ 
       cum_weight * value_curr + (1 - cum_weight) * value_prior,
-    TRUE ~ (0.9 + 0.1 * games_played / max_games) * value_curr + 
-      (0.1 - 0.1 * games_played / max_games) * value_prior)) %>% 
+    TRUE ~ (0.9 + 0.1 * games_played / weights_prior$max_games) * value_curr + 
+      (0.1 - 0.1 * games_played / weights_prior$max_games) * value_prior)) %>% 
   select(name, value)
 
 
@@ -490,8 +523,8 @@ ratings.rtg <- priors.rtg %>%
     is.na(value_prior) ~ value_curr,
     str_detect(name, "team_id_") | str_detect(name, "opp_id_") ~ 
       cum_weight * value_curr + (1 - cum_weight) * value_prior,
-    TRUE ~ (0.9 + 0.1 * games_played / max_games) * value_curr + 
-      (0.1 - 0.1 * games_played / max_games) * value_prior)) %>% 
+    TRUE ~ (0.9 + 0.1 * games_played / weights_prior$max_games) * value_curr + 
+      (0.1 - 0.1 * games_played / weights_prior$max_games) * value_prior)) %>% 
   select(name, value)
 
 ## Look to see who's in the top 68 -------------
@@ -598,8 +631,8 @@ ratings.rtg_raw <- priors.rtg_raw %>%
     is.na(value_prior) ~ value_curr,
     str_detect(name, "team_id_") | str_detect(name, "opp_id_") ~ 
       cum_weight * value_curr + (1 - cum_weight) * value_prior,
-    TRUE ~ (0.9 + 0.1 * games_played / max_games) * value_curr + 
-      (0.1 - 0.1 * games_played / max_games) * value_prior)) %>% 
+    TRUE ~ (0.9 + 0.1 * games_played / weights_prior$max_games) * value_curr + 
+      (0.1 - 0.1 * games_played / weights_prior$max_games) * value_prior)) %>% 
   select(name, value)
 
 ## Look to see who's in the top 68 -------------
@@ -678,7 +711,7 @@ rtgs.no_prior <- list(pace = {raw.coeff.pace},
 
 ## Save ratings --------
 saveRDS(rtgs.all,
-        glue::glue("Power Ratings/Team Ratings/Inseason/inseason_ratings_all_wbb_{season}.rds"))
+        glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_wbb_{season}.rds"))
 
 saveRDS(rtgs.no_prior,
-        glue::glue("Power Ratings/Team Ratings/Inseason/inseason_ratings_all_no_prior_wbb_{season}.rds"))
+        glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_no_prior_wbb_{season}.rds"))

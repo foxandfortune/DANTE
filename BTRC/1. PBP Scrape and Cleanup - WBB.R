@@ -573,7 +573,7 @@ summary_box <- team_box %>%
          to_rt = turnovers / possessions) %>% 
   left_join(sched_doubled, by = c("game_id", "team_id")) %>% 
   left_join(schedule %>% 
-              mutate(mins = 40 + (5 * (status_period - 2))) %>% 
+              mutate(mins = 40 + (5 * (status_period - 4))) %>% 
               select(game_id, game_date, game_date_time,
                      tournament_id, mins), by = c("game_id", "game_date")) %>% 
   mutate(game_time = lubridate::hour(game_date_time),

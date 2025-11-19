@@ -16,7 +16,7 @@ sim_method <- "to_oreb_ast"
 
 # Load ratings ------------------
 ratings <- readRDS(glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_wbb_{cur_yr}.rds"))
-ratings_no_prior <- readRDS(glue::glue("Stats/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_no_prior_{cur_yr}.rds"))
+ratings_no_prior <- readRDS(glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_no_prior_wbb_{cur_yr}.rds"))
 
 ratings <- list(
   pace = ratings$pace,
@@ -85,8 +85,16 @@ rating_ids <- ratings$rtg %>%
   mutate(team_id = str_remove_all(name, "team_id_")) %>% 
   pull(team_id)
 
+rating_np_ids <- ratings_no_prior$rtg %>% 
+  filter(str_detect(name, "team_id_")) %>% 
+  mutate(team_id = str_remove_all(name, "team_id_")) %>% 
+  pull(team_id)
+
 schedule <- schedule %>% 
   filter(home_id %in% rating_ids & away_id %in% rating_ids)
+
+schedule_np <- schedule %>% 
+  filter(home_id %in% rating_np_ids & away_id %in% rating_np_ids)
 
 ##########################RUN SIMULATION #########################################################################
 ## Set seed ------------------
@@ -108,7 +116,7 @@ set.seed(421)
 ## Run again without priors -------------------------------------
 object_no_prior <- simulate_ncaa(ncaa_season =  {cur_yr},
                                  process_games = {process_games},
-                                 schedule = {schedule},
+                                 schedule = {schedule_np},
                                  if_ended_today = FALSE,
                                  fresh_season = TRUE,
                                  ratings = {ratings_no_prior},
