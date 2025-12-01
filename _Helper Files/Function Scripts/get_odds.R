@@ -1,10 +1,10 @@
 get_odds <- function(df,
                      bk_name = c("Consensus", "Open", "DraftKings",
-                                   "FanDuel", "PointsBet", "BetMGM"),
+                                 "FanDuel", "PointsBet", "BetMGM"),
                      league_nm = c("ncaab", "ncaaw")){
   
   if (!(bk_name %in% c("Consensus", "Open", "DraftKings",
-                         "FanDuel", "PointsBet", "BetMGM"))) {
+                       "FanDuel", "PointsBet", "BetMGM"))) {
     cli::cli_abort("The book you have selected is not a valid option!")
   }
   
@@ -18,8 +18,8 @@ get_odds <- function(df,
     URL = case_when(
       lubridate::day(day) < 10 & lubridate::month(day) < 10 ~
         paste0('https://api.actionnetwork.com/web/v1/scoreboard/',
-        {league_nm},'?division=D1&date=',
-        lubridate::year(day), 0, lubridate::month(day), 0, lubridate::day(day)),
+               {league_nm},'?division=D1&date=',
+               lubridate::year(day), 0, lubridate::month(day), 0, lubridate::day(day)),
       lubridate::day(day) < 10 & lubridate::month(day) >= 10 ~
         paste0('https://api.actionnetwork.com/web/v1/scoreboard/',
                {league_nm},'?division=D1&date=',
@@ -60,6 +60,12 @@ get_odds <- function(df,
         mutate(date = day) %>% 
         filter(!is.na(team), !is.na(opponent))
       
+      
+      for(k in 1:length(matches$id)){
+        
+      }
+      
+      
       temp.odds <- data.frame()
       
       for(j in 1:length(matches$id)){
@@ -88,8 +94,10 @@ get_odds <- function(df,
             rename(action_id = team_id)
         }
         
-        temp.odds = bind_rows(temp.odds, temp) %>% 
-          relocate(team)
+        if(!is.null(matches$odds[[j]])){
+          temp.odds = bind_rows(temp.odds, temp) %>% 
+            relocate(team)
+        }
       }
       
       odds <- rbind(odds, temp.odds) %>% 
@@ -108,4 +116,5 @@ get_odds <- function(df,
   return(odds)
 }
 
-saveRDS(get_odds, '_Helper Files/Simulation Functions/get_odds.rds')
+saveRDS(get_odds,
+        '_Helper Files/Simulation Functions/get_odds.rds')

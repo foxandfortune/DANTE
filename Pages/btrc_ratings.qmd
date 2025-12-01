@@ -26,7 +26,7 @@ season <- 2026
 gt_dante_title <- readRDS(here::here('_Helper Files/Simulation Functions', 'gt_dante_title.rds'))
 
 # Create Table Function -------------------------
-create_ratings_table <- readRDS(here::here('_Helper Files/Other/create_ratings_table_preseason.rds'))
+create_ratings_table <- readRDS(here::here('_Helper Files/Other/create_ratings_table_inseason.rds'))
 
 # WBB Theme -------------------------
 rank_theme <- readRDS(here::here('_Helper Files/Other/rank_theme_wbb.rds'))
@@ -175,6 +175,14 @@ tm.rtg <- ratings.rtg %>%
   mutate(OffRtg = OffRtg + base.rtg,
          DefRtg = DefRtg + base.rtg) 
 
+# Get results from season --------------------------------
+results <- wehoop::espn_wbb_standings({season})
+
+## Team W-L records --------------
+records <- results %>% 
+  transmute(team_id = as.character(team_id),
+            total)
+
 
 # Create full ratings table ----------------------------------------------
 ratings_tbl <- tm.pace %>% 
@@ -200,9 +208,10 @@ ratings_tbl <- tm.pace %>%
                      logo, conference_short_name), by = "team_id") %>% 
   arrange(desc(netrtg)) %>% 
   filter(!is.na(conference_short_name)) %>% 
+  left_join(records, by = 'team_id') %>% 
   mutate(rank = dense_rank(desc(netrtg))) %>% 
   select(rank, logo, team, 
-         conference_short_name, 
+         conference_short_name, total,
          pace, oreb_rt, dreb_rt,
          to_rt, to_opp_rt, ast_rt,
          tm_efg, opp_efg,
