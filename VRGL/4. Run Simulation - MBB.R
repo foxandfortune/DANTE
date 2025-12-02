@@ -197,11 +197,6 @@ moneyline <- team_bets %>%
   left_join(game_ids, by = c("game_date", "team_id")) %>% 
   relocate(game_id)
 
-print(moneyline %>% arrange(team))
-
-moneyline %>% 
-  filter(ml_val > .02, ml_val <=.11) %>% 
-  arrange(team)
 
 ## Wrong team favored ----------------------
 wtf <- team_bets %>% 
@@ -214,7 +209,6 @@ wtf <- team_bets %>%
   left_join(game_ids, by = c("game_date", "team_id")) %>% 
   relocate(game_id)
 
-print(wtf)
 
 ## Spread bets --------------
 spread <- team_bets %>% 
@@ -227,10 +221,6 @@ spread <- team_bets %>%
          spread_line, payout, result, spread, spread_val) %>% 
   left_join(game_ids, by = c("game_date", "team_id")) %>% 
   relocate(game_id)
-
-print(spread %>% arrange(team))
-print(spread %>% filter(spread_val > 0.5) %>% arrange(game_date,
-                                                      team))
 
 ## Team overs -----------------
 tm_over <- team_bets %>%  
@@ -256,8 +246,6 @@ tm_under <- team_bets %>%
   left_join(game_ids, by = c("game_date", "team_id")) %>% 
   relocate(game_id)
 
-print(tm_over)
-print(tm_under)
 
 # Pull game bets ---------------------------------------
 game_bets <- as.data.frame(object$games) %>% 
@@ -290,7 +278,6 @@ game_bets <- as.data.frame(object$games) %>%
   relocate(c(over_odds, over_val), .before = over) %>% 
   relocate(c(under_odds, under_val), .before = under)
   
-head(game_bets)
 
 ## Game overs ----------------------------
 game_over <- game_bets %>% 
@@ -324,8 +311,6 @@ game_under <- game_bets %>%
          under, payout, est_total, total, is_under, under_odds,
          total_val)
 
-print(game_over)
-print(game_under %>% arrange(away_tm))
 
 # Combine all bets --------------------------------------
 all_bets <- list(ml = {moneyline},
