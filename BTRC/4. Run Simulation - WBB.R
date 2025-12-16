@@ -96,6 +96,8 @@ schedule <- schedule %>%
 schedule_np <- schedule %>% 
   filter(home_id %in% rating_np_ids & away_id %in% rating_np_ids)
 
+print(length(schedule$game_id))
+
 ##########################RUN SIMULATION #########################################################################
 ## Set seed ------------------
 set.seed(421)

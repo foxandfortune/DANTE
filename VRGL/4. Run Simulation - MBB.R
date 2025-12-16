@@ -88,6 +88,8 @@ rating_ids <- ratings$rtg %>%
 schedule <- schedule %>% 
   filter(home_id %in% rating_ids & away_id %in% rating_ids)
 
+print(length(schedule$game_id))
+
 ##########################RUN SIMULATION #########################################################################
 ## Set seed ------------------
 set.seed(421)
