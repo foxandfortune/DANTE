@@ -91,10 +91,12 @@ rating_np_ids <- ratings_no_prior$rtg %>%
   pull(team_id)
 
 schedule <- schedule %>% 
-  filter(home_id %in% rating_ids & away_id %in% rating_ids)
+  filter(home_id %in% rating_ids & away_id %in% rating_ids) %>% 
+  filter(!is.na(away_rest))
 
 schedule_np <- schedule %>% 
-  filter(home_id %in% rating_np_ids & away_id %in% rating_np_ids)
+  filter(home_id %in% rating_np_ids & away_id %in% rating_np_ids) %>% 
+  filter(!is.na(away_rest))
 
 print(length(schedule$game_id))
 
