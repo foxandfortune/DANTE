@@ -2,8 +2,8 @@ library(hoopR)
 library(tidyverse)
 
 # Set working directory
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-setwd('..')
+#setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+#setwd('..')
 
 # Set season
 cur_yr <- 2026
