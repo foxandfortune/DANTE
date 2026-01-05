@@ -1,0 +1,166 @@
+name: VRGL Basketball Analysis Pipeline
+
+on:
+  # Run daily at 5 AM Central Time (11 AM UTC during CST, 10 AM UTC during CDT)
+  # Using 11 AM UTC to cover CST - adjust if needed for CDT
+  schedule:
+    - cron: '0 11 * * *'
+  
+  # Allow manual triggering
+  workflow_dispatch:
+
+# Set permissions for GitHub Pages deployment
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  run-vrgl-pipeline:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for proper git operations
+      
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: '4.3.2'
+      
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libcurl4-openssl-dev \
+            libssl-dev \
+            libxml2-dev \
+            libgdal-dev \
+            libudunits2-dev \
+            libproj-dev \
+            libgeos-dev
+      
+      - name: Cache R packages
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: ${{ runner.os }}-r-${{ hashFiles('VRGL/*.R') }}
+          restore-keys: |
+            ${{ runner.os }}-r-
+      
+      - name: Install R dependencies
+        run: |
+          Rscript -e 'install.packages(c("hoopR", "tidyverse", "glue", "sp", "fastDummies", "splitTools", "dials", "xgboost", "MLmetrics", "glmnet", "gsubfn", "jsonlite", "odds.converter"), repos="https://cloud.r-project.org")'
+      
+      - name: Verify directory structure
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Directory contents:"
+          ls -la
+          echo "VRGL directory contents:"
+          ls -la VRGL/ || echo "VRGL directory not found"
+      
+      - name: Run Script 1 - PBP Scrape and Cleanup
+        run: |
+          echo "Running Script 1 from $(pwd)"
+          Rscript "VRGL/1. PBP Scrape and Cleanup - MBB.R"
+        continue-on-error: false
+      
+      - name: Run Script 2 - In-Season Ratings
+        run: |
+          echo "Running Script 2 from $(pwd)"
+          Rscript "VRGL/2. In-Season Ratings - All - MBB.R"
+        continue-on-error: false
+      
+      - name: Run Script 3 - Create Revised Schedule
+        run: |
+          echo "Running Script 3 from $(pwd)"
+          Rscript "VRGL/3. Create Revised Schedule - MBB.R"
+        continue-on-error: false
+      
+      - name: Run Script 4 - Run Simulation
+        run: |
+          echo "Running Script 4 from $(pwd)"
+          Rscript "VRGL/4. Run Simulation - MBB.R"
+        continue-on-error: false
+      
+      - name: Commit and push results
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add -A
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update VRGL analysis results - $(date +'%Y-%m-%d %H:%M:%S')"
+            git push
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Deploy to GitHub Pages
+        if: success()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./Pages
+          publish_branch: gh-pages
+      
+      - name: Upload artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: error-logs
+          path: |
+            VRGL/*.log
+            VRGL/*.Rout
+            VRGL/*.rds
+          retention-days: 7
+      
+      - name: Send error notification email
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "❌ VRGL Pipeline Failed - ${{ github.repository }}"
+          to: ${{ secrets.NOTIFICATION_EMAIL }}
+          from: GitHub Actions
+          body: |
+            The VRGL Basketball Analysis Pipeline failed!
+            
+            Repository: ${{ github.repository }}
+            Workflow: ${{ github.workflow }}
+            Run: ${{ github.run_id }}
+            Commit: ${{ github.sha }}
+            
+            View details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            
+            Please check the logs for more information.
+      
+      - name: Send success notification email
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "✅ VRGL Pipeline Completed - ${{ github.repository }}"
+          to: ${{ secrets.NOTIFICATION_EMAIL }}
+          from: GitHub Actions
+          body: |
+            The VRGL Basketball Analysis Pipeline completed successfully!
+            
+            Repository: ${{ github.repository }}
+            Workflow: ${{ github.workflow }}
+            Run: ${{ github.run_id }}
+            Commit: ${{ github.sha }}
+            Timestamp: $(date +'%Y-%m-%d %H:%M:%S')
+            
+            View details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
