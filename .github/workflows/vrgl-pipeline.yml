@@ -52,7 +52,20 @@ jobs:
       
       - name: Install R dependencies
         run: |
-          Rscript -e 'install.packages(c("hoopR", "tidyverse", "glue", "sp", "fastDummies", "splitTools", "dials", "xgboost", "MLmetrics", "glmnet", "gsubfn", "jsonlite", "odds.converter"), repos="https://cloud.r-project.org")'
+          Rscript -e '
+          options(repos = c(CRAN = "https://cloud.r-project.org"))
+          
+          # Install tidyverse components individually for better reliability
+          install.packages(c("rlang", "dplyr", "tidyr", "readr", "purrr", "tibble", "stringr", "forcats", "ggplot2"))
+          
+          # Install other packages
+          install.packages(c("hoopR", "glue", "sp", "fastDummies", "splitTools", "dials", "xgboost", "MLmetrics", "glmnet", "gsubfn", "jsonlite", "odds.converter", "lubridate", "data.table"))
+          
+          # Verify installations
+          library(dplyr)
+          library(hoopR)
+          cat("All packages installed successfully\n")
+          '
       
       - name: Verify directory structure
         run: |
