@@ -54,17 +54,27 @@ jobs:
         run: |
           Rscript -e '
           options(repos = c(CRAN = "https://cloud.r-project.org"))
+          options(timeout = 300)
           
-          # Install tidyverse components individually for better reliability
-          install.packages(c("rlang", "dplyr", "tidyr", "readr", "purrr", "tibble", "stringr", "forcats", "ggplot2"))
+          # Install packages with error handling
+          packages <- c("tidyverse", "hoopR", "glue", "sp", "fastDummies", 
+                       "splitTools", "dials", "xgboost", "MLmetrics", 
+                       "glmnet", "gsubfn", "jsonlite", "odds.converter", 
+                       "lubridate", "data.table")
           
-          # Install other packages
-          install.packages(c("hoopR", "glue", "sp", "fastDummies", "splitTools", "dials", "xgboost", "MLmetrics", "glmnet", "gsubfn", "jsonlite", "odds.converter", "lubridate", "data.table"))
+          for (pkg in packages) {
+            if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+              cat("Installing", pkg, "\n")
+              install.packages(pkg, dependencies = TRUE)
+            } else {
+              cat(pkg, "already installed\n")
+            }
+          }
           
-          # Verify installations
-          library(dplyr)
+          # Verify critical packages
+          library(tidyverse)
           library(hoopR)
-          cat("All packages installed successfully\n")
+          cat("All packages installed and loaded successfully\n")
           '
       
       - name: Verify directory structure
