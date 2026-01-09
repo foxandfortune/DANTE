@@ -42,39 +42,50 @@ jobs:
             libproj-dev \
             libgeos-dev
       
-      - name: Cache R packages
-        uses: actions/cache@v3
+      - name: Setup R dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-r-${{ hashFiles('VRGL/*.R') }}
-          restore-keys: |
-            ${{ runner.os }}-r-
+          cache-version: 2
+          extra-packages: |
+            any::tidyverse
+            any::hoopR
+            any::glue
+            any::sp
+            any::fastDummies
+            any::splitTools
+            any::dials
+            any::xgboost
+            any::MLmetrics
+            any::glmnet
+            any::gsubfn
+            any::jsonlite
+            any::odds.converter
+            any::lubridate
+            any::data.table
       
-      - name: Install R dependencies
+      - name: Verify R environment
         run: |
           Rscript -e '
-          options(repos = c(CRAN = "https://cloud.r-project.org"))
-          options(timeout = 300)
-          
-          # Install packages with error handling
-          packages <- c("tidyverse", "hoopR", "glue", "sp", "fastDummies", 
-                       "splitTools", "dials", "xgboost", "MLmetrics", 
-                       "glmnet", "gsubfn", "jsonlite", "odds.converter", 
-                       "lubridate", "data.table")
-          
-          for (pkg in packages) {
-            if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
-              cat("Installing", pkg, "\n")
-              install.packages(pkg, dependencies = TRUE)
-            } else {
-              cat(pkg, "already installed\n")
-            }
+          cat("=== R Environment Info ===\n")
+          cat("R version:", R.version.string, "\n")
+          cat("Library paths:", .libPaths(), "\n\n")
+          cat("=== Checking for tidyverse ===\n")
+          if (require(tidyverse, quietly = TRUE)) {
+            cat("✓ tidyverse loaded successfully\n")
+            cat("tidyverse version:", as.character(packageVersion("tidyverse")), "\n")
+          } else {
+            cat("✗ tidyverse failed to load\n")
+            cat("Installed packages:\n")
+            print(installed.packages()[, c("Package", "Version")])
+            stop("tidyverse not available")
           }
-          
-          # Verify critical packages
-          library(tidyverse)
-          library(hoopR)
-          cat("All packages installed and loaded successfully\n")
+          cat("\n=== Checking for hoopR ===\n")
+          if (require(hoopR, quietly = TRUE)) {
+            cat("✓ hoopR loaded successfully\n")
+          } else {
+            cat("✗ hoopR failed to load\n")
+            stop("hoopR not available")
+          }
           '
       
       - name: Verify directory structure
