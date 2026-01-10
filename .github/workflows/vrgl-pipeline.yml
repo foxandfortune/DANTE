@@ -42,26 +42,42 @@ jobs:
             libproj-dev \
             libgeos-dev
       
-      - name: Setup R dependencies
-        uses: r-lib/actions/setup-r-dependencies@v2
+      - name: Cache R packages
+        uses: actions/cache@v3
         with:
-          cache-version: 2
-          extra-packages: |
-            any::tidyverse
-            any::hoopR
-            any::glue
-            any::sp
-            any::fastDummies
-            any::splitTools
-            any::dials
-            any::xgboost
-            any::MLmetrics
-            any::glmnet
-            any::gsubfn
-            any::jsonlite
-            any::odds.converter
-            any::lubridate
-            any::data.table
+          path: ${{ env.R_LIBS_USER }}
+          key: ${{ runner.os }}-r-v3-${{ hashFiles('.github/workflows/vrgl-pipeline.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-r-v3-
+      
+      - name: Install R dependencies
+        run: |
+          Rscript -e '
+          options(repos = c(CRAN = "https://cloud.r-project.org"))
+          options(timeout = 600)
+          
+          # Install packages one by one to see which fails
+          packages <- c("tidyverse", "hoopR", "glue", "sp", "fastDummies", 
+                       "splitTools", "dials", "xgboost", "MLmetrics", 
+                       "glmnet", "gsubfn", "jsonlite", "odds.converter", 
+                       "lubridate", "data.table")
+          
+          for (pkg in packages) {
+            cat("\n=== Installing", pkg, "===\n")
+            tryCatch({
+              if (!requireNamespace(pkg, quietly = TRUE)) {
+                install.packages(pkg, dependencies = TRUE, Ncpus = 2)
+              }
+              library(pkg, character.only = TRUE)
+              cat("✓", pkg, "installed and loaded successfully\n")
+            }, error = function(e) {
+              cat("✗ Error installing", pkg, ":", conditionMessage(e), "\n")
+              stop(paste("Failed to install", pkg))
+            })
+          }
+          
+          cat("\n=== All packages installed successfully ===\n")
+          '
       
       - name: Verify R environment
         run: |
@@ -75,8 +91,6 @@ jobs:
             cat("tidyverse version:", as.character(packageVersion("tidyverse")), "\n")
           } else {
             cat("✗ tidyverse failed to load\n")
-            cat("Installed packages:\n")
-            print(installed.packages()[, c("Package", "Version")])
             stop("tidyverse not available")
           }
           cat("\n=== Checking for hoopR ===\n")
