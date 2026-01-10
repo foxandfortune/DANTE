@@ -318,9 +318,9 @@ library(dials)
 library(xgboost)
 
 # Models
-xfg_loc <- xgb.load(glue::glue("VRGL/Stats/Offseason Updates - MBB/Shooting Models/Models/xfg {cur_yr}.model"))
+xfg_loc <- xgb.load(glue::glue("VRGL/Stats/Offseason Updates - MBB/Shooting Models/Models/xfg {cur_yr}.json"))
 
-xfg_noloc <- xgb.load(glue::glue("VRGL/Stats/Offseason Updates - MBB/Shooting Models/Models/xfg noloc {cur_yr}.model"))
+xfg_noloc <- xgb.load(glue::glue("VRGL/Stats/Offseason Updates - MBB/Shooting Models/Models/xfg noloc {cur_yr}.json"))
 
 xfg_ft <- readRDS(glue::glue("VRGL/Stats/Offseason Updates - MBB/Shooting Models/Models/ft {cur_yr}.rds"))
 
