@@ -40,7 +40,14 @@ jobs:
             libgdal-dev \
             libudunits2-dev \
             libproj-dev \
-            libgeos-dev
+            libgeos-dev \
+            libfontconfig1-dev \
+            libfreetype6-dev \
+            libharfbuzz-dev \
+            libfribidi-dev \
+            libpng-dev \
+            libtiff5-dev \
+            libjpeg-dev
       
       - name: Cache R packages
         uses: actions/cache@v3
