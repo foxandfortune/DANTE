@@ -324,6 +324,26 @@ xfg_noloc <- xgb.load(glue::glue("VRGL/Stats/Offseason Updates - MBB/Shooting Mo
 
 xfg_ft <- readRDS(glue::glue("VRGL/Stats/Offseason Updates - MBB/Shooting Models/Models/ft {cur_yr}.rds"))
 
+####### ERROR CHECK
+cat("\n=== Checking shots_loc columns ===\n")
+cat("Number of features:", ncol(shots_loc %>% select(-c(label, game_id, game_play_number,
+                                                        period_display_value, period_number,
+                                                        team_id, poss_tm, poss_id, poss_row, poss_start,
+                                                        player_id, other_player_id, player, number, athlete_headshot_href,
+                                                        away_team_id, home_team_id,
+                                                        point_value, shot_value))), "\n")
+cat("Column names:\n")
+print(names(shots_loc %>% select(-c(label, game_id, game_play_number,
+                                    period_display_value, period_number,
+                                    team_id, poss_tm, poss_id, poss_row, poss_start,
+                                    player_id, other_player_id, player, number, athlete_headshot_href,
+                                    away_team_id, home_team_id,
+                                    point_value, shot_value))))
+
+
+
+
+
 # Preds to location shots
 set.seed(421)
 
