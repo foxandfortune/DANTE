@@ -61,11 +61,6 @@ get_odds <- function(df,
         filter(!is.na(team), !is.na(opponent))
       
       
-      for(k in 1:length(matches$id)){
-        
-      }
-      
-      
       temp.odds <- data.frame()
       
       for(j in 1:length(matches$id)){
