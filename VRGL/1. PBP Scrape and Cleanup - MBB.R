@@ -10,6 +10,10 @@ cur_yr <- 2026
 
 `%!in%` = Negate(`%in%`)
 
+# Define all possible categories upfront
+all_positions <- c("ATH", "C", "F", "G", "PF", "PG", "SF", "SG")
+all_season_types <- c(2, 3)
+
 # Load full pbp and raw pbp, roster and team data ----------------------------------------------------
 pbp_full <- readRDS(glue::glue("VRGL/Stats/Team and Player Stats/PBP and Shot Data/pbp_{cur_yr}.rds"))
 
@@ -230,9 +234,9 @@ shots_loc <- pbp_raw %>%
   )) %>% 
   mutate(shot_diff_time = if_else(secs_remaining == 0, shot_diff/.1, shot_diff / secs_remaining),
          year_index = as.numeric(season) - cur_yr,
-         pos = as.factor(pos),
+         pos = factor(pos, levels = all_positions),
          shot_made_numeric = as.numeric(scoring_play),
-         season_type = as.factor(season_type)) %>% 
+         season_type = factor(season_type, levels = all_season_types)) %>% 
   select(
     # Labels and ids
     label = shot_made_numeric, season,
@@ -266,9 +270,9 @@ shots_noloc <- pbp_raw %>%
   )) %>% 
   mutate(shot_diff_time = if_else(secs_remaining == 0, shot_diff/.1, shot_diff / secs_remaining),
          year_index = as.numeric(season) - cur_yr,
-         pos = as.factor(pos),
+         pos = factor(pos, levels = all_positions),
          shot_made_numeric = as.numeric(scoring_play),
-         season_type = as.factor(season_type),
+         season_type = factor(season_type, levels = all_season_types),
          is_three = case_when(
            type_id %in% c("30558", "558") ~ TRUE,
            str_detect(text, "Three Point") ~ TRUE,
@@ -326,14 +330,14 @@ xfg_ft <- readRDS(glue::glue("VRGL/Stats/Offseason Updates - MBB/Shooting Models
 
 ####### ERROR CHECK
 cat("\n=== Checking shots_loc columns ===\n")
-cat("Number of features:", ncol(shots_loc %>% select(-c(label, game_id, game_play_number,
+cat("Number of features:", ncol(shots_noloc %>% select(-c(label, game_id, game_play_number,
                                                         period_display_value, period_number,
                                                         team_id, poss_tm, poss_id, poss_row, poss_start,
                                                         player_id, other_player_id, player, number, athlete_headshot_href,
                                                         away_team_id, home_team_id,
                                                         point_value, shot_value))), "\n")
 cat("Column names:\n")
-print(names(shots_loc %>% select(-c(label, game_id, game_play_number,
+print(names(shots_noloc %>% select(-c(label, game_id, game_play_number,
                                     period_display_value, period_number,
                                     team_id, poss_tm, poss_id, poss_row, poss_start,
                                     player_id, other_player_id, player, number, athlete_headshot_href,
