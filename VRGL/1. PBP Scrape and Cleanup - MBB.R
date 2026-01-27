@@ -351,38 +351,53 @@ print(names(shots_noloc %>% select(-c(label, game_id, game_play_number,
 # Preds to location shots
 set.seed(421)
 
-preds_loc <- stats::predict(
-  xfg_loc,
-  # get rid of the things not needed for prediction here
-  as.matrix(shots_loc %>% select(-c(label, game_id, game_play_number,
-                                    period_display_value, period_number,
-                                    team_id, poss_tm, poss_id, poss_row, poss_start,
-                                    player_id, other_player_id, player, number, athlete_headshot_href,
-                                    away_team_id, home_team_id,
-                                    point_value, shot_value)
-  ))
-) %>%
-  tibble::as_tibble() %>%
-  dplyr::rename(xfg = value) %>%
-  dplyr::bind_cols(shots_loc)
+length(shots_noloc$label)
 
-# Preds to no-location shots
-set.seed(421)
-
-preds_noloc <- stats::predict(
-  xfg_noloc,
-  # get rid of the things not needed for prediction here
-  as.matrix(shots_noloc %>% select(-c(label, game_id, game_play_number,
+if(length(shots_loc$label) > 0) {
+  preds_loc <- stats::predict(
+    xfg_loc,
+    # get rid of the things not needed for prediction here
+    as.matrix(shots_loc %>% select(-c(label, game_id, game_play_number,
                                       period_display_value, period_number,
                                       team_id, poss_tm, poss_id, poss_row, poss_start,
                                       player_id, other_player_id, player, number, athlete_headshot_href,
                                       away_team_id, home_team_id,
                                       point_value, shot_value)
-  ))
-) %>%
-  tibble::as_tibble() %>%
-  dplyr::rename(xfg = value) %>%
-  dplyr::bind_cols(shots_noloc)
+    ))
+  ) %>%
+    tibble::as_tibble() %>%
+    dplyr::rename(xfg = value) %>%
+    dplyr::bind_cols(shots_loc)
+  
+} else {
+  preds_loc <- data.frame(game_id = integer(),
+                          game_play_number = integer(),
+                          xfg = numeric())
+}
+
+# Preds to no-location shots
+set.seed(421)
+
+if(length(shots_noloc$label) > 0){
+  preds_noloc <- stats::predict(
+    xfg_noloc,
+    # get rid of the things not needed for prediction here
+    as.matrix(shots_noloc %>% select(-c(label, game_id, game_play_number,
+                                        period_display_value, period_number,
+                                        team_id, poss_tm, poss_id, poss_row, poss_start,
+                                        player_id, other_player_id, player, number, athlete_headshot_href,
+                                        away_team_id, home_team_id,
+                                        point_value, shot_value)
+    ))
+  ) %>%
+    tibble::as_tibble() %>%
+    dplyr::rename(xfg = value) %>%
+    dplyr::bind_cols(shots_noloc)
+} else {
+  preds_noloc <- data.frame(game_id = integer(),
+                          game_play_number = integer(),
+                          xfg = numeric())
+}
 
 # Preds to free throws
 preds_ft <- shots_ft %>% 
