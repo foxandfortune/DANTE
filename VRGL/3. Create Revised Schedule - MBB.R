@@ -144,3 +144,6 @@ schedule_adj %>%
 
 # Save --------------------------
 saveRDS(schedule_adj, glue::glue("VRGL/Stats/Season Schedules/schedule_adj_{cur_yr}.rds"))
+Sys.setFileTime(glue::glue("VRGL/Stats/Season Schedules/schedule_adj_{cur_yr}.rds"),
+                Sys.time())  
+

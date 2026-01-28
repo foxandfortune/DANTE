@@ -737,3 +737,9 @@ saveRDS(rtgs.all,
 
 saveRDS(rtgs.no_prior,
         glue::glue("VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_no_prior_{season}.rds"))
+
+
+Sys.setFileTime(glue::glue("VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_{season}.rds"),
+                Sys.time())  
+Sys.setFileTime(glue::glue("VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_no_prior_{season}.rds"),
+                Sys.time())  

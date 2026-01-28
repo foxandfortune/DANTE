@@ -146,4 +146,6 @@ schedule_adj %>%
 
 # Save --------------------------
 saveRDS(schedule_adj, glue::glue("BTRC/Stats/Season Schedules/schedule_adj_wbb_{cur_yr}.rds"))
+Sys.setFileTime(glue::glue("BTRC/Stats/Season Schedules/schedule_adj_wbb_{cur_yr}.rds"),
+                Sys.time())  
 

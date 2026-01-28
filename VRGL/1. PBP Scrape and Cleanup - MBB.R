@@ -222,6 +222,8 @@ pbp_raw %>%
 
 # Save roster ---------------
 saveRDS(roster, glue::glue("VRGL/Stats/Team and Player Stats/Rosters/roster_{cur_yr}.rds"))
+Sys.setFileTime(glue::glue("VRGL/Stats/Team and Player Stats/Rosters/roster_{cur_yr}.rds"),
+                Sys.time()) 
 
 # Add expected values to shots --------------------------------------------
 ## Shots with location -----------
@@ -473,6 +475,8 @@ pbp_full <- bind_rows(pbp_full,
                       pbp_raw)
 
 saveRDS(pbp_full, glue::glue("VRGL/Stats/Team and Player Stats/PBP and Shot Data/pbp_{cur_yr}.rds"))
+Sys.setFileTime(glue::glue("VRGL/Stats/Team and Player Stats/PBP and Shot Data/pbp_{cur_yr}.rds"),
+                Sys.time())  
 
 # Clear out extra objects ------------------------------
 pbp <- pbp_full
@@ -767,3 +771,5 @@ head(coords, 10)
 
 # Save --------------------------
 saveRDS(coords, glue::glue("VRGL/Stats/Team and Player Stats/Power Ratings/Raw Data/poss_stats_with_types_{cur_yr}.rds"))
+Sys.setFileTime(glue::glue("VRGL/Stats/Team and Player Stats/Power Ratings/Raw Data/poss_stats_with_types_{cur_yr}.rds"),
+                Sys.time())  
