@@ -146,23 +146,47 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add -A
-          if git diff --quiet && git diff --staged --quiet; then
+          
+          echo "=== Git Status Before Add ==="
+          git status
+          
+          echo "=== Adding all changes (including modified RDS files) ==="
+          git add -A --force
+          
+          echo "=== Git Status After Add ==="
+          git status
+          
+          echo "=== Files changed ==="
+          git diff --staged --name-only
+          
+          if git diff --staged --quiet; then
             echo "No changes to commit"
           else
             git commit -m "Update VRGL analysis results - $(date +'%Y-%m-%d %H:%M:%S')"
+            echo "=== Pushing to remote ==="
             git push
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: 'release'
+      
+      - name: Render Quarto site
+        run: |
+          quarto render
+        working-directory: ./
       
       - name: Deploy to GitHub Pages
         if: success()
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./Pages
+          publish_dir: ./Pages/_site
           publish_branch: gh-pages
+          force_orphan: true
       
       - name: Upload artifacts on failure
         if: failure()
