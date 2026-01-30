@@ -67,7 +67,7 @@ jobs:
           packages <- c("tidyverse", "hoopR", "glue", "sp", "fastDummies", 
                        "splitTools", "dials", "xgboost", "MLmetrics", 
                        "glmnet", "gsubfn", "jsonlite", "odds.converter", 
-                       "lubridate", "data.table", "here")
+                       "lubridate", "data.table", "here", "gt", "gtExtras")
           
           for (pkg in packages) {
             cat("\n=== Installing", pkg, "===\n")
