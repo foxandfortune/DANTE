@@ -176,17 +176,33 @@ jobs:
       
       - name: Render Quarto site
         run: |
+          echo "=== Rendering Quarto site from root ==="
           quarto render
         working-directory: ./
+      
+      - name: Check Quarto output location
+        run: |
+          echo "=== Checking for _site directories ==="
+          find . -name "_site" -type d
+          echo ""
+          echo "=== Contents of _site ==="
+          ls -la _site/ || echo "No _site in root"
+          echo ""
+          echo "=== Index file check ==="
+          ls -la _site/index.html || echo "No index.html found"
+          echo ""
+          echo "=== Pages subdirectory check ==="
+          ls -la _site/Pages/ || echo "No Pages subdirectory in _site"
       
       - name: Deploy to GitHub Pages
         if: success()
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./Pages/_site
+          publish_dir: ./_site
           publish_branch: gh-pages
           force_orphan: true
+          cname: false
       
       - name: Upload artifacts on failure
         if: failure()
@@ -200,7 +216,7 @@ jobs:
           retention-days: 7
       
       - name: Send error notification email
-        if: failure()
+        if: failure() && secrets.NOTIFICATION_EMAIL != ''
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
@@ -221,9 +237,10 @@ jobs:
             View details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
             
             Please check the logs for more information.
+        continue-on-error: true
       
       - name: Send success notification email
-        if: success()
+        if: success() && secrets.NOTIFICATION_EMAIL != ''
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
@@ -243,3 +260,4 @@ jobs:
             Timestamp: $(date +'%Y-%m-%d %H:%M:%S')
             
             View details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        continue-on-error: true
