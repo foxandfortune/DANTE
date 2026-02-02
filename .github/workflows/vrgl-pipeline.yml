@@ -64,7 +64,7 @@ jobs:
           options(timeout = 600)
           
           # Install packages one by one to see which fails
-          packages <- c("tidyverse", "hoopR", "glue", "sp", "fastDummies", 
+          packages <- c("tidyverse", "hoopR", "wehoop", "glue", "sp", "fastDummies", 
                        "splitTools", "dials", "xgboost", "MLmetrics", 
                        "glmnet", "gsubfn", "jsonlite", "odds.converter", 
                        "lubridate", "data.table", "here", "gt", "gtExtras")
