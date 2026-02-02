@@ -216,7 +216,7 @@ jobs:
           retention-days: 7
       
       - name: Send error notification email
-        if: failure() && secrets.NOTIFICATION_EMAIL != ''
+        if: failure()
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
@@ -237,10 +237,11 @@ jobs:
             View details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
             
             Please check the logs for more information.
+          ignore_errors: true
         continue-on-error: true
       
       - name: Send success notification email
-        if: success() && secrets.NOTIFICATION_EMAIL != ''
+        if: success()
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
@@ -260,4 +261,5 @@ jobs:
             Timestamp: $(date +'%Y-%m-%d %H:%M:%S')
             
             View details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          ignore_errors: true
         continue-on-error: true
