@@ -2,8 +2,8 @@ library(tidyverse)
 library(glmnet)
 
 # Set working directory
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-setwd('..')
+#setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+#setwd('..')
 
 # Set season/country/tier
 season <- 2026
@@ -712,6 +712,11 @@ rtgs.no_prior <- list(pace = {raw.coeff.pace},
 ## Save ratings --------
 saveRDS(rtgs.all,
         glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_wbb_{season}.rds"))
+Sys.setFileTime(glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_wbb_{season}.rds"),
+                Sys.time()) 
+
 
 saveRDS(rtgs.no_prior,
         glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_no_prior_wbb_{season}.rds"))
+Sys.setFileTime(glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_no_prior_wbb_{season}.rds"),
+                Sys.time()) 

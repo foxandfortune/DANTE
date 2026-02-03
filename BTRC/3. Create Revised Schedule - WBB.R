@@ -3,8 +3,8 @@ library(tidyverse)
 library(sp)
 
 # Set working directory
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-setwd('..')
+#setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+#setwd('..')
 
 # Add NOT IN function:
 `%!in%` = Negate(`%in%`)

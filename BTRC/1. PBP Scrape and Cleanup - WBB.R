@@ -2,8 +2,8 @@ library(wehoop)
 library(tidyverse)
 
 # Set working directory
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-setwd('..')
+#setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+#setwd('..')
 
 `%!in%` = Negate(`%in%`)
 
@@ -216,6 +216,8 @@ pbp_raw %>%
 
 # Save roster ---------------
 saveRDS(roster, glue::glue("BTRC/Stats/Team and Player Stats - WBB/Rosters/roster_wbb_{cur_yr}.rds"))
+Sys.setFileTime(glue::glue("BTRC/Stats/Team and Player Stats - WBB/Rosters/roster_wbb_{cur_yr}.rds"),
+                Sys.time()) 
 
 # Add expected values to shots --------------------------------------------
 ## Shots with location -----------
@@ -318,9 +320,9 @@ library(xgboost)
 set.seed(421)
 
 # Models
-xfg_loc <- xgb.load(glue::glue("BTRC/Stats/Offseason Updates - WBB/Shooting Models/Models/xfg wbb {cur_yr}.model"))
+xfg_loc <- xgb.load(glue::glue("BTRC/Stats/Offseason Updates - WBB/Shooting Models/Models/xfg wbb {cur_yr}.json"))
 
-xfg_noloc <- xgb.load(glue::glue("BTRC/Stats/Offseason Updates - WBB/Shooting Models/Models/xfg noloc wbb {cur_yr}.model"))
+xfg_noloc <- xgb.load(glue::glue("BTRC/Stats/Offseason Updates - WBB/Shooting Models/Models/xfg noloc wbb {cur_yr}.json"))
 
 xfg_ft <- readRDS(glue::glue("BTRC/Stats/Offseason Updates - WBB/Shooting Models/Models/ft wbb {cur_yr}.rds"))
 
@@ -436,6 +438,8 @@ pbp_full <- bind_rows(pbp_full,
                       pbp_raw)
 
 saveRDS(pbp_full, glue::glue("BTRC/Stats/Team and Player Stats - WBB/PBP and Shot Data/pbp_wbb_{cur_yr}.rds"))
+Sys.setFileTime(glue::glue("BTRC/Stats/Team and Player Stats - WBB/PBP and Shot Data/pbp_wbb_{cur_yr}.rds"),
+                Sys.time()) 
 
 # Clear out extra objects ------------------------------
 pbp <- pbp_full
@@ -727,3 +731,5 @@ head(coords, 10)
 
 # Save --------------------------
 saveRDS(coords, glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Raw Data/poss_stats_with_types_wbb_{cur_yr}.rds"))
+Sys.setFileTime(glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Raw Data/poss_stats_with_types_wbb_{cur_yr}.rds"),
+                Sys.time()) 

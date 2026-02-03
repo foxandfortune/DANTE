@@ -118,28 +118,52 @@ jobs:
           echo "VRGL directory contents:"
           ls -la VRGL/ || echo "VRGL directory not found"
       
-      - name: Run Script 1 - PBP Scrape and Cleanup
+      - name: Run MBB Script 1 - PBP Scrape and Cleanup
         run: |
           echo "Running Script 1 from $(pwd)"
           Rscript "VRGL/1. PBP Scrape and Cleanup - MBB.R"
         continue-on-error: false
       
-      - name: Run Script 2 - In-Season Ratings
+      - name: Run MBB Script 2 - In-Season Ratings
         run: |
           echo "Running Script 2 from $(pwd)"
           Rscript "VRGL/2. In-Season Ratings - All - MBB.R"
         continue-on-error: false
       
-      - name: Run Script 3 - Create Revised Schedule
+      - name: Run MBB Script 3 - Create Revised Schedule
         run: |
           echo "Running Script 3 from $(pwd)"
           Rscript "VRGL/3. Create Revised Schedule - MBB.R"
         continue-on-error: false
       
-      - name: Run Script 4 - Run Simulation
+      - name: Run MBB Script 4 - Run Simulation
         run: |
           echo "Running Script 4 from $(pwd)"
           Rscript "VRGL/4. Run Simulation - MBB.R"
+        continue-on-error: false
+      
+      - name: Run WBB Script 1 - PBP Scrape and Cleanup
+        run: |
+          echo "Running WBB Script 1 from $(pwd)"
+          Rscript "BTRC/1. PBP Scrape and Cleanup - WBB.R"
+        continue-on-error: false
+      
+      - name: Run WBB Script 2 - In-Season Ratings
+        run: |
+          echo "Running WBB Script 2 from $(pwd)"
+          Rscript "BTRC/2. In-Season Ratings - All - WBB.R"
+        continue-on-error: false
+      
+      - name: Run WBB Script 3 - Create Revised Schedule
+        run: |
+          echo "Running WBB Script 3 from $(pwd)"
+          Rscript "BTRC/3. Create Revised Schedule - WBB.R"
+        continue-on-error: false
+      
+      - name: Run WBB Script 4 - Run Simulation
+        run: |
+          echo "Running WBB Script 4 from $(pwd)"
+          Rscript "BTRC/4. Run Simulation - WBB.R"
         continue-on-error: false
       
       - name: Commit and push results
