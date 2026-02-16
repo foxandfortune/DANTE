@@ -450,7 +450,7 @@ pbp_raw <- pbp_raw %>%
 pbp_full <- bind_rows(pbp_full,
                       pbp_raw)
 
-saveRDS(pbp_full, glue::glue("BTRC/Stats/Team and Player Stats - WBB/PBP and Shot Data/pbp_wbb_{cur_yr}.rds"))
+saveRDS(pbp_full, glue::glue("BTRC/Stats/Team and Player Stats - WBB/PBP and Shot Data/pbp_wbb_{cur_yr}.rds"), compress = "xz")
 Sys.setFileTime(glue::glue("BTRC/Stats/Team and Player Stats - WBB/PBP and Shot Data/pbp_wbb_{cur_yr}.rds"),
                 Sys.time()) 
 
