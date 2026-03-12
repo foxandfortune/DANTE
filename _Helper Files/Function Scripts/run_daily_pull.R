@@ -37,8 +37,15 @@ library(hoopR)
 library(wehoop)
 library(purrr)
 
+# Set working directory
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+setwd('..')
+setwd('..')
+
+
 source("_Helper Files/Function Scripts/pull_daily_mbb.R")
 source("_Helper Files/Function Scripts/pull_daily_wbb.R")
+
 
 `%!in%` <- Negate(`%in%`)
 
