@@ -34,7 +34,7 @@ team_coords <- all_venues %>%
   select(-row)
 
 # Load schedule ------ 
-schedule <- hoopR::load_mbb_schedule(seasons = {cur_yr}) %>% 
+schedule <- readRDS(glue::glue('_Helper Files/_MBB Fallback/updated_schedule_{cur_yr}.rds')) %>% 
   as.data.frame() %>% 
   # Filter for teams in database
   filter(home_id %in% teams$team_id | away_id %in% teams$team_id) %>% 
@@ -82,6 +82,7 @@ coords %>%
   #select(venue_id) %>% 
   #distinct()
 
+max(sched_doubled$game_date)
 ### Check for duplicates ---------------------
 duplicates <- coords %>% 
   with_groups(.groups = c(game_id, team_id), mutate, n = n()) %>% 

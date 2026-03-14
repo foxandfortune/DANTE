@@ -4,6 +4,7 @@ library(tidyverse)
 # Set working directory
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 setwd('..')
+setwd('..')
 
 # Set season
 cur_yr <- 2026
@@ -17,17 +18,8 @@ all_season_types <- c(2, 3)
 # Load full pbp and raw pbp, roster and team data ----------------------------------------------------
 pbp_full <- readRDS(glue::glue("VRGL/Stats/Team and Player Stats/PBP and Shot Data/pbp_{cur_yr}.rds"))
 
-pbp_raw <- readRDS(glue::glue('VRGL/Stats/Team and Player Stats/PBP and Shot Data/pbp_raw_daily_{cur_yr}.rds')) %>% 
-  mutate(game_id = as.integer(game_id),
-         type_id = as.integer(type_id),
-         team_id = as.integer(team_id),
-         athlete_id_1 = as.integer(athlete_id_1),
-         athlete_id_2 = as.integer(athlete_id_2))
+pbp_raw <- readRDS(glue::glue('_Helper Files/_MBB Fallback/updated_pbp_{cur_yr}.rds'))
 
-
-str(pbp_raw)
-str(pbp_full)
-#unique(pbp_raw$game_date)
 
 pbp_raw <- pbp_raw %>% 
   filter(game_id %!in% pbp_full$game_id)
@@ -37,11 +29,9 @@ print(length(pbp_raw$game_id))
 Sys.sleep(3)
 
 # Load roster
-roster <- hoopR::load_mbb_player_box(seasons = {cur_yr}) %>% 
-  bind_rows(readRDS(glue::glue('VRGL/Stats/Team and Player Stats/Rosters/roster_daily_2026.rds')) %>% 
-              mutate(game_id = as.integer(game_id),
-                     team_id = as.integer(team_id),
-                     athlete_id = as.integer(athlete_id)))
+roster <- readRDS(glue::glue('_Helper Files/_MBB Fallback/updated_player_box_2026.rds'))
+
+unique(roster$game_date)
 
 # Check for missing play types ------------
 playtypes <- pbp_raw %>% 
@@ -51,8 +41,7 @@ playtypes <- pbp_raw %>%
   as.data.frame() %>% 
   arrange(type_id)
 
-playtypes %>% 
-  print(n = Inf)
+playtypes
 
 pbp_raw <- pbp_raw %>% filter(type_id != 0)
 
@@ -208,8 +197,6 @@ pbp_raw <- pbp_raw %>%
 
 # Fix shot clock below 0; use possession start, exclude fast break
 mean_sc <- pbp_raw %>%
-  mutate(home_team_id = as.integer(home_team_id),
-         away_team_id = as.integer(away_team_id)) %>% 
   bind_rows(pbp_full) %>% 
   filter(shot_clock >= 0, shooting_play == TRUE, is_fastbreak == FALSE) %>% 
   with_groups(.groups = poss_start, summarise, mean_sc = mean(shot_clock))
@@ -341,25 +328,6 @@ xfg_noloc <- xgb.load(glue::glue("VRGL/Stats/Offseason Updates - MBB/Shooting Mo
 xfg_ft <- readRDS(glue::glue("VRGL/Stats/Offseason Updates - MBB/Shooting Models/Models/ft {cur_yr}.rds"))
 
 ####### ERROR CHECK
-cat("\n=== Checking shots_loc columns ===\n")
-cat("Number of features:", ncol(shots_noloc %>% select(-c(label, game_id, game_play_number,
-                                                        period_display_value, period_number,
-                                                        team_id, poss_tm, poss_id, poss_row, poss_start,
-                                                        player_id, other_player_id, player, number, athlete_headshot_href,
-                                                        away_team_id, home_team_id,
-                                                        point_value, shot_value))), "\n")
-cat("Column names:\n")
-print(names(shots_noloc %>% select(-c(label, game_id, game_play_number,
-                                    period_display_value, period_number,
-                                    team_id, poss_tm, poss_id, poss_row, poss_start,
-                                    player_id, other_player_id, player, number, athlete_headshot_href,
-                                    away_team_id, home_team_id,
-                                    point_value, shot_value))))
-
-
-
-
-
 # Preds to location shots
 set.seed(421)
 
@@ -480,10 +448,6 @@ pbp_raw <- pbp_raw %>%
 
 
 
-pbp_raw <- pbp_raw %>% 
-  mutate(home_team_id = as.integer(home_team_id),
-         away_team_id = as.integer(away_team_id))
-
 # Add the new values back to the old ones ---------------------
 pbp_full <- bind_rows(pbp_full,
                       pbp_raw)
@@ -508,8 +472,7 @@ library(sp)
 teams <- readRDS(glue::glue("_Helper Files/Team Data/team_database.rds"))
 
 # Load schedule ------ 
-schedule <- readRDS(glue::glue('_Helper Files/updated_schedule_{cur_yr}.rds'))
-
+schedule <- readRDS(glue::glue('_Helper Files/_MBB Fallback/updated_schedule_{cur_yr}.rds'))
 
 # Calculate days rest based on schedule ---------------
 sched_doubled <- schedule %>% 
@@ -526,7 +489,7 @@ sched_doubled <- schedule %>%
 
 # Get correct scores for games; filter out pbp which does not match to correct scores ------ 
 ## Load team box -----
-team_box <- readRDS(glue::glue('_Helper Files/updated_team_box_{cur_yr}.rds')) %>% 
+team_box <- readRDS(glue::glue('_Helper Files/_MBB Fallback/updated_team_box_{cur_yr}.rds')) %>% 
   mutate(efg_adj = (0.5 * free_throws_made + field_goals_made + 0.5 * three_point_field_goals_made) / 
            (field_goals_attempted + free_throws_attempted),
          ast_rt = assists / field_goals_made,
@@ -654,7 +617,7 @@ summary_box <- team_box %>%
 
 summary <- bind_rows(summary, summary_box)
 
-summary %>% filter(game_date > as.Date("2026-03-6"))
+summary %>% filter(game_date > as.Date("2026-03-12"))
 
 ## Create shot type summary ------------
 shot_type_summary <- pbp %>% 
@@ -787,7 +750,7 @@ coords <- coords %>%
 coords <- as.data.frame(coords)
 
 head(coords, 10)
-coords %>% filter(game_date > as.Date("2026-03-06"))
+coords %>% filter(game_date > as.Date("2026-03-12"))
 
 
 # Save --------------------------

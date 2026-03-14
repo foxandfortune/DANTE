@@ -55,13 +55,17 @@ is_sequential <- readRDS("_Helper Files/Simulation Functions/is_sequential.rds")
 process_games <- readRDS(glue::glue("_Helper Files/Simulation Functions/process_games_wk_{sim_method}.rds"))
 
 # Load schedule -----------------
-schedule <- hoopR::load_mbb_schedule(seasons = {cur_yr}) %>% 
+schedule <- readRDS(glue::glue('_Helper Files/_MBB Fallback/updated_schedule_{cur_yr}.rds')) %>% 
   filter(status_type_completed == FALSE,
          home_id %in% teams$team_id & away_id %in% teams$team_id) %>%
   filter(game_date >= Sys.Date(),
          game_date <= Sys.Date() + 0)
 
 unique(schedule$game_date)
+schedule %>% 
+  filter(game_date == Sys.Date()) %>% 
+  select(home_display_name, away_display_name) %>% 
+  print(n = 200)
 
 ## Adjusted schedule -----------
 adj_schedule <- readRDS(glue::glue("VRGL/Stats/Season Schedules/schedule_adj_{cur_yr}.rds"))
