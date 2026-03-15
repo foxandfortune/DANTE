@@ -23,6 +23,9 @@ mbb_schedule_base <- hoopR::load_mbb_schedule(seasons = 2026) %>%
 # Load new schedule
 schedule_new      <- load_mbb_schedule_espn(start_date = "2026-03-07")
 
+schedule_new <- schedule_new %>% 
+  filter(game_id %!in% mbb_schedule_base$game_id)
+
 # Add to old schedule
 mbb_schedule_full <- bind_rows(mbb_schedule_base, schedule_new)
 
@@ -73,7 +76,7 @@ source("load_mbb_player_box_espn.R")
 
 # Load data prior to March 7
 player_box_base <- hoopR::load_mbb_player_box(seasons = 2026) %>%
-  filter(game_date <= as.Date("2026-03-06"))
+  filter(game_date <= as.Date("2026-03-06")) 
 
 # Pull new data
 player_box_new <- load_mbb_player_box_espn(
@@ -82,7 +85,8 @@ player_box_new <- load_mbb_player_box_espn(
 )
 
 # Add to base data 
-mbb_player_box_full <- bind_rows(player_box_base, player_box_new)
+mbb_player_box_full <- bind_rows(player_box_base,
+                                 player_box_new) 
 
 # Save
 saveRDS(mbb_player_box_full, 'updated_player_box_2026.rds')

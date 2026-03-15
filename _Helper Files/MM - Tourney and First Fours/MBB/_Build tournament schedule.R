@@ -11,7 +11,7 @@ setwd('..')
 `%!in%` = Negate(`%in%`)
 
 # Set season -----------------------
-season <- 2024
+season <- 2026
 
 # Load teams -------------------------------------------
 teams <- readRDS('Stats/Teams/team_database.rds') %>% 

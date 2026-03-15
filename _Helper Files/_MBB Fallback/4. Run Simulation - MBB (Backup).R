@@ -62,10 +62,6 @@ schedule <- readRDS(glue::glue('_Helper Files/_MBB Fallback/updated_schedule_{cu
          game_date <= Sys.Date() + 0)
 
 unique(schedule$game_date)
-schedule %>% 
-  filter(game_date == Sys.Date()) %>% 
-  select(home_display_name, away_display_name) %>% 
-  print(n = 200)
 
 ## Adjusted schedule -----------
 adj_schedule <- readRDS(glue::glue("VRGL/Stats/Season Schedules/schedule_adj_{cur_yr}.rds"))

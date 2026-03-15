@@ -259,44 +259,44 @@ shots_loc <- pbp_raw %>%
   select(-c(pos, season_type))
 
 # Shots without location
-#shots_noloc <- data.frame()
-shots_noloc <- pbp_raw %>% 
-  filter(shooting_play == TRUE, type_id != "540", is.na(shot_dist)) %>% 
-  mutate(pos = case_when(
-    pos != "NA" & !is.na(pos) ~ pos,
-    is.na(pos) ~ "ATH",
-    pos == "NA" ~ "ATH"
-  )) %>% 
-  mutate(shot_diff_time = if_else(secs_remaining == 0, shot_diff/.1, shot_diff / secs_remaining),
-         year_index = as.numeric(season) - cur_yr,
-         pos = factor(pos, levels = all_positions),
-         shot_made_numeric = as.numeric(scoring_play),
-         season_type = factor(season_type, levels = all_season_types),
-         is_three = case_when(
-           type_id %in% c("30558", "558") ~ TRUE,
-           str_detect(text, "Three Point") ~ TRUE,
-           TRUE ~ FALSE)) %>% 
-  select(
-    # Labels and ids
-    label = shot_made_numeric, season,
-    game_id, game_play_number,
-    period_display_value, period_number,
-    team_id, poss_tm, poss_id, poss_row, poss_start,
-    player_id, other_player_id, player, number, athlete_headshot_href,
-    away_team_id, home_team_id,
-    point_value, shot_value,
-    
-    # Features
-    pos, is_atrim, is_putback, is_three, 
-    is_home, secs_remaining,
-    shot_diff, shot_diff_time,
-    shot_clock, is_fastbreak, year_index,
-    season_type) %>% 
-  # Create dummy variables for position and shot type
-  # because xgboost doesn't like these for some reason
-  fastDummies::dummy_cols(select_columns = c("pos", "season_type"), remove_first_dummy = TRUE) %>% 
-  # Drop extra columns from dummy variables
-  select(-c(pos, season_type))
+shots_noloc <- data.frame()
+#shots_noloc <- pbp_raw %>% 
+#  filter(shooting_play == TRUE, type_id != "540", is.na(shot_dist)) %>% 
+#  mutate(pos = case_when(
+#    pos != "NA" & !is.na(pos) ~ pos,
+#    is.na(pos) ~ "ATH",
+#    pos == "NA" ~ "ATH"
+#  )) %>% 
+#  mutate(shot_diff_time = if_else(secs_remaining == 0, shot_diff/.1, shot_diff / secs_remaining),
+#         year_index = as.numeric(season) - cur_yr,
+#         pos = factor(pos, levels = all_positions),
+#         shot_made_numeric = as.numeric(scoring_play),
+#         season_type = factor(season_type, levels = all_season_types),
+#         is_three = case_when(
+#           type_id %in% c("30558", "558") ~ TRUE,
+#           str_detect(text, "Three Point") ~ TRUE,
+#           TRUE ~ FALSE)) %>% 
+#  select(
+#    # Labels and ids
+#    label = shot_made_numeric, season,
+#    game_id, game_play_number,
+#    period_display_value, period_number,
+#    team_id, poss_tm, poss_id, poss_row, poss_start,
+#    player_id, other_player_id, player, number, athlete_headshot_href,
+#    away_team_id, home_team_id,
+#    point_value, shot_value,
+#    
+#    # Features
+#    pos, is_atrim, is_putback, is_three, 
+#    is_home, secs_remaining,
+#    shot_diff, shot_diff_time,
+#    shot_clock, is_fastbreak, year_index,
+#    season_type) %>% 
+#  # Create dummy variables for position and shot type
+#  # because xgboost doesn't like these for some reason
+#  fastDummies::dummy_cols(select_columns = c("pos", "season_type"), remove_first_dummy = TRUE) %>% 
+#  # Drop extra columns from dummy variables
+#  select(-c(pos, season_type))
 
 # Free throws
 shots_ft <- pbp_raw %>% 
@@ -750,7 +750,7 @@ coords <- coords %>%
 coords <- as.data.frame(coords)
 
 head(coords, 10)
-coords %>% filter(game_date > as.Date("2026-03-12"))
+coords %>% filter(game_date > as.Date("2026-03-13"))
 
 
 # Save --------------------------
