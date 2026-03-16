@@ -1,22 +1,32 @@
 simulate_round <- function(sim_round,
                            sim_rounds,
-                          sims_per_round,
-                          schedule,
-                          simulations,
-                          rounds_to_sim,
-                          process_games,
-                          ...,
-                          tiebreaker_depth,
-                          test_round,
-                          .debug,
-                          playoff_seeds,
-                          p,
-                          sim_include) {
+                           sims_per_round,
+                           schedule,
+                           simulations,
+                           rounds_to_sim,
+                           process_games,
+                           ...,
+                           tiebreaker_depth,
+                           test_round,
+                           .debug,
+                           playoff_seeds,
+                           p,
+                           sim_include,
+                           mbb_wbb,        
+                           ncaa_season,    
+                           left_bracket,   
+                           right_bracket) {
   
   # iteration sims
   iter_sims <- sims_per_round * (sim_round - 1) + seq_len(sims_per_round)
   iter_sims <- iter_sims[iter_sims <= simulations]
   iter_sims_num <- length(iter_sims)
+  
+  # Add tournament parameters
+  mbb_wbb = mbb_wbb
+  ncaa_season = ncaa_season
+  left_bracket = left_bracket
+  right_bracket = right_bracket
   
   # games have copies per sim
   sched_rows <- nrow(schedule)
@@ -25,13 +35,13 @@ simulate_round <- function(sim_round,
     select(sim, everything())
   
   # load tournament teams
-  teams <- readRDS(glue::glue('March Madness Backup/tourney_teams_{ncaa_season}.rds'))
+  teams <- readRDS(glue::glue('_Helper Files/MM - Tourney and First Fours/{mbb_wbb}/tourney_teams_{ncaa_season}.rds'))
   teams <- teams[rep(seq_len(nrow(teams)), iter_sims_num), ] %>%
     mutate(sim = rep(iter_sims, each = nrow(teams))) %>%
     select(sim, everything())
   
   # get tourney structure
-  tourney_structure <- readRDS(glue::glue('March Madness Backup/tourney_structure_{ncaa_season}.rds'))
+  tourney_structure <- readRDS(glue::glue('_Helper Files/MM - Tourney and First Fours/{mbb_wbb}/tourney_structure_{ncaa_season}.rds'))
   structure_rows <- nrow(tourney_structure)
   tourney_structure <- tourney_structure[rep(seq_len(structure_rows), each = iter_sims_num), ] %>%
     mutate(sim = rep(iter_sims, structure_rows)) %>%
@@ -329,4 +339,4 @@ simulate_round <- function(sim_round,
   list("teams" = teams, "games" = games)
 }
 
-saveRDS(simulate_round, 'Simulation Backup/Functions/simulate_round.rds')
+saveRDS(simulate_round, '_Helper Files/Simulation Functions/simulate_round.rds')

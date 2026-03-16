@@ -11,6 +11,7 @@ simulate_ncaa <- function(ncaa_season = NULL,
                           sims_per_round = max(ceiling(simulations / future::availableCores() * 2), 100),
                           .debug = FALSE,
                           print_summary = FALSE,
+                          mbb_wbb = c("MBB", "WBB"),
                           sim_include = c("FIRST4", "POST")) {
   
   sim_include <- rlang::arg_match0(sim_include, c("FIRST4", "POST"))
@@ -43,10 +44,10 @@ simulate_ncaa <- function(ncaa_season = NULL,
   # load games data
   report("Loading games data")
   
-  tourney_structure <- readRDS(glue::glue('March Madness Backup/tourney_structure_{ncaa_season}.rds'))
+  tourney_structure <- readRDS(glue::glue('_Helper Files/MM - Tourney and First Fours/{mbb_wbb}/tourney_structure_{ncaa_season}.rds'))
   
   if(isTRUE(fresh_tourney)) {
-    schedule <- readRDS(glue::glue('March Madness Backup/first_four_{ncaa_season}.rds')) %>%
+    schedule <- readRDS(glue::glue('_Helper Files/MM - Tourney and First Fours/{mbb_wbb}/first_four_{ncaa_season}.rds')) %>%
       select(
         region, round_name, round_no,
         away_seed, away_id, away_rest, away_dist, away_score,
@@ -62,7 +63,6 @@ simulate_ncaa <- function(ncaa_season = NULL,
         region, round_name, round_no,
         away_seed, away_id, away_rest, away_dist, away_score,
         home_seed, home_id, home_rest, home_dist, home_score,
-        home_seed, home_id, home_rest, home_dist,
         result,
         winner_to
       )
@@ -150,6 +150,10 @@ simulate_ncaa <- function(ncaa_season = NULL,
       playoff_seeds = playoff_seeds,
       p = p,
       sim_include = sim_include,
+      mbb_wbb = mbb_wbb,        
+      left_bracket = left_bracket, 
+      right_bracket = right_bracket, 
+      ncaa_season = ncaa_season,
       .options = furrr::furrr_options(seed = TRUE)
     )
   })
@@ -264,4 +268,4 @@ simulate_ncaa <- function(ncaa_season = NULL,
   out
 }
 
-saveRDS(simulate_ncaa, 'Simulation Backup/Functions/simulate_ncaa.rds')
+saveRDS(simulate_ncaa, '_Helper Files/Simulation Functions/simulate_ncaa.rds')
