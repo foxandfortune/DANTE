@@ -6,6 +6,7 @@ library(tidyverse)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 setwd('..')
 setwd('..')
+setwd('..')
 
 # Add NOT IN function:
 `%!in%` = Negate(`%in%`)
@@ -14,7 +15,7 @@ setwd('..')
 season <- 2026
 
 # Load teams -------------------------------------------
-teams <- readRDS('Stats/Teams/team_database.rds') %>% 
+teams <- readRDS('_Helper Files/Team Data/team_database.rds') %>% 
   mutate(team_id = as.integer(team_id))
 
 # Load schedule -------------------
@@ -22,12 +23,13 @@ sched <- hoopR::load_mbb_schedule(seasons = {season})
 
 ## Filter tournament games -----------------------
 tourn <- sched %>% 
-  filter(tournament_id == 22) %>% 
+  #filter(tournament_id == 22) %>% 
+  filter(str_detect(notes_headline, "NCAA Men's Basketball Championship")) %>% 
   arrange(date)
 
 # Load team venues for calculating travel -------
-venues <- readRDS("Stats/Teams/team_venues.rds") %>%
-  plyr::rbind.fill(readRDS("Stats/Teams/neutral_sites.rds")) %>% 
+venues <- readRDS("_Helper Files/Team Data/team_venues.rds") %>%
+  plyr::rbind.fill(readRDS("_Helper Files/Team Data/neutral_sites.rds")) %>% 
   mutate(latitude = as.numeric(latitude),
          longitude = as.numeric(longitude))
 
@@ -149,8 +151,8 @@ str(tourney_teams)
 tourney_teams
 
 # Create Tournament Structure ----------------
-bracket.left <- c("West", "East")
-bracket.right <- c("South", "Midwest")
+bracket.left <- c("South", "East")
+bracket.right <- c("West", "Midwest")
 
 tourney_structure <- data.frame(
   region = c(rep("South", 15),
@@ -208,8 +210,8 @@ tourney_structure
 
 # Get First Four Schedule ---------------------------
 # Load team venues for calculating travel -------------------
-all_venues <- readRDS("Stats/Teams/team_venues.rds") %>%
-  bind_rows(readRDS("Stats/Teams/neutral_sites.rds")) %>% 
+all_venues <- readRDS("_Helper Files/Team Data/team_venues.rds") %>%
+  bind_rows(readRDS("_Helper Files/Team Data/neutral_sites.rds")) %>% 
   mutate(latitude = as.numeric(latitude),
          longitude = as.numeric(longitude))
 
@@ -340,13 +342,12 @@ first_four_travel <- tourn %>%
   left_join(venues %>%
               select(venue_id, ven_lat = latitude, ven_lng = longitude), by = c("venue_id")) %>% 
   mutate(seed = case_when(
-    region == "West" ~ 16,
-    region == "South" ~ 10,
-    venue_id == 1893 ~ 10,
-    venue_id == 2183 ~16)) %>% 
+    region == "West" ~ 11,
+    region == "South" ~ 16,
+    venue_id == 1845 ~ 11,
+    venue_id == 1848 ~ 16)) %>% 
   mutate(game_to = paste0(seed, " v ", 17 - seed)) %>% 
   left_join(first_four_venue, by = c("region", "seed"), suffix = c("", "_start"))
-
 
 
 ## Calculate distances ------
@@ -379,7 +380,7 @@ tourney_structure <- tourney_structure %>%
 
 
 # Save tourney structure, tourney teams, and First Four schedule ----------
-saveRDS(tourney_teams, glue::glue("Minos/March Madness Backup/tourney_teams_{season}.rds"))
-saveRDS(first_four_sched, glue::glue("Minos/March Madness Backup/first_four_{season}.rds"))
-saveRDS(tourney_structure, glue::glue("Minos/March Madness Backup/tourney_structure_{season}.rds"))
+saveRDS(tourney_teams, glue::glue("_Helper Files/MM - Tourney and First Fours/MBB/tourney_teams_{season}.rds"))
+saveRDS(first_four_sched, glue::glue("_Helper Files/MM - Tourney and First Fours/MBB/first_four_{season}.rds"))
+saveRDS(tourney_structure, glue::glue("_Helper Files/MM - Tourney and First Fours/MBB/tourney_structure_{season}.rds"))
 

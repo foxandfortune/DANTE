@@ -11,7 +11,7 @@ options(chromote.headless. = 'new')
 `%!in%` = Negate(`%in%`)
 
 # Set reference year
-cur_yr <- 2025
+cur_yr <- 2026
 
 # Sim method ------------------------
 sim_method <- "to_reb_ast"
@@ -26,7 +26,7 @@ ratings <- list(
   to = ratings$to,
   rtg = ratings$rtg,
   
-  disp_Rtg = 11
+  disp_Rtg = 13
 )
 
 # Load functions ----------------------------------------------------------
@@ -61,8 +61,8 @@ set.seed(421)
 object <- simulate_ncaa(ncaa_season =  {cur_yr},
                         process_games = {process_games},
                         playoff_seeds = 17,
-                        left_bracket = c("West", "South"),
-                        right_bracket = c("East", "Midwest"),
+                        left_bracket = c("East", "South"),
+                        right_bracket = c("West", "Midwest"),
                         if_ended_today = FALSE,
                         fresh_tourney = TRUE,
                         ratings = {ratings},

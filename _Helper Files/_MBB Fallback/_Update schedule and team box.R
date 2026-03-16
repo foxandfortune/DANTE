@@ -21,7 +21,8 @@ mbb_schedule_base <- hoopR::load_mbb_schedule(seasons = 2026) %>%
   filter(game_date <= as.Date("2026-03-06"))
 
 # Load new schedule
-schedule_new      <- load_mbb_schedule_espn(start_date = "2026-03-07")
+schedule_new      <- load_mbb_schedule_espn(start_date = "2026-03-07",
+                                            end_date = "2026-04-10")
 
 schedule_new <- schedule_new %>% 
   filter(game_id %!in% mbb_schedule_base$game_id)
