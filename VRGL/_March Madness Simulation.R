@@ -26,7 +26,7 @@ ratings <- list(
   to = ratings$to,
   rtg = ratings$rtg,
   
-  disp_Rtg = 13
+  disp_Rtg = 16
 )
 
 # Load functions ----------------------------------------------------------
