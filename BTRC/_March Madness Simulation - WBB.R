@@ -26,7 +26,7 @@ ratings <- list(
   to = ratings$to,
   rtg = ratings$rtg,
   
-  disp_Rtg = 11
+  disp_Rtg = 13.5
 )
 
 # Load functions ----------------------------------------------------------
@@ -66,22 +66,21 @@ object <- simulate_ncaa(ncaa_season =  {cur_yr},
                         if_ended_today = FALSE,
                         fresh_tourney = TRUE,
                         ratings = {ratings},
-                        simulations = 100,
+                        simulations = 100000,
                         mbb_wbb = 'WBB',
                         sim_include = "POST")
 
 ## Save viz ----
 summary.ncaa_simulation(object,
                         type = 'wbb') %>% 
-  gtExtras::gtsave_extra(glue::glue('March Madness Backup/Visualizations/pre_tourney_{cur_yr}.png'),
+  gtExtras::gtsave_extra(glue::glue('BTRC/Stats/March Madness Results/pre_tourney_{cur_yr}.png'),
                          vwidth = 2350)
 
 object$games %>% 
   filter(round_no >= 4)
 
 ## Save object
-saveRDS({object}, glue::glue('March Madness Backup/Sims/pre_tourney_{cur_yr}.rds'))
-saveRDS({object}, glue::glue('March Madness Backup/Sims/pre_tourney_{cur_yr}.rds'))
+saveRDS({object}, glue::glue('BTRC/Stats/March Madness Results/pre_tourney_{cur_yr}.rds'))
 
 ##########################GET BRACKETS############################################################################
 # Reload if needed ----
