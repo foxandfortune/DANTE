@@ -11,7 +11,7 @@ options(chromote.headless. = 'new')
 `%!in%` = Negate(`%in%`)
 
 # Set reference year
-cur_yr <- 2025
+cur_yr <- 2026
 
 # Sim method ------------------------
 sim_method <- "to_reb_ast"

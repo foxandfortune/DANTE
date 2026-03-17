@@ -38,7 +38,7 @@ games_played <- summary %>%
                           games_played = n_distinct(game_id)))
 
 ### To be played -----------------------
-schedule <- wehoop::load_wbb_schedule(seasons = {season})
+schedule <- readRDS(glue::glue('_Helper Files/_WBB Fallback/updated_wbb_schedule_{season}.rds'))
 
 schedule <- schedule %>% 
   select(game_date, game_id, team_id = home_id, opp_id = away_id) %>% 

@@ -2,8 +2,9 @@ library(wehoop)
 library(tidyverse)
 
 # Set working directory
-#setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-#setwd('..')
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+setwd('..')
+setwd('..')
 
 `%!in%` = Negate(`%in%`)
 
@@ -17,13 +18,14 @@ cur_yr <- 2026
 # Load full pbp and raw pbp, roster and team data ----------------------------------------------------
 pbp_full <- readRDS(glue::glue("BTRC/Stats/Team and Player Stats - WBB/PBP and Shot Data/pbp_wbb_{cur_yr}.rds"))
 
-pbp_raw <- wehoop::load_wbb_pbp(seasons = {cur_yr})
+pbp_raw <- readRDS(glue::glue('_Helper Files/_WBB Fallback/updated_wbb_pbp_{cur_yr}.rds'))
+
 
 pbp_raw <- pbp_raw %>% 
   filter(game_id %!in% pbp_full$game_id)
 
 # Load roster
-roster <- wehoop::load_wbb_player_box(seasons = {cur_yr})
+roster <- readRDS(glue::glue('_Helper Files/_WBB Fallback/updated_wbb_player_box_2026.rds'))
 
 # Check for missing play types ------------
 playtypes <- pbp_raw %>% 
@@ -257,43 +259,7 @@ shots_loc <- pbp_raw %>%
   select(-c(pos, season_type))
 
 # Shots without location
-shots_noloc <- pbp_raw %>% 
-  filter(shooting_play == TRUE, type_id != "540", is.na(shot_dist)) %>% 
-  mutate(pos = case_when(
-    pos != "NA" & !is.na(pos) ~ pos,
-    is.na(pos) ~ "ATH",
-    pos == "NA" ~ "ATH"
-  )) %>% 
-  mutate(shot_diff_time = if_else(secs_remaining == 0, shot_diff/.1, shot_diff / secs_remaining),
-         year_index = as.numeric(season) - cur_yr,
-         pos = factor(pos, levels = all_positions),
-         shot_made_numeric = as.numeric(scoring_play),
-         season_type = factor(season_type, levels = all_season_types),
-         is_three = case_when(
-           type_id %in% c("30558", "558") ~ TRUE,
-           str_detect(text, "Three Point") ~ TRUE,
-           TRUE ~ FALSE)) %>% 
-  select(
-    # Labels and ids
-    label = shot_made_numeric, season,
-    game_id, game_play_number,
-    period_display_value, period_number,
-    team_id, poss_tm, poss_id, poss_row, poss_start,
-    player_id, other_player_id, player, number, athlete_headshot_href,
-    away_team_id, home_team_id,
-    point_value, shot_value,
-    
-    # Features
-    pos, is_atrim, is_putback, is_three, 
-    is_home, secs_remaining,
-    shot_diff, shot_diff_time,
-    shot_clock, is_fastbreak, year_index,
-    season_type) %>% 
-  # Create dummy variables for position and shot type
-  # because xgboost doesn't like these for some reason
-  fastDummies::dummy_cols(select_columns = c("pos", "season_type"), remove_first_dummy = TRUE) %>% 
-  # Drop extra columns from dummy variables
-  select(-c(pos, season_type))
+shots_noloc <- data.frame()
 
 # Free throws
 shots_ft <- pbp_raw %>% 
@@ -470,12 +436,7 @@ library(sp)
 teams <- readRDS(glue::glue("_Helper Files/Team Data/team_database_wbb.rds"))
 
 # Load schedule ------ 
-schedule <- wehoop::load_wbb_schedule(seasons = {cur_yr}) %>% 
-  as.data.frame() %>% 
-  # Filter for teams in database
-  filter(home_id %in% teams$team_id | away_id %in% teams$team_id) %>% 
-  # Exclude canceled/postponed games
-  filter(status_type_description %!in% c("Postponed", "Canceled"))
+schedule <- readRDS(glue::glue('_Helper Files/_WBB Fallback/updated_wbb_schedule_{cur_yr}.rds'))
 
 # Calculate days rest based on schedule ---------------
 sched_doubled <- schedule %>% 
@@ -490,7 +451,7 @@ sched_doubled <- schedule %>%
 
 # Get correct scores for games; filter out pbp which does not match to correct scores ------ 
 ## Load team box -----
-team_box <- wehoop::load_wbb_team_box({cur_yr}) %>% 
+team_box <- readRDS(glue::glue('_Helper Files/_WBB Fallback/updated_wbb_team_box_{cur_yr}.rds')) %>% 
   mutate(efg_adj = (0.5 * free_throws_made + field_goals_made + 0.5 * three_point_field_goals_made) / 
            (field_goals_attempted + free_throws_attempted),
          ast_rt = assists / field_goals_made,

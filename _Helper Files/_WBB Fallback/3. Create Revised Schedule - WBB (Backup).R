@@ -34,7 +34,7 @@ team_coords <- all_venues %>%
   select(-row)
 
 # Load schedule ------ 
-schedule <- wehoop::load_wbb_schedule(seasons = {cur_yr}) %>% 
+schedule <- readRDS(glue::glue('_Helper Files/_WBB Fallback/updated_wbb_schedule_{cur_yr}.rds')) %>% 
   as.data.frame() %>% 
   # Filter for teams in database
   filter(home_id %in% teams$team_id | away_id %in% teams$team_id) %>% 

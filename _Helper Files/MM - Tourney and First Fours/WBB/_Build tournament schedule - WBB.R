@@ -1,4 +1,4 @@
-library(hoopR)
+library(wehoop)
 library(sp)
 library(tidyverse)
 
@@ -6,28 +6,30 @@ library(tidyverse)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 setwd('..')
 setwd('..')
+setwd('..')
 
 # Add NOT IN function:
 `%!in%` = Negate(`%in%`)
 
 # Set season -----------------------
-season <- 2025
+season <- 2026
 
 # Load teams -------------------------------------------
-teams <- readRDS('Team Data/team_database_wbb.rds') %>% 
+teams <- readRDS('_Helper Files/Team Data/team_database_wbb.rds') %>% 
   mutate(team_id = as.integer(team_id))
 
 # Load schedule -------------------
 sched <- wehoop::load_wbb_schedule(seasons = {season})
 
 ## Filter tournament games -----------------------
-tourn <- sched %>% 
-  filter(tournament_id == 22) %>% 
+tourn <- sched %>%
+  #filter(tournament_id == 22) %>% 
+  filter(str_detect(notes_headline, "NCAA Women's Basketball Championship")) %>% 
   arrange(date)
-
+  
 # Load team venues for calculating travel -------
-venues <- readRDS("Team Data/team_venues_wbb.rds") %>%
-  plyr::rbind.fill(readRDS("Team Data/neutral_sites_wbb.rds")) %>% 
+venues <- readRDS("_Helper Files/Team Data/team_venues_wbb.rds") %>%
+  plyr::rbind.fill(readRDS("_Helper Files/Team Data/neutral_sites_wbb.rds")) %>% 
   mutate(latitude = as.numeric(latitude),
          longitude = as.numeric(longitude))
 
@@ -219,8 +221,8 @@ tourney_structure
 
 # Get First Four Schedule ---------------------------
 # Load team venues for calculating travel -------------------
-all_venues <- readRDS("Team Data/team_venues_wbb.rds") %>%
-  plyr::rbind.fill(readRDS("Team Data/neutral_sites_wbb.rds")) %>% 
+all_venues <- readRDS("_Helper Files/Team Data/team_venues_wbb.rds") %>%
+  plyr::rbind.fill(readRDS("_Helper Files/Team Data/neutral_sites_wbb.rds")) %>% 
   mutate(latitude = as.numeric(latitude),
          longitude = as.numeric(longitude))
 
@@ -337,7 +339,7 @@ first_four_sched
 # Get venues First Four winners will travel to --------
 ##### UPDATE BASED ON FIRST FOUR SETTINGS #############
 first_four_travel <- tourn %>% 
-  filter(str_detect(notes_headline, "1st Round")) %>%
+  filter(str_detect(notes_headline, "First Four")) %>%
   mutate(region = case_when(
     str_detect(notes_headline, "Regional 1") ~ "Region 1",
     str_detect(notes_headline, "Regional 2") ~ "Region 2",
@@ -390,7 +392,7 @@ tourney_structure <- tourney_structure %>%
 
 
 # Save tourney structure, tourney teams, and First Four schedule ----------
-saveRDS(tourney_teams, glue::glue("MM - Tourney and First Fours/WBB/tourney_teams_{season}.rds"))
-saveRDS(first_four_sched, glue::glue("MM - Tourney and First Fours/WBB/first_four_{season}.rds"))
-saveRDS(tourney_structure, glue::glue("MM - Tourney and First Fours/WBB/tourney_structure_{season}.rds"))
+saveRDS(tourney_teams, glue::glue("_Helper Files/MM - Tourney and First Fours/WBB/tourney_teams_{season}.rds"))
+saveRDS(first_four_sched, glue::glue("_Helper Files/MM - Tourney and First Fours/WBB/first_four_{season}.rds"))
+saveRDS(tourney_structure, glue::glue("_Helper Files/MM - Tourney and First Fours/WBB/tourney_structure_{season}.rds"))
 
