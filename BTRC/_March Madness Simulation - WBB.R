@@ -84,7 +84,7 @@ saveRDS({object}, glue::glue('BTRC/Stats/March Madness Results/pre_tourney_{cur_
 
 ##########################GET BRACKETS############################################################################
 # Reload if needed ----
-object <- readRDS(glue::glue('March Madness Backup/Sims/pre_tourney_{cur_yr}.rds'))
+object <- readRDS(glue::glue('BTRC/Stats/March Madness Results/pre_tourney_{cur_yr}.rds'))
 
 ## Get list of teams with "reasonable" chance of winning -------
 champ_tms <- data.frame(object$overall) %>% 
@@ -99,7 +99,7 @@ champ_tms <- data.frame(object$overall) %>%
 champ_tms
 
 # Go through each team -----
-champ <- champ_tms$team_id[6]
+champ <- champ_tms$team_id[1]
 
 ## Print
 print(teams$team_name[teams$team_id == champ])
@@ -119,7 +119,7 @@ samp_no <- 1
 
 ### Print results from each round /
 data.frame(object$games) %>% 
-  filter(sim == 38898, round_no >= 1) %>% 
+  filter(sim == sim_sample, round_no >= 1) %>% 
   mutate(winner = case_when(
     result > 0 ~ home_id,
     result < 0 ~ away_id)) %>% 
