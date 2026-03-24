@@ -66,14 +66,14 @@ object <- simulate_ncaa(ncaa_season =  {cur_yr},
                         if_ended_today = FALSE,
                         fresh_tourney = FALSE,
                         ratings = {ratings},
-                        simulations = 10,
+                        simulations = 100000,
                         mbb_wbb = 'MBB',
                         sim_include = "POST")
 
 ## Save viz ----
 summary.ncaa_simulation(object,
                         type = 'mbb') %>% 
-  gtExtras::gtsave_extra(glue::glue('VRGL/Stats/March Madness Results/pre_tourney_{cur_yr}.png'),
+  gtExtras::gtsave_extra(glue::glue('VRGL/Stats/March Madness Results/sweet_16_{cur_yr}.png'),
                          vwidth = 2350)
 
 
