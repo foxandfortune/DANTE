@@ -58,7 +58,8 @@ simulate_ncaa <- function(ncaa_season = NULL,
   } else {
     schedule <- load_completed_games(season = ncaa_season,
                                      left_bracket = {left_bracket},
-                                     right_bracket = {right_bracket}) %>%
+                                     right_bracket = {right_bracket},
+                                     mbb_wbb = {mbb_wbb}) %>%
       select(
         region, round_name, round_no,
         away_seed, away_id, away_rest, away_dist, away_score,

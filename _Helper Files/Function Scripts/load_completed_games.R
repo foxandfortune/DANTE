@@ -1,6 +1,7 @@
 load_completed_games <- function(season,
                                  left_bracket,
-                                 right_bracket) {
+                                 right_bracket,
+                                 mbb_wbb) {
   # Load full season using hoopR
   sched <- hoopR::load_mbb_schedule(seasons = {season}) %>% 
     # Filter for March Madness Tournament
@@ -10,14 +11,17 @@ load_completed_games <- function(season,
     # Add result column
     mutate(result = home_score - away_score)
   
-  # ONLY FOR TESTING
-  sched <- sched %>% 
-    filter(!is.na(result))
+  # Filter to completed games only (excludes NA results and 0-0 scheduled games
+  # that hoopR returns for not-yet-played games)
+  sched <- sched %>%
+    filter(!is.na(result) & result != 0)
   
-  teams <- readRDS(glue::glue('March Madness Backup/tourney_teams_{season}.rds'))
+  # Load teams and tourney schedule 
+  teams <- readRDS(glue::glue('_Helper Files/MM - Tourney and First Fours/{mbb_wbb}/tourney_teams_{season}.rds'))
+  tourney_structure <- readRDS(glue::glue('_Helper Files/MM - Tourney and First Fours/{mbb_wbb}/tourney_structure_{season}.rds'))
   
   sched <- sched %>% 
-    filter(!is.na(result)) %>% 
+    #filter(!is.na(result)) %>% 
     left_join(teams %>% select(team_id, seed), by = c("away_id" = "team_id")) %>% 
     rename(away_seed = seed) %>% 
     left_join(teams %>% select(team_id, seed), by = c("home_id" = "team_id")) %>% 
@@ -64,8 +68,9 @@ load_completed_games <- function(season,
       winner_to
     ) %>% 
     as.data.frame()
-  
+
   return(sched)
 }
 
-saveRDS(load_completed_games, 'Simulation Backup/Functions/load_completed_games.rds')
+
+saveRDS(load_completed_games, '_Helper Files/Simulation Functions/load_completed_games.rds')

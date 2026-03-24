@@ -64,9 +64,9 @@ object <- simulate_ncaa(ncaa_season =  {cur_yr},
                         left_bracket = c("East", "South"),
                         right_bracket = c("West", "Midwest"),
                         if_ended_today = FALSE,
-                        fresh_tourney = TRUE,
+                        fresh_tourney = FALSE,
                         ratings = {ratings},
-                        simulations = 100000,
+                        simulations = 10,
                         mbb_wbb = 'MBB',
                         sim_include = "POST")
 
