@@ -25,7 +25,7 @@ ratings <- list(
   to = ratings$to,
   rtg = ratings$rtg,
   
-  disp_Rtg = 13
+  disp_Rtg = 16
 )
 
 ratings_no_prior <- list(
@@ -35,7 +35,7 @@ ratings_no_prior <- list(
   to = ratings_no_prior$to,
   rtg = ratings_no_prior$rtg,
   
-  disp_Rtg = 13
+  disp_Rtg = 16
 )
 
 # Load teams -------------------
