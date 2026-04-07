@@ -85,10 +85,17 @@ rating_ids <- ratings$rtg %>%
   mutate(team_id = str_remove_all(name, "team_id_")) %>% 
   pull(team_id)
 
-schedule <- schedule %>% 
-  filter(home_id %in% rating_ids & away_id %in% rating_ids)
+schedule <- schedule %>%
+  filter(home_id %in% rating_ids & away_id %in% rating_ids) %>%
+  filter(!is.na(away_rest))
 
 print(length(schedule$game_id))
+
+# Exit gracefully if no games to simulate today
+if (nrow(schedule) == 0) {
+  message("No MBB games to simulate today. Exiting.")
+  quit(status = 0)
+}
 
 ##########################RUN SIMULATION #########################################################################
 ## Set seed ------------------

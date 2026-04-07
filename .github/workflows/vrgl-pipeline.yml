@@ -3,9 +3,10 @@ name: VRGL Basketball Analysis Pipeline
 on:
   # Run daily at 5 AM Central Time (11 AM UTC during CST, 10 AM UTC during CDT)
   # Using 11 AM UTC to cover CST - adjust if needed for CDT
-  schedule:
-    - cron: '0 11 * * *'
-  
+  # DISABLED for off-season - uncomment the schedule block below to re-enable
+  # schedule:
+  #   - cron: '0 11 * * *'
+
   # Allow manual triggering
   workflow_dispatch:
 
