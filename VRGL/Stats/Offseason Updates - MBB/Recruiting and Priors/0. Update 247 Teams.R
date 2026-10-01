@@ -28,7 +28,7 @@ team_db_path    <- "_Helper Files/Team Data/team_database.rds"
 placeholder_url <- "https://247sports.com/"
 
 update_urls  <- TRUE   # also refresh URLs for teams already in the file (placeholder or changed slug)
-save_changes <- FALSE   # FALSE = dry run, just print what would change
+save_changes <- TRUE   # FALSE = dry run, just print what would change
 
 ## Manual name fixes: 247 name -> DANTE team key (team_database.rds$Team, or
 ## display_name where Team is NA). Add to this when the report flags a team.
