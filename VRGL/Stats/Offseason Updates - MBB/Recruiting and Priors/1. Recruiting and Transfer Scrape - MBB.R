@@ -10,11 +10,12 @@ setwd('..')
 setwd('..')
 
 # Load teams
-teams.247 <- readRDS('_Helper Files/Team Data/teams247.rds')
+teams.247 <- readRDS('_Helper Files/Team Data/teams247.rds') %>% 
+  filter(URL != "https://247sports.com/")   # no 247 team page - the bare URL returns the national commit list
 
 # Scrape transfers by season --------------------
 ## Set season -----
-season <- 2025
+season <- 2026
 
 ## Create transfer data.frame ------
 transfer.df <- data.frame()
