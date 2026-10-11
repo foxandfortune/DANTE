@@ -176,7 +176,7 @@ transfers |>
          match_name = str_to_title(match_name),
          match_name = str_remove_all(match_name, '\''),
          match_name = str_remove_all(match_name, "Jr "),
-         match_name = str_remove_all(match_name, " Jr")) |> 
+         match_name = str_remove_all(match_name, " Jr")) |>
   # Start fixing names
   mutate(match_name = case_when(
     str_detect(match_name, "Zz Clark") ~ "Zachiah Clark",
@@ -185,13 +185,29 @@ transfers |>
     str_detect(match_name, "Sadkiu Ayo") ~ "Sadiku Ibine Ayo",
     str_detect(match_name, "Papa Kante") ~ "Papa Amadou Kante",
     str_detect(match_name, "Nilavan ") ~ "Nilavan Daniels",
-    str_detect(match_name, "Codie ") ~ "Nicolas Codie",
-    str_detect(match_name, " Chitikoudis ") ~ "Nikolaos Chitikoudis",
+    str_detect(match_name, " Codie") ~ "Nic Codie",
+    str_detect(match_name, " Chitikoudis") ~ "Nikolaos Chitikoudis",
     str_detect(match_name, " Ivanauskas ") ~ "Mykolaus Ivanauskas",
     str_detect(match_name, " Nwoko") ~ "Michael Nwoko",
     str_detect(match_name, "Mike Mcnair") ~ "Michael Mcnair",
     str_detect(match_name, "Martavious Russell") ~ "Mj Russell",
     str_detect(match_name, "Malik Moore") ~ "Malik Messina-Moore",
+    str_detect(match_name, "Kj Garris") ~ "Kiwane Garris",
+    str_detect(match_name, "Josh Dalton") ~ "Joshua Dalton",
+    str_detect(match_name, " Laboy") ~ "Ii John Laboy",
+    str_detect(match_name, " Eyenga") ~ "Jarne Elouna Eyenga",
+    str_detect(match_name, " Dunkley") ~ "Jalik Dunkley",
+    str_detect(match_name, "Jacolb") ~ "Jacolb Fredson-Cole",
+    str_detect(match_name, "Jacob Wilkins") ~ "Jake Wilkins",
+    str_detect(match_name, " Ifaola") ~ 'Fawaz "Tacko" Ifaola',
+    str_detect(match_name, "Devon Pearson") ~ "Devon Kobi Pearson",
+    str_detect(match_name, " Nwuli") ~ "Christopher Nwuli",
+    str_detect(match_name, "Chris Jeffrey") ~ "Christian Jeffrey",
+    str_detect(match_name, "Cash Chavis") ~ "Casmir Chavis",
+    str_detect(match_name, "Butta") ~ "Efrem Johnson",
+    str_detect(match_name, "Ashley Sims") ~ "Ii Ashley Sims",
+    str_detect(match_name, "Anthony Smith") ~ "Anthony Smith Lll",
+    str_detect(match_name, "Ace Glass") ~ "Ace Glass Lll",
     
     
     TRUE ~ match_name
@@ -200,24 +216,52 @@ transfers |>
   select(match_name, transfrom, transto, season) |>  
   arrange(match_name)
 
-  
+
+
 rosters.game |>  
-  filter(str_detect(match_name, "Malik")) |>   
+  filter(str_detect(match_name, " Codie")) |>   
   select(match_name, Team) |>  
   arrange(match_name)
+
+## CHECK FOR ERRORS IN SCHOOL NAME --------
+transfers |> 
+  filter(transfrom == "Https:")
+
+transfers |> 
+  filter(transfrom == "")
 
 ### Double check positions ----------
 transfers |> 
   filter(pos %!in% c("PF", "CG", "PG",
                      "SF", "SG", "C"))
 
+
+## Schools with no 247 page all share the placeholder URL, so match those by name
+placeholder_url <- "https://247sports.com/"
+no_page_fixes <- c("Tarleton State" = "Tarleton Texans",
+                   "East Texas A&M" = "Texas A&M-Commerce Lions")
+no_page_teams <- all_teams |> filter(URL == placeholder_url)
+match_no_page <- function(name) {
+  if (is.na(name)) return(NA_character_)
+  if (name %in% names(no_page_fixes)) return(unname(no_page_fixes[name]))
+  hit <- no_page_teams$Team[str_starts(no_page_teams$Team, fixed(paste0(name, " ")))]
+  if (length(hit) == 1) hit else NA_character_
+}
+
+transfers <- transfers |>
+  left_join(all_teams |> filter(URL != placeholder_url) |> select(URL, from_team_url = Team),
+            by = c("transfromURL" = "URL")) |>
+  mutate(transfromTeam = if_else(transfromURL == placeholder_url,
+                                 map_chr(transfrom, match_no_page),
+                                 from_team_url)) |>
+  select(-from_team_url)
+
 ## Add cleaned names to transfers 
 transfers_clean <- transfers |>  
   # Add Transfer From Team to match ESPN
-  left_join(all_teams, by = c("transfromURL" = "URL")) |>  
-  rename(transfromTeam = Team,
-         transfromID = team_id, 
-         transfromTorvik = torvik_team) |>  
+  left_join(all_teams |> select(transfromTeam = Team, transfromID = team_id,
+                                transfromTorvik = torvik_team),
+            by = "transfromTeam") |>
   # Add Transfer To Team to match ESPN
   left_join(all_teams, by = c("transtoURL" = "URL")) |>  
   rename(transtoTeam = Team,
@@ -231,42 +275,50 @@ transfers_clean <- transfers |>
          match_name = str_remove_all(match_name, " Jr")) |> 
   # Start fixing names
   mutate(match_name = case_when(
-    str_detect(match_name, "Holiman") ~ "Adante' Holiman",
-    str_detect(match_name, " Mukeba") ~ "Allen David Mukeba",
-    str_detect(match_name, "Amare Marshall") ~ "Amar'e Marshall",
-    str_detect(match_name, " Haffner") ~ "Cameron Haffner",
-    str_detect(match_name, " Palesse") ~ "Cam Palesse",
-    str_detect(match_name, "Damarien Yates") ~ "Demarien Yates",
-    str_detect(match_name, "Manyiel") ~ "Dhiaukuei Manyiel Dut",
-    str_detect(match_name, "Dre Bullock") ~ "Quandre Bullock",
-    str_detect(match_name, " Federiko") ~ "Federiko Federiko",
-    str_detect(match_name, "Jacolb Cole") ~ "Jacolb Fredson-Cole",
-    str_detect(match_name, "Jaqualon Roberts") ~ 'Jaqualon "Jq" Roberts',
-    str_detect(match_name, " Monegro") ~ "Jefferson De La Cruz Monegro",
-    str_detect(match_name, " Cherry") ~ 'Jeremiah "Bear" Cherry',
-    str_detect(match_name, "Jorge Diaz") ~ "Jorge Diaz Graham",
-    str_detect(match_name, " Beadle") ~ "Joshua Beadle",
-    str_detect(match_name, " Ogarro") ~ "Joshua Ogarro",
-    str_detect(match_name, " Ola-Joseph") ~ "Joshua Ola-Joseph",
-    str_detect(match_name, "Matt Reed") ~ "Matthew Reed",
-    str_detect(match_name, "Rob Wright") ~ "Robert Wright",
-    str_detect(match_name, "Sam Onu") ~ "Samuel Onu",
-    str_detect(match_name, "Ubongabasi Etim") ~ "Ubong Abasi Etim",
-    str_detect(match_name, " Salaridze") ~ "Vladimer Salaridze",
+    str_detect(match_name, "Zz Clark") ~ "Zachiah Clark",
+    str_detect(match_name, "Tj Simpkins") ~ "Tajuan Simpkins",
+    str_detect(match_name, " Malovec") ~ "Timotej Malovec",
+    str_detect(match_name, "Sadkiu Ayo") ~ "Sadiku Ibine Ayo",
+    str_detect(match_name, "Papa Kante") ~ "Papa Amadou Kante",
+    str_detect(match_name, "Nilavan ") ~ "Nilavan Daniels",
+    str_detect(match_name, " Codie") ~ "Nic Codie",
+    str_detect(match_name, " Chitikoudis") ~ "Nikolaos Chitikoudis",
+    str_detect(match_name, " Ivanauskas ") ~ "Mykolaus Ivanauskas",
+    str_detect(match_name, " Nwoko") ~ "Michael Nwoko",
+    str_detect(match_name, "Mike Mcnair") ~ "Michael Mcnair",
+    str_detect(match_name, "Martavious Russell") ~ "Mj Russell",
+    str_detect(match_name, "Malik Moore") ~ "Malik Messina-Moore",
+    str_detect(match_name, "Kj Garris") ~ "Kiwane Garris",
+    str_detect(match_name, "Josh Dalton") ~ "Joshua Dalton",
+    str_detect(match_name, " Laboy") ~ "Ii John Laboy",
+    str_detect(match_name, " Eyenga") ~ "Jarne Elouna Eyenga",
+    str_detect(match_name, " Dunkley") ~ "Jalik Dunkley",
+    str_detect(match_name, "Jacolb") ~ "Jacolb Fredson-Cole",
+    str_detect(match_name, "Jacob Wilkins") ~ "Jake Wilkins",
+    str_detect(match_name, " Ifaola") ~ 'Fawaz "Tacko" Ifaola',
+    str_detect(match_name, "Devon Pearson") ~ "Devon Kobi Pearson",
+    str_detect(match_name, " Nwuli") ~ "Christopher Nwuli",
+    str_detect(match_name, "Chris Jeffrey") ~ "Christian Jeffrey",
+    str_detect(match_name, "Cash Chavis") ~ "Casmir Chavis",
+    str_detect(match_name, "Butta") ~ "Efrem Johnson",
+    str_detect(match_name, "Ashley Sims") ~ "Ii Ashley Sims",
+    str_detect(match_name, "Anthony Smith") ~ "Anthony Smith Lll",
+    str_detect(match_name, "Ace Glass") ~ "Ace Glass Lll",
     TRUE ~ match_name
   )) |>  
   # Fix player positions
-  mutate(pos = case_when(
-    pos == "TE" ~ "PF",
-    pos == "IOL" ~ "C",
-    pos == "QB" & player == "Drew Carter" ~ "SG",
-    pos == "QB" & player == "Conrad Hawley" ~ "PF",
-    TRUE ~ pos)) |>  
+  #mutate(pos = case_when(
+  #  pos == "TE" ~ "PF",
+  #  pos == "IOL" ~ "C",
+  #  pos == "QB" & player == "Drew Carter" ~ "SG",
+  #  pos == "QB" & player == "Conrad Hawley" ~ "PF",
+  #  TRUE ~ pos)) |>  
   distinct()
 
 ## Check again
 transfers_clean |>  
-  filter(match_name %!in% rosters.game$match_name)
+  filter(match_name %!in% rosters.game$match_name) |> 
+  arrange(match_name)
 
 head(transfers_clean)
 
@@ -324,6 +376,7 @@ missing_schools <- draftees |>
          school != "IMG Academy") |>  
   select(school) |>  
   distinct()
+
 teams |>  filter(str_detect(team, "John"))
 print(missing_schools)
 

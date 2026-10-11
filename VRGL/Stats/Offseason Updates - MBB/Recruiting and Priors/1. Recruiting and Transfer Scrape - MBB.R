@@ -65,14 +65,13 @@ for(i in 1:length(teams.247$URL)){
     slice(2:n())
   
   #### Team name for transfer from
+  ## Taken from the school logo's alt text. Schools with no 247 team page
+  ## (Merrimack, Grand Canyon, LMU, ...) link to https://247sports.com/season/...
+  ## with no school in the URL, but the logo still carries the name.
   temp.tmname.tr <- temp.portal %>%
-    html_element('.transfer-institution a') %>%
-    html_attr("href") %>%
-    str_remove_all(pattern = rmv) %>% 
-    str_replace_all(pattern = c("https://247sports.com/college/" = "")) %>% 
-    str_remove_all(pattern = c('\\/.*')) %>% 
-    str_replace_all("-", " ") %>% 
-    str_to_title() %>% 
+    html_element('.transfer-institution a img') %>%
+    html_attr("alt") %>%
+    str_squish() %>% 
     as_tibble() %>% 
     as.data.frame() %>% 
     rename(transfrom = value) %>% 
