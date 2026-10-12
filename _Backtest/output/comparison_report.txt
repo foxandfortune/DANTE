@@ -1,0 +1,136 @@
+
+================= MBB =================
+Games (common to all variants): 41922 | calibrated seasons: 2020-2026 
+
+-- As-is (each model's own stretch and sigma) --
+# A tibble: 5 x 12
+  model            n    margin_mae   margin_rmse margin_bias margin_slope logloss    total_mae total_rmse total_bias z_margin_sd    z_total_sd
+  <chr>        <int>         <dbl>         <dbl>       <dbl>        <dbl>   <dbl>        <dbl>      <dbl>      <dbl>       <dbl>         <dbl>
+1 V0_prod      41922         9.411         11.98    8.650e-1    9.785e- 1  0.5550        13.38   1.702e 1    1.295e0    9.573e-1         1.361
+2 V1_sitcomp   41922         9.449         12.02   -1.009e-1    9.755e- 1  0.5552        13.41   1.708e 1    1.954e0    9.682e-1         1.369
+3 V2_ridgefix  41922 115304885.    9638187698.      1.153e+8   -3.094e-11  0.5712 265457640.     1.683e10   -2.342e8    1.068e+8 186780113.   
+4 D0_direct    41922         9.457         12.03   -9.560e-2    9.611e- 1  0.5562        13.38   1.702e 1    1.331e0    9.636e-1         1.361
+5 D1_directfix 41922        15.94         540.6    -7.549e+0    7.644e- 4  0.5610        39.68   1.893e 3    2.759e1    1.519e+1        31.47 
+
+-- Calibrated walk-forward across seasons (scale/sd/total bias from prior seasons only) --
+# A tibble: 5 x 12
+  model            n    margin_mae   margin_rmse margin_slope logloss  brier    total_mae total_rmse team_pts_rmse z_margin_sd z_total_sd
+  <chr>        <int>         <dbl>         <dbl>        <dbl>   <dbl>  <dbl>        <dbl>      <dbl>         <dbl>       <dbl>      <dbl>
+1 V0_prod      36568         9.412         11.98    1.002e+ 0  0.5548 0.1885        13.34   1.693e 1      1.037e 1    9.987e-1   9.973e-1
+2 V1_sitcomp   36568         9.443         12.02    1.042e+ 0  0.5557 0.1889        13.34   1.693e 1      1.038e 1    1.000e+0   9.971e-1
+3 V2_ridgefix  36568 124779167.    9741354882.     -3.277e-11  0.5732 0.1948 304323866.     1.802e10      1.024e10    8.003e+8   1.054e+9
+4 D0_direct    36568         9.452         12.02    1.004e+ 0  0.5567 0.1893        13.34   1.693e 1      1.038e 1    9.982e-1   9.978e-1
+5 D1_directfix 36568        16.49         546.9     7.836e- 4  0.5634 0.1913        43.47   2.027e 3      1.050e 3    4.569e+1   1.195e+2
+
+-- Calibrated, by phase: margin RMSE / logloss --
+# A tibble: 5 x 13
+  model        `margin_rmse_1 Nov` `margin_rmse_2 Dec` `margin_rmse_3 Jan-Feb` `margin_rmse_4 Mar-Apr` `logloss_1 Nov` `logloss_2 Dec` `logloss_3 Jan-Feb` `logloss_4 Mar-Apr` `total_rmse_1 Nov` `total_rmse_2 Dec`
+  <chr>                      <dbl>               <dbl>                   <dbl>                   <dbl>           <dbl>           <dbl>               <dbl>               <dbl>              <dbl>              <dbl>
+1 V0_prod                 1.403e 1               12.33                   11.27                   11.19          0.5369          0.5104              0.5730              0.5675           1.814e 1              16.72
+2 V1_sitcomp              1.407e 1               12.37                   11.32                   11.18          0.5375          0.5118              0.5741              0.5670           1.815e 1              16.72
+3 V2_ridgefix             2.323e10               13.00                   11.47                   11.26          0.5684          0.5409              0.5853              0.5757           4.298e10              16.73
+4 D0_direct               1.393e 1               12.43                   11.36                   11.18          0.5366          0.5156              0.5752              0.5661           1.814e 1              16.74
+5 D1_directfix            1.304e 3               12.70                   11.33                   11.17          0.5505          0.5276              0.5780              0.5710           4.834e 3              16.78
+# i 2 more variables: `total_rmse_3 Jan-Feb` <dbl>, `total_rmse_4 Mar-Apr` <dbl>
+
+-- Paired differences vs V0_prod (calibrated; negative = better; 95% CI by date bootstrap) --
+# A tibble: 16 x 8
+   model        metric         n   mean_a    mean_b       diff       lo95      hi95
+   <chr>        <chr>      <int>    <dbl>     <dbl>      <dbl>      <dbl>     <dbl>
+ 1 V1_sitcomp   sq_margin  36568 143.5    1.445e+ 2  9.086e- 1  0.6280    1.186e+ 0
+ 2 V1_sitcomp   abs_margin 36568   9.412  9.443e+ 0  3.148e- 2  0.02040   4.251e- 2
+ 3 V1_sitcomp   logloss    36568   0.5548 5.557e- 1  9.235e- 4  0.0001895 1.640e- 3
+ 4 V1_sitcomp   sq_total   36568 286.6    2.865e+ 2 -2.348e- 2 -0.3903    2.949e- 1
+ 5 V2_ridgefix  sq_margin  36568 143.5    9.489e+19  9.489e+19  5.819     2.914e+20
+ 6 V2_ridgefix  abs_margin 36568   9.412  1.248e+ 8  1.248e+ 8  0.1705    3.832e+ 8
+ 7 V2_ridgefix  logloss    36568   0.5548 5.732e- 1  1.845e- 2  0.01461   2.311e- 2
+ 8 V2_ridgefix  sq_total   36568 286.6    3.247e+20  3.247e+20  1.387     9.972e+20
+ 9 D0_direct    sq_margin  36568 143.5    1.446e+ 2  1.009e+ 0  0.5246    1.516e+ 0
+10 D0_direct    abs_margin 36568   9.412  9.452e+ 0  4.009e- 2  0.02288   5.638e- 2
+11 D0_direct    logloss    36568   0.5548 5.567e- 1  1.922e- 3  0.0009647 2.753e- 3
+12 D0_direct    sq_total   36568 286.6    2.866e+ 2  2.527e- 2 -0.3612    3.442e- 1
+13 D1_directfix sq_margin  36568 143.5    2.991e+ 5  2.989e+ 5  1.072     9.180e+ 5
+14 D1_directfix abs_margin 36568   9.412  1.649e+ 1  7.078e+ 0  0.03392   2.161e+ 1
+15 D1_directfix logloss    36568   0.5548 5.634e- 1  8.580e- 3  0.006334  1.105e- 2
+16 D1_directfix sq_total   36568 286.6    4.108e+ 6  4.108e+ 6  1.026     1.261e+ 7
+
+-- Home-court check: mean (actual - predicted) home margin, non-neutral, calibrated --
+         model     n     home_bias           se
+1      V0_prod 32101  9.873825e-01 6.667530e-02
+2   V1_sitcomp 32101  1.216547e-01 6.713242e-02
+3  V2_ridgefix 32101  1.421427e+08 5.802533e+07
+4    D0_direct 32101  2.813430e-02 6.713768e-02
+5 D1_directfix 32101 -9.052090e+00 3.257430e+00
+
+-- 2026 vs Vegas morning consensus (calibrated) --
+# A tibble: 5 x 9
+  model        n_spread     model_mae vegas_mae info_corr n_total model_total_mae vegas_total_mae total_info_corr
+  <chr>           <int>         <dbl>     <dbl>     <dbl>   <int>           <dbl>           <dbl>           <dbl>
+1 V0_prod          4933         9.571     9.020  0.007712    4003           14.28           13.63         0.02880
+2 V1_sitcomp       4933         9.626     9.020  0.005231    4003           14.25           13.63         0.03301
+3 V2_ridgefix      4933 924979580.        9.020 -0.02378     4003   2780043641.             13.63        -0.01469
+4 D0_direct        4933         9.592     9.020  0.007261    4003           14.25           13.63         0.03019
+5 D1_directfix     4933        61.74      9.020  0.02384     4003          289.1            13.63         0.01647
+
+================= WBB =================
+Games (common to all variants): 26502 | calibrated seasons: 2023-2026 
+
+-- As-is (each model's own stretch and sigma) --
+# A tibble: 5 x 12
+  model            n margin_mae margin_rmse margin_bias margin_slope logloss total_mae total_rmse total_bias z_margin_sd z_total_sd
+  <chr>        <int>      <dbl>       <dbl>       <dbl>        <dbl>   <dbl>     <dbl>      <dbl>      <dbl>       <dbl>      <dbl>
+1 V0_prod      26502      10.33       13.20      0.6654       0.9543  0.4918     12.91      16.38     1.115        1.036      1.288
+2 V1_sitcomp   26502      10.39       13.26     -0.5135       0.9601  0.4939     12.93      16.42     1.650        1.046      1.294
+3 V2_ridgefix  26502      10.55       13.86     -1.219        1.013   0.5119     13.63      22.12     1.348        1.085      1.647
+4 D0_direct    26502      10.46       13.32     -0.7334       0.8831  0.4969     12.94      16.42     1.192        1.045      1.291
+5 D1_directfix 26502      10.32       13.50     -0.8339       0.9839  0.5013     13.50      20.68     0.7469       1.055      1.574
+
+-- Calibrated walk-forward across seasons (scale/sd/total bias from prior seasons only) --
+# A tibble: 5 x 12
+  model            n margin_mae margin_rmse margin_slope logloss  brier total_mae total_rmse team_pts_rmse z_margin_sd z_total_sd
+  <chr>        <int>      <dbl>       <dbl>        <dbl>   <dbl>  <dbl>     <dbl>      <dbl>         <dbl>       <dbl>      <dbl>
+1 V0_prod      21515      10.34       13.27       1.029   0.4901 0.1635     12.93      16.33         10.52       1.011     0.9911
+2 V1_sitcomp   21515      10.38       13.32       1.055   0.4920 0.1643     12.93      16.32         10.53       1.013     0.9900
+3 V2_ridgefix  21515      10.64       14.11       0.9605  0.5107 0.1693     13.77      23.22         13.58       1.055     1.344 
+4 D0_direct    21515      10.36       13.26       1.019   0.4939 0.1650     12.96      16.37         10.53       1.013     0.9923
+5 D1_directfix 21515      10.44       13.71       0.9968  0.5015 0.1664     13.62      21.54         12.76       1.059     1.256 
+
+-- Calibrated, by phase: margin RMSE / logloss --
+# A tibble: 5 x 13
+  model        `margin_rmse_1 Nov` `margin_rmse_2 Dec` `margin_rmse_3 Jan-Feb` `margin_rmse_4 Mar-Apr` `logloss_1 Nov` `logloss_2 Dec` `logloss_3 Jan-Feb` `logloss_4 Mar-Apr` `total_rmse_1 Nov` `total_rmse_2 Dec`
+  <chr>                      <dbl>               <dbl>                   <dbl>                   <dbl>           <dbl>           <dbl>               <dbl>               <dbl>              <dbl>              <dbl>
+1 V0_prod                    16.91               13.31                   11.95                   11.83          0.5030          0.4339              0.5011              0.5065              17.55              16.32
+2 V1_sitcomp                 16.96               13.43                   11.99                   11.80          0.5040          0.4388              0.5027              0.5058              17.53              16.32
+3 V2_ridgefix                19.59               13.92                   12.05                   11.82          0.5696          0.4530              0.5087              0.5104              41.58              16.31
+4 D0_direct                  16.63               13.38                   12.06                   11.78          0.5060          0.4389              0.5057              0.5056              17.61              16.40
+5 D1_directfix               18.34               13.50                   12.06                   11.78          0.5379          0.4376              0.5084              0.5089              36.46              16.47
+# i 2 more variables: `total_rmse_3 Jan-Feb` <dbl>, `total_rmse_4 Mar-Apr` <dbl>
+
+-- Paired differences vs V0_prod (calibrated; negative = better; 95% CI by date bootstrap) --
+# A tibble: 16 x 8
+   model        metric         n   mean_a   mean_b       diff       lo95       hi95
+   <chr>        <chr>      <int>    <dbl>    <dbl>      <dbl>      <dbl>      <dbl>
+ 1 V1_sitcomp   sq_margin  21515 176.1    177.4      1.310     0.8637      1.764   
+ 2 V1_sitcomp   abs_margin 21515  10.34    10.38     0.04245   0.02442     0.05794 
+ 3 V1_sitcomp   logloss    21515   0.4901   0.4920   0.001828  0.0008754   0.002764
+ 4 V1_sitcomp   sq_total   21515 266.6    266.5     -0.05542  -0.2882      0.1805  
+ 5 V2_ridgefix  sq_margin  21515 176.1    199.0     22.90      4.237      57.36    
+ 6 V2_ridgefix  abs_margin 21515  10.34    10.64     0.2984    0.1436      0.5238  
+ 7 V2_ridgefix  logloss    21515   0.4901   0.5107   0.02055   0.01449     0.02713 
+ 8 V2_ridgefix  sq_total   21515 266.6    539.0    272.5       2.540     818.8     
+ 9 D0_direct    sq_margin  21515 176.1    175.8     -0.2491   -1.505       0.9549  
+10 D0_direct    abs_margin 21515  10.34    10.36     0.01973  -0.01133     0.05377 
+11 D0_direct    logloss    21515   0.4901   0.4939   0.003733  0.002369    0.005140
+12 D0_direct    sq_total   21515 266.6    268.0      1.443     0.7509      2.362   
+13 D1_directfix sq_margin  21515 176.1    187.9     11.81     -3.486      39.25    
+14 D1_directfix abs_margin 21515  10.34    10.44     0.09727  -0.04226     0.2913  
+15 D1_directfix logloss    21515   0.4901   0.5015   0.01139   0.006361    0.01743 
+16 D1_directfix sq_total   21515 266.6    463.8    197.3       1.627     598.6     
+
+-- Home-court check: mean (actual - predicted) home margin, non-neutral, calibrated --
+         model     n  home_bias         se
+1      V0_prod 19375  0.9769056 0.09543696
+2   V1_sitcomp 19375 -0.1755707 0.09605799
+3  V2_ridgefix 19375 -1.6844633 0.10152587
+4    D0_direct 19375 -0.1159218 0.09559574
+5 D1_directfix 19375 -0.8576911 0.09898115

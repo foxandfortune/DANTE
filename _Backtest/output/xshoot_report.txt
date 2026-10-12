@@ -1,0 +1,214 @@
+
+================= MBB | games 36326 =================
+
+-- no priors seasons: 2020-2023 --
+# A tibble: 7 x 8
+  model                n margin_mae margin_rmse logloss total_mae total_rmse team_pts_rmse
+  <chr>            <int>      <dbl>       <dbl>   <dbl>     <dbl>      <dbl>         <dbl>
+1 V0_raw           19333      9.258       11.76  0.5602     13.20      16.74         10.23
+2 X1_xshoot        19333      9.415       11.97  0.5688     13.20      16.78         10.30
+3 X2_xshoot_fast   19333      9.418       11.97  0.5690     13.20      16.77         10.30
+4 X3_xshoot_heavy  19333      9.519       12.10  0.5751     13.26      16.84         10.37
+5 X4_xshoot_impute 19333      9.315       11.82  0.5631     13.22      16.78         10.27
+6 X5_impute_light  19333      9.284       11.79  0.5618     13.22      16.78         10.25
+7 X6_impute_vlight 19333      9.306       11.82  0.5638     13.29      16.87         10.30
+# A tibble: 18 x 5
+   model            metric        diff        lo95     hi95
+   <chr>            <chr>        <dbl>       <dbl>    <dbl>
+ 1 X1_xshoot        sq_margin 4.971     3.816      6.255   
+ 2 X1_xshoot        logloss   0.008625  0.005814   0.01108 
+ 3 X1_xshoot        sq_total  1.019    -0.2415     2.310   
+ 4 X2_xshoot_fast   sq_margin 5.046     3.886      6.345   
+ 5 X2_xshoot_fast   logloss   0.008792  0.005949   0.01124 
+ 6 X2_xshoot_fast   sq_total  0.9181   -0.3498     2.194   
+ 7 X3_xshoot_heavy  sq_margin 8.150     6.772      9.715   
+ 8 X3_xshoot_heavy  logloss   0.01490   0.01155    0.01788 
+ 9 X3_xshoot_heavy  sq_total  3.287     1.702      4.824   
+10 X4_xshoot_impute sq_margin 1.582     0.7413     2.503   
+11 X4_xshoot_impute logloss   0.002903  0.0007636  0.004807
+12 X4_xshoot_impute sq_total  1.328     0.2324     2.474   
+13 X5_impute_light  sq_margin 0.7247    0.04518    1.430   
+14 X5_impute_light  logloss   0.001549 -0.00008263 0.003084
+15 X5_impute_light  sq_total  1.233     0.3628     2.111   
+16 X6_impute_vlight sq_margin 1.571     0.8480     2.338   
+17 X6_impute_vlight logloss   0.003605  0.002112   0.005108
+18 X6_impute_vlight sq_total  4.138     3.230      5.015   
+
+-- with priors seasons: 2024-2026 --
+# A tibble: 7 x 8
+  model                n margin_mae margin_rmse logloss total_mae total_rmse team_pts_rmse
+  <chr>            <int>      <dbl>       <dbl>   <dbl>     <dbl>      <dbl>         <dbl>
+1 V0_raw           16993      9.350       11.89  0.5449     13.48      17.12         10.42
+2 X1_xshoot        16993      9.376       11.91  0.5441     13.48      17.13         10.43
+3 X2_xshoot_fast   16993      9.378       11.92  0.5441     13.48      17.13         10.43
+4 X3_xshoot_heavy  16993      9.404       11.96  0.5468     13.50      17.16         10.46
+5 X4_xshoot_impute 16993      9.376       11.92  0.5442     13.49      17.17         10.45
+6 X5_impute_light  16993      9.378       11.91  0.5440     13.51      17.19         10.46
+7 X6_impute_vlight 16993      9.423       11.97  0.5460     13.58      17.28         10.51
+# A tibble: 18 x 5
+   model            metric          diff       lo95      hi95
+   <chr>            <chr>          <dbl>      <dbl>     <dbl>
+ 1 X1_xshoot        sq_margin  0.5238    -0.1846    1.210    
+ 2 X1_xshoot        logloss   -0.0008191 -0.002189  0.0006886
+ 3 X1_xshoot        sq_total   0.4806    -0.2845    1.274    
+ 4 X2_xshoot_fast   sq_margin  0.5852    -0.1522    1.316    
+ 5 X2_xshoot_fast   logloss   -0.0008354 -0.002219  0.0006596
+ 6 X2_xshoot_fast   sq_total   0.3368    -0.3744    1.065    
+ 7 X3_xshoot_heavy  sq_margin  1.677      1.013     2.413    
+ 8 X3_xshoot_heavy  logloss    0.001878   0.0005138 0.003422 
+ 9 X3_xshoot_heavy  sq_total   1.550      0.6619    2.482    
+10 X4_xshoot_impute sq_margin  0.5571    -0.1353    1.235    
+11 X4_xshoot_impute logloss   -0.0006635 -0.001959  0.0007271
+12 X4_xshoot_impute sq_total   1.642      0.6854    2.684    
+13 X5_impute_light  sq_margin  0.4793    -0.4498    1.342    
+14 X5_impute_light  logloss   -0.0009338 -0.002675  0.0007221
+15 X5_impute_light  sq_total   2.405      1.297     3.598    
+16 X6_impute_vlight sq_margin  1.761      0.4828    2.993    
+17 X6_impute_vlight logloss    0.001082  -0.001113  0.003203 
+18 X6_impute_vlight sq_total   5.645      4.174     7.211    
+
+-- all seasons: 2020-2026 --
+# A tibble: 7 x 8
+  model                n margin_mae margin_rmse logloss total_mae total_rmse team_pts_rmse
+  <chr>            <int>      <dbl>       <dbl>   <dbl>     <dbl>      <dbl>         <dbl>
+1 V0_raw           36326      9.301       11.82  0.5530     13.33      16.92         10.32
+2 X1_xshoot        36326      9.397       11.94  0.5572     13.33      16.94         10.36
+3 X2_xshoot_fast   36326      9.399       11.94  0.5573     13.33      16.94         10.36
+4 X3_xshoot_heavy  36326      9.465       12.03  0.5619     13.37      16.99         10.41
+5 X4_xshoot_impute 36326      9.343       11.87  0.5543     13.34      16.96         10.35
+6 X5_impute_light  36326      9.328       11.85  0.5534     13.35      16.97         10.35
+7 X6_impute_vlight 36326      9.361       11.89  0.5555     13.43      17.06         10.40
+# A tibble: 18 x 5
+   model            metric         diff       lo95     hi95
+   <chr>            <chr>         <dbl>      <dbl>    <dbl>
+ 1 X1_xshoot        sq_margin 2.891      2.150     3.652   
+ 2 X1_xshoot        logloss   0.004207   0.002623  0.005631
+ 3 X1_xshoot        sq_total  0.7672     0.002730  1.515   
+ 4 X2_xshoot_fast   sq_margin 2.959      2.211     3.705   
+ 5 X2_xshoot_fast   logloss   0.004289   0.002699  0.005705
+ 6 X2_xshoot_fast   sq_total  0.6462    -0.09977   1.399   
+ 7 X3_xshoot_heavy  sq_margin 5.122      4.270     5.983   
+ 8 X3_xshoot_heavy  logloss   0.008811   0.006915  0.01054 
+ 9 X3_xshoot_heavy  sq_total  2.475      1.563     3.388   
+10 X4_xshoot_impute sq_margin 1.102      0.5464    1.652   
+11 X4_xshoot_impute logloss   0.001235  -0.0001341 0.002444
+12 X4_xshoot_impute sq_total  1.475      0.7208    2.239   
+13 X5_impute_light  sq_margin 0.6099     0.02132   1.175   
+14 X5_impute_light  logloss   0.0003876 -0.0008340 0.001513
+15 X5_impute_light  sq_total  1.782      1.101     2.513   
+16 X6_impute_vlight sq_margin 1.660      0.8591    2.401   
+17 X6_impute_vlight logloss   0.002425   0.0009063 0.003823
+18 X6_impute_vlight sq_total  4.843      3.964     5.715   
+
+-- 2026 vs Vegas morning consensus --
+# A tibble: 7 x 7
+  model            spread_mae vegas_spread_mae spread_info total_mae vegas_total_mae total_info
+  <chr>                 <dbl>            <dbl>       <dbl>     <dbl>           <dbl>      <dbl>
+1 V0_raw                9.459            9.020    0.01996      14.30           13.63    0.02968
+2 X1_xshoot             9.470            9.020    0.007861     14.29           13.63    0.02593
+3 X2_xshoot_fast        9.471            9.020    0.007872     14.29           13.63    0.02475
+4 X3_xshoot_heavy       9.454            9.020    0.02271      14.30           13.63    0.02963
+5 X4_xshoot_impute      9.462            9.020    0.007851     14.31           13.63    0.02504
+6 X5_impute_light       9.514            9.020   -0.008569     14.35           13.63    0.01917
+7 X6_impute_vlight      9.591            9.020   -0.02196      14.44           13.63    0.01270
+
+================= WBB | games 21492 =================
+
+-- no priors seasons: 2023-2024 --
+# A tibble: 7 x 8
+  model                n margin_mae margin_rmse logloss total_mae total_rmse team_pts_rmse
+  <chr>            <int>      <dbl>       <dbl>   <dbl>     <dbl>      <dbl>         <dbl>
+1 V0_raw           10620      10.25       13.19  0.5000     13.06      16.50         10.56
+2 X1_xshoot        10620      10.28       13.22  0.5022     13.01      16.42         10.54
+3 X2_xshoot_fast   10620      10.28       13.23  0.5022     13.00      16.42         10.54
+4 X3_xshoot_heavy  10620      10.38       13.37  0.5070     13.05      16.48         10.61
+5 X4_xshoot_impute 10620      10.25       13.19  0.5013     12.98      16.39         10.52
+6 X5_impute_light  10620      10.20       13.12  0.4993     12.98      16.40         10.50
+7 X6_impute_vlight 10620      10.19       13.10  0.4993     13.04      16.48         10.53
+# A tibble: 18 x 5
+   model            metric          diff       lo95      hi95
+   <chr>            <chr>          <dbl>      <dbl>     <dbl>
+ 1 X1_xshoot        sq_margin  0.9181    -0.7076     2.498   
+ 2 X1_xshoot        logloss    0.002155  -0.0001620  0.004602
+ 3 X1_xshoot        sq_total  -2.423     -4.105     -0.6508  
+ 4 X2_xshoot_fast   sq_margin  1.001     -0.6603     2.601   
+ 5 X2_xshoot_fast   logloss    0.002157  -0.0002123  0.004583
+ 6 X2_xshoot_fast   sq_total  -2.631     -4.311     -0.8641  
+ 7 X3_xshoot_heavy  sq_margin  4.694      2.670      6.857   
+ 8 X3_xshoot_heavy  logloss    0.006975   0.003654   0.01029 
+ 9 X3_xshoot_heavy  sq_total  -0.3932    -2.707      1.912   
+10 X4_xshoot_impute sq_margin  0.1189    -1.150      1.378   
+11 X4_xshoot_impute logloss    0.001207  -0.001015   0.003446
+12 X4_xshoot_impute sq_total  -3.415     -5.018     -1.938   
+13 X5_impute_light  sq_margin -1.857     -3.028     -0.6691  
+14 X5_impute_light  logloss   -0.0007291 -0.002418   0.001178
+15 X5_impute_light  sq_total  -3.130     -4.270     -2.057   
+16 X6_impute_vlight sq_margin -2.367     -3.778     -0.8001  
+17 X6_impute_vlight logloss   -0.0006997 -0.002392   0.001495
+18 X6_impute_vlight sq_total  -0.5893    -1.732      0.5636  
+
+-- with priors seasons: 2025-2026 --
+# A tibble: 7 x 8
+  model                n margin_mae margin_rmse logloss total_mae total_rmse team_pts_rmse
+  <chr>            <int>      <dbl>       <dbl>   <dbl>     <dbl>      <dbl>         <dbl>
+1 V0_raw           10872      10.29       13.06  0.4787     12.78      16.15         10.38
+2 X1_xshoot        10872      10.36       13.14  0.4764     12.79      16.17         10.42
+3 X2_xshoot_fast   10872      10.36       13.14  0.4763     12.79      16.17         10.42
+4 X3_xshoot_heavy  10872      10.41       13.20  0.4786     12.78      16.16         10.43
+5 X4_xshoot_impute 10872      10.37       13.15  0.4759     12.79      16.18         10.42
+6 X5_impute_light  10872      10.32       13.09  0.4752     12.84      16.25         10.44
+7 X6_impute_vlight 10872      10.29       13.08  0.4756     12.94      16.39         10.48
+# A tibble: 18 x 5
+   model            metric          diff      lo95       hi95
+   <chr>            <chr>          <dbl>     <dbl>      <dbl>
+ 1 X1_xshoot        sq_margin  2.009      0.3383    3.790    
+ 2 X1_xshoot        logloss   -0.002217  -0.004101 -0.0005146
+ 3 X1_xshoot        sq_total   0.7858    -0.2841    1.850    
+ 4 X2_xshoot_fast   sq_margin  2.034      0.3064    3.829    
+ 5 X2_xshoot_fast   logloss   -0.002386  -0.004284 -0.0006759
+ 6 X2_xshoot_fast   sq_total   0.8772    -0.2077    2.016    
+ 7 X3_xshoot_heavy  sq_margin  3.638      1.547     6.290    
+ 8 X3_xshoot_heavy  logloss   -0.0001026 -0.001684  0.001488 
+ 9 X3_xshoot_heavy  sq_total   0.4724    -0.3590    1.399    
+10 X4_xshoot_impute sq_margin  2.226      0.2896    4.402    
+11 X4_xshoot_impute logloss   -0.002740  -0.004564 -0.0009163
+12 X4_xshoot_impute sq_total   0.9745    -0.1245    2.167    
+13 X5_impute_light  sq_margin  0.7911    -0.9083    2.444    
+14 X5_impute_light  logloss   -0.003499  -0.005860 -0.001206 
+15 X5_impute_light  sq_total   3.478      1.904     5.079    
+16 X6_impute_vlight sq_margin  0.4052    -1.855     2.621    
+17 X6_impute_vlight logloss   -0.003038  -0.006215 -0.0001018
+18 X6_impute_vlight sq_total   7.799      5.536     9.975    
+
+-- all seasons: 2023-2026 --
+# A tibble: 7 x 8
+  model                n margin_mae margin_rmse logloss total_mae total_rmse team_pts_rmse
+  <chr>            <int>      <dbl>       <dbl>   <dbl>     <dbl>      <dbl>         <dbl>
+1 V0_raw           21492      10.27       13.13  0.4892     12.92      16.32         10.47
+2 X1_xshoot        21492      10.32       13.18  0.4892     12.89      16.30         10.48
+3 X2_xshoot_fast   21492      10.32       13.18  0.4891     12.90      16.29         10.48
+4 X3_xshoot_heavy  21492      10.39       13.28  0.4926     12.92      16.32         10.52
+5 X4_xshoot_impute 21492      10.31       13.17  0.4884     12.88      16.28         10.47
+6 X5_impute_light  21492      10.26       13.11  0.4871     12.91      16.33         10.47
+7 X6_impute_vlight 21492      10.24       13.09  0.4873     12.99      16.43         10.50
+# A tibble: 18 x 5
+   model            metric           diff      lo95         hi95
+   <chr>            <chr>           <dbl>     <dbl>        <dbl>
+ 1 X1_xshoot        sq_margin  1.470       0.2488    2.708      
+ 2 X1_xshoot        logloss   -0.00005636 -0.001626  0.001511   
+ 3 X1_xshoot        sq_total  -0.8000     -1.757     0.1476     
+ 4 X2_xshoot_fast   sq_margin  1.524       0.2861    2.759      
+ 5 X2_xshoot_fast   logloss   -0.0001413  -0.001688  0.001479   
+ 6 X2_xshoot_fast   sq_total  -0.8563     -1.809     0.1253     
+ 7 X3_xshoot_heavy  sq_margin  4.160       2.519     5.808      
+ 8 X3_xshoot_heavy  logloss    0.003395    0.001601  0.005374   
+ 9 X3_xshoot_heavy  sq_total   0.04466    -1.183     1.216      
+10 X4_xshoot_impute sq_margin  1.185      -0.05048   2.501      
+11 X4_xshoot_impute logloss   -0.0007900  -0.002282  0.0007122  
+12 X4_xshoot_impute sq_total  -1.195      -2.226    -0.2555     
+13 X5_impute_light  sq_margin -0.5173     -1.603     0.5992     
+14 X5_impute_light  logloss   -0.002130   -0.003634 -0.0006413  
+15 X5_impute_light  sq_total   0.2126     -0.8753    1.234      
+16 X6_impute_vlight sq_margin -0.9645     -2.275     0.5207     
+17 X6_impute_vlight logloss   -0.001883   -0.003645 -0.000008202
+18 X6_impute_vlight sq_total   3.654       2.302     4.991      

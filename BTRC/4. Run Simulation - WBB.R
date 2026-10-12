@@ -12,7 +12,11 @@ library(gsubfn)
 cur_yr <- 2026
 
 # Sim method ------------------------
-sim_method <- "to_oreb_ast"
+# "calibrated" = calibrated engine: phase-specific margin scale and sd, separate
+# total sd (correlated scoring noise) and a home-court correction, read from
+# ratings$calibration (built by _Backtest/build_calibration.R).
+# Set back to "to_oreb_ast" to use the previous engine (x1.3 stretch + disp_Rtg).
+sim_method <- "calibrated"
 
 # Load ratings ------------------
 ratings <- readRDS(glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_wbb_{cur_yr}.rds"))
@@ -25,6 +29,8 @@ ratings <- list(
   to = ratings$to,
   rtg = ratings$rtg,
   
+  calibration = readRDS("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/calibration_wbb.rds"),
+  
   disp_Rtg = 13
 )
 
@@ -34,6 +40,8 @@ ratings_no_prior <- list(
   oreb = ratings_no_prior$oreb,
   to = ratings_no_prior$to,
   rtg = ratings_no_prior$rtg,
+  
+  calibration = readRDS("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/calibration_wbb_no_prior.rds"),
   
   disp_Rtg = 13
 )

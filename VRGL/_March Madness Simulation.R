@@ -14,7 +14,11 @@ options(chromote.headless. = 'new')
 cur_yr <- 2026
 
 # Sim method ------------------------
-sim_method <- "to_reb_ast"
+# "calibrated" = calibrated engine: phase-specific margin scale and sd, separate
+# total sd (correlated scoring noise) and a home-court correction, read from
+# ratings$calibration (built by _Backtest/build_calibration.R).
+# Set back to "to_reb_ast" to use the previous engine (x1.3 stretch + disp_Rtg).
+sim_method <- "calibrated"
 
 # Load ratings ------------------
 ratings <- readRDS(glue::glue("VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_{cur_yr}.rds"))
@@ -25,6 +29,8 @@ ratings <- list(
   oreb = ratings$oreb,
   to = ratings$to,
   rtg = ratings$rtg,
+  
+  calibration = readRDS("VRGL/Stats/Team and Player Stats/Power Ratings/Weights/calibration_mbb.rds"),
   
   disp_Rtg = 16
 )

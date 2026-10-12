@@ -1,0 +1,48 @@
+===== MBB production predictions + calibration layers (seasons > 2019 )
+# A tibble: 5 x 11
+  version            n margin_mae margin_rmse margin_slope logloss  brier total_mae total_rmse z_margin_sd z_total_sd
+  <chr>          <int>      <dbl>       <dbl>        <dbl>   <dbl>  <dbl>     <dbl>      <dbl>       <dbl>      <dbl>
+1 asis           36568      9.412       11.98       0.9837  0.5555 0.1887     13.35      16.98      0.9582     1.358 
+2 cal_global     36568      9.412       11.98       1.002   0.5548 0.1885     13.34      16.93      0.9987     0.9973
+3 cal_phase      36568      9.337       11.88       0.9563  0.5540 0.1882     13.34      16.93      1.001      0.9957
+4 cal_global_hfa 36568      9.394       11.95       1.044   0.5536 0.1880     13.34      16.93      0.9998     0.9973
+5 cal_phase_hfa  36568      9.330       11.86       0.9973  0.5532 0.1879     13.34      16.93      1.002      0.9957
+# A tibble: 12 x 5
+   version        metric          diff      lo95       hi95
+   <chr>          <chr>          <dbl>     <dbl>      <dbl>
+ 1 cal_global     sq_margin  0.04821   -0.03473   0.1316   
+ 2 cal_global     logloss   -0.0007434 -0.001018 -0.0004947
+ 3 cal_global     sq_total  -1.769     -2.312    -1.269    
+ 4 cal_phase      sq_margin -2.317     -3.033    -1.574    
+ 5 cal_phase      logloss   -0.001564  -0.002337 -0.0007620
+ 6 cal_phase      sq_total  -1.679     -2.078    -1.274    
+ 7 cal_global_hfa sq_margin -0.6752    -0.9427   -0.3948   
+ 8 cal_global_hfa logloss   -0.001972  -0.002705 -0.001277 
+ 9 cal_global_hfa sq_total  -1.769     -2.312    -1.269    
+10 cal_phase_hfa  sq_margin -2.772     -3.570    -1.930    
+11 cal_phase_hfa  logloss   -0.002362  -0.003425 -0.001303 
+12 cal_phase_hfa  sq_total  -1.679     -2.078    -1.274    
+===== WBB production predictions + calibration layers (seasons > 2022 )
+# A tibble: 5 x 11
+  version            n margin_mae margin_rmse margin_slope logloss  brier total_mae total_rmse z_margin_sd z_total_sd
+  <chr>          <int>      <dbl>       <dbl>        <dbl>   <dbl>  <dbl>     <dbl>      <dbl>       <dbl>      <dbl>
+1 asis           21515      10.36       13.26       0.9629  0.4893 0.1634     12.88      16.33       1.038     1.281 
+2 cal_global     21515      10.34       13.27       1.029   0.4901 0.1635     12.93      16.33       1.011     0.9911
+3 cal_phase      21515      10.28       13.15       0.9841  0.4893 0.1632     12.92      16.32       1.006     0.9888
+4 cal_global_hfa 21515      10.33       13.25       1.050   0.4900 0.1635     12.93      16.33       1.012     0.9911
+5 cal_phase_hfa  21515      10.28       13.14       1.006   0.4894 0.1633     12.92      16.32       1.006     0.9888
+# A tibble: 12 x 5
+   version        metric           diff        lo95       hi95
+   <chr>          <chr>           <dbl>       <dbl>      <dbl>
+ 1 cal_global     sq_margin  0.1944     -0.3640      0.7833   
+ 2 cal_global     logloss    0.0008073   0.00001798  0.001583 
+ 3 cal_global     sq_total  -0.1335     -0.9775      0.7344   
+ 4 cal_phase      sq_margin -3.000      -4.436      -1.445    
+ 5 cal_phase      logloss   -0.00001305 -0.0007505   0.0006547
+ 6 cal_phase      sq_total  -0.2544     -1.065       0.5724   
+ 7 cal_global_hfa sq_margin -0.4099     -0.9984      0.1841   
+ 8 cal_global_hfa logloss    0.0006180  -0.0004780   0.001585 
+ 9 cal_global_hfa sq_total  -0.1335     -0.9775      0.7344   
+10 cal_phase_hfa  sq_margin -3.278      -4.771      -1.694    
+11 cal_phase_hfa  logloss    0.00004344 -0.0009963   0.0009738
+12 cal_phase_hfa  sq_total  -0.2544     -1.065       0.5724   
