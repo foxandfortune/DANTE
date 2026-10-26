@@ -1,0 +1,218 @@
+MBB: 84 stat x side x season jobs, 15 fitted models each, engine = lm 
+fixed-effect model matrix is rank deficient so dropping 1 column / coefficient
+boundary (singular) fit: see help('isSingular')
+[1/84] ast        def 2021  (0.0 min)
+boundary (singular) fit: see help('isSingular')
+[2/84] ast        def 2022  (0.0 min)
+boundary (singular) fit: see help('isSingular')
+[3/84] ast        def 2023  (0.0 min)
+boundary (singular) fit: see help('isSingular')
+[4/84] ast        def 2024  (0.0 min)
+boundary (singular) fit: see help('isSingular')
+[5/84] ast        def 2025  (0.1 min)
+boundary (singular) fit: see help('isSingular')
+[6/84] ast        def 2026  (0.1 min)
+fixed-effect model matrix is rank deficient so dropping 1 column / coefficient
+[7/84] ast        off 2021  (0.1 min)
+boundary (singular) fit: see help('isSingular')
+[8/84] ast        off 2022  (0.1 min)
+[9/84] ast        off 2023  (0.1 min)
+[10/84] ast        off 2024  (0.1 min)
+[11/84] ast        off 2025  (0.1 min)
+[12/84] ast        off 2026  (0.1 min)
+fixed-effect model matrix is rank deficient so dropping 1 column / coefficient
+[13/84] efg        def 2021  (0.1 min)
+boundary (singular) fit: see help('isSingular')
+[14/84] efg        def 2022  (0.1 min)
+boundary (singular) fit: see help('isSingular')
+[15/84] efg        def 2023  (0.1 min)
+boundary (singular) fit: see help('isSingular')
+[16/84] efg        def 2024  (0.1 min)
+boundary (singular) fit: see help('isSingular')
+[17/84] efg        def 2025  (0.1 min)
+[18/84] efg        def 2026  (0.1 min)
+fixed-effect model matrix is rank deficient so dropping 1 column / coefficient
+boundary (singular) fit: see help('isSingular')
+[19/84] efg        off 2021  (0.1 min)
+boundary (singular) fit: see help('isSingular')
+[20/84] efg        off 2022  (0.1 min)
+boundary (singular) fit: see help('isSingular')
+[21/84] efg        off 2023  (0.1 min)
+boundary (singular) fit: see help('isSingular')
+[22/84] efg        off 2024  (0.2 min)
+boundary (singular) fit: see help('isSingular')
+[23/84] efg        off 2025  (0.2 min)
+[24/84] efg        off 2026  (0.2 min)
+fixed-effect model matrix is rank deficient so dropping 1 column / coefficient
+boundary (singular) fit: see help('isSingular')
+[25/84] oreb       def 2021  (0.2 min)
+boundary (singular) fit: see help('isSingular')
+[26/84] oreb       def 2022  (0.2 min)
+boundary (singular) fit: see help('isSingular')
+[27/84] oreb       def 2023  (0.2 min)
+boundary (singular) fit: see help('isSingular')
+[28/84] oreb       def 2024  (0.2 min)
+boundary (singular) fit: see help('isSingular')
+[29/84] oreb       def 2025  (0.2 min)
+boundary (singular) fit: see help('isSingular')
+[30/84] oreb       def 2026  (0.2 min)
+fixed-effect model matrix is rank deficient so dropping 1 column / coefficient
+[31/84] oreb       off 2021  (0.2 min)
+boundary (singular) fit: see help('isSingular')
+[32/84] oreb       off 2022  (0.2 min)
+boundary (singular) fit: see help('isSingular')
+[33/84] oreb       off 2023  (0.2 min)
+boundary (singular) fit: see help('isSingular')
+[34/84] oreb       off 2024  (0.2 min)
+[35/84] oreb       off 2025  (0.2 min)
+[36/84] oreb       off 2026  (0.2 min)
+fixed-effect model matrix is rank deficient so dropping 1 column / coefficient
+[37/84] pace       def 2021  (0.2 min)
+[38/84] pace       def 2022  (0.2 min)
+boundary (singular) fit: see help('isSingular')
+[39/84] pace       def 2023  (0.2 min)
+[40/84] pace       def 2024  (0.3 min)
+[41/84] pace       def 2025  (0.3 min)
+[42/84] pace       def 2026  (0.3 min)
+fixed-effect model matrix is rank deficient so dropping 1 column / coefficient
+[43/84] pace       off 2021  (0.3 min)
+[44/84] pace       off 2022  (0.3 min)
+boundary (singular) fit: see help('isSingular')
+[45/84] pace       off 2023  (0.3 min)
+[46/84] pace       off 2024  (0.3 min)
+[47/84] pace       off 2025  (0.3 min)
+[48/84] pace       off 2026  (0.3 min)
+fixed-effect model matrix is rank deficient so dropping 1 column / coefficient
+boundary (singular) fit: see help('isSingular')
+[49/84] raw_rating def 2021  (0.3 min)
+boundary (singular) fit: see help('isSingular')
+[50/84] raw_rating def 2022  (0.3 min)
+boundary (singular) fit: see help('isSingular')
+[51/84] raw_rating def 2023  (0.3 min)
+boundary (singular) fit: see help('isSingular')
+[52/84] raw_rating def 2024  (0.3 min)
+boundary (singular) fit: see help('isSingular')
+[53/84] raw_rating def 2025  (0.3 min)
+boundary (singular) fit: see help('isSingular')
+[54/84] raw_rating def 2026  (0.3 min)
+fixed-effect model matrix is rank deficient so dropping 1 column / coefficient
+boundary (singular) fit: see help('isSingular')
+[55/84] raw_rating off 2021  (0.3 min)
+boundary (singular) fit: see help('isSingular')
+[56/84] raw_rating off 2022  (0.3 min)
+boundary (singular) fit: see help('isSingular')
+[57/84] raw_rating off 2023  (0.4 min)
+boundary (singular) fit: see help('isSingular')
+[58/84] raw_rating off 2024  (0.4 min)
+boundary (singular) fit: see help('isSingular')
+[59/84] raw_rating off 2025  (0.4 min)
+boundary (singular) fit: see help('isSingular')
+[60/84] raw_rating off 2026  (0.4 min)
+fixed-effect model matrix is rank deficient so dropping 1 column / coefficient
+boundary (singular) fit: see help('isSingular')
+[61/84] rtg        def 2021  (0.4 min)
+boundary (singular) fit: see help('isSingular')
+[62/84] rtg        def 2022  (0.4 min)
+boundary (singular) fit: see help('isSingular')
+[63/84] rtg        def 2023  (0.4 min)
+boundary (singular) fit: see help('isSingular')
+[64/84] rtg        def 2024  (0.4 min)
+boundary (singular) fit: see help('isSingular')
+[65/84] rtg        def 2025  (0.4 min)
+boundary (singular) fit: see help('isSingular')
+[66/84] rtg        def 2026  (0.4 min)
+fixed-effect model matrix is rank deficient so dropping 1 column / coefficient
+boundary (singular) fit: see help('isSingular')
+[67/84] rtg        off 2021  (0.4 min)
+boundary (singular) fit: see help('isSingular')
+[68/84] rtg        off 2022  (0.4 min)
+boundary (singular) fit: see help('isSingular')
+[69/84] rtg        off 2023  (0.4 min)
+boundary (singular) fit: see help('isSingular')
+[70/84] rtg        off 2024  (0.4 min)
+boundary (singular) fit: see help('isSingular')
+[71/84] rtg        off 2025  (0.4 min)
+boundary (singular) fit: see help('isSingular')
+[72/84] rtg        off 2026  (0.4 min)
+fixed-effect model matrix is rank deficient so dropping 1 column / coefficient
+[73/84] to         def 2021  (0.4 min)
+boundary (singular) fit: see help('isSingular')
+[74/84] to         def 2022  (0.5 min)
+boundary (singular) fit: see help('isSingular')
+[75/84] to         def 2023  (0.5 min)
+[76/84] to         def 2024  (0.5 min)
+[77/84] to         def 2025  (0.5 min)
+[78/84] to         def 2026  (0.5 min)
+fixed-effect model matrix is rank deficient so dropping 1 column / coefficient
+boundary (singular) fit: see help('isSingular')
+[79/84] to         off 2021  (0.5 min)
+boundary (singular) fit: see help('isSingular')
+[80/84] to         off 2022  (0.5 min)
+boundary (singular) fit: see help('isSingular')
+[81/84] to         off 2023  (0.5 min)
+boundary (singular) fit: see help('isSingular')
+[82/84] to         off 2024  (0.5 min)
+boundary (singular) fit: see help('isSingular')
+[83/84] to         off 2025  (0.5 min)
+boundary (singular) fit: see help('isSingular')
+[84/84] to         off 2026  (0.5 min)
+There were 50 or more warnings (use warnings() to see the first 50)
+
+==============================================================================
+MBB: CHOSEN MODEL PER STAT x SIDE (no preseason rosters)
+==============================================================================
+       stat side model                    label   rmse rmse_current skill_vs_avg   corr cover80 rmse_new
+        ast  def   M01              two seasons 0.0389       0.0423       0.2111 0.6149  0.8054   0.0856
+        ast  off   M03 two seasons + conference 0.0407       0.0443       0.1894 0.5859  0.7875   0.0579
+        efg  def   M06               + recruits 0.0157       0.0171       0.2321 0.6391  0.8096   0.0302
+        efg  off   M08         M06 + conference 0.0173       0.0186       0.2600 0.6754  0.8059   0.0303
+       oreb  def   M03 two seasons + conference 0.0249       0.0271       0.2761 0.6904  0.8211   0.0488
+       oreb  off   M03 two seasons + conference 0.0338       0.0373       0.2293 0.6366  0.7994   0.0553
+       pace  def   M00               prior only 2.0862       2.3205       0.1358 0.5053  0.8234   2.6674
+       pace  off   M00               prior only 2.0940       2.3337       0.1340 0.5019  0.8211   2.6827
+ raw_rating  def   M09         M06 + other side 4.5842       5.1462       0.3407 0.7515  0.7888   9.6598
+ raw_rating  off   M11             kitchen sink 4.8996       5.5649       0.3786 0.7853  0.7815   8.1556
+        rtg  def   M06               + recruits 3.6394       3.9706       0.2894 0.7025  0.8027   7.6327
+        rtg  off   M09         M06 + other side 4.0354       4.4224       0.2995 0.7170  0.7782   7.0267
+         to  def   M01              two seasons 0.0173       0.0194       0.1543 0.5338  0.8271   0.0307
+         to  off   M05           + transfers in 0.0164       0.0187       0.1410 0.5168  0.8368   0.0292
+
+With preseason rosters available:
+       stat side model                                    label   rmse skill_vs_avg
+        ast  def   M01                              two seasons 0.0389       0.2111
+        ast  off   M03                 two seasons + conference 0.0407       0.1894
+        efg  def   M06                               + recruits 0.0157       0.2321
+        efg  off   M08                         M06 + conference 0.0173       0.2600
+       oreb  def   M03                 two seasons + conference 0.0249       0.2761
+       oreb  off    R1 two seasons x returning minutes [roster] 0.0336       0.2346
+       pace  def   M00                               prior only 2.0862       0.1358
+       pace  off   M01                              two seasons 2.0809       0.1394
+ raw_rating  def   M09                         M06 + other side 4.5842       0.3407
+ raw_rating  off   M11                             kitchen sink 4.8996       0.3786
+        rtg  def   M06                               + recruits 3.6394       0.2894
+        rtg  off   M09                         M06 + other side 4.0354       0.2995
+         to  def   M03                 two seasons + conference 0.0173       0.1554
+         to  off   M08                         M06 + conference 0.0162       0.1490
+
+Average skill vs league-average baseline, by model (higher = better):
+ model                                    label mean_skill mean_rank rmse_new
+    R2         M08 x returning minutes [roster]      0.238       1.9    2.752
+   M11                             kitchen sink      0.237       3.0    2.748
+   M08                         M06 + conference      0.235       4.7    2.748
+    R1 two seasons x returning minutes [roster]      0.231       5.2    2.722
+   M09                         M06 + other side      0.234       5.5    2.749
+   M07           M06 + persistence x continuity      0.232       6.1    2.747
+   M06                               + recruits      0.231       6.6    2.748
+   M03                 two seasons + conference      0.227       8.1    2.722
+   M05                           + transfers in      0.226       8.7    2.746
+   M10                     M06 + program effect      0.229       8.9    2.767
+   M02                 two seasons + other side      0.220      10.3    2.717
+   M04                 two seasons + departures      0.216      11.0    2.720
+   M01                              two seasons      0.215      11.1    2.720
+   M00                               prior only      0.199      14.0    2.718
+    P0      current method: prior + team effect      0.153      14.9    3.562
+    B1          baseline: last season unchanged      0.108      16.1    3.065
+    B0             baseline: league average (0)      0.000      16.9    3.065
+
+Teams new to D1 in test predictions: 27
+Saved /home/claude/_Backtest/priors/output/prior_model_tests_MBB_lm.rds 

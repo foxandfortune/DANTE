@@ -8,7 +8,7 @@ library(gtExtras)
 `%!in%` = Negate(`%in%`)
 
 # Set season
-season <- 2026
+season <- 2027
 
 # Dante header function
 gt_dante_title <- readRDS(here::here('_Helper Files/Simulation Functions', 'gt_dante_title.rds'))

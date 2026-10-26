@@ -1,6 +1,6 @@
 library(xgboost)
 
-cur_yr <- 2026
+cur_yr <- 2027
 
 # MBB ------------------------
 # Load and re-save the location model

@@ -1,0 +1,114 @@
+
+================= MBB =================
+
+-- held-out seasons 2024-2026 | games 16995 --
+# A tibble: 5 x 9
+  model             n margin_mae margin_rmse logloss  brier total_mae total_rmse team_pts_rmse
+  <chr>         <int>      <dbl>       <dbl>   <dbl>  <dbl>     <dbl>      <dbl>         <dbl>
+1 V0_raw        16995      9.356       11.90  0.5450 0.1851     13.48      17.12         10.42
+2 C1_lam050     16995      9.302       11.84  0.5417 0.1835     13.42      17.05         10.38
+3 C3_lam050_nl4 16995      9.326       11.87  0.5424 0.1836     13.42      17.06         10.39
+4 C2_lam025     16995      9.327       11.88  0.5420 0.1833     13.40      17.04         10.38
+5 C4_lam025_nl8 16995      9.353       11.92  0.5429 0.1836     13.40      17.04         10.40
+# A tibble: 12 x 5
+   model         metric         diff      lo95       hi95
+   <chr>         <chr>         <dbl>     <dbl>      <dbl>
+ 1 C1_lam050     sq_margin -1.494    -2.426    -0.5661   
+ 2 C1_lam050     logloss   -0.003289 -0.004414 -0.002168 
+ 3 C1_lam050     sq_total  -2.242    -2.940    -1.573    
+ 4 C3_lam050_nl4 sq_margin -0.6536   -1.812     0.5649   
+ 5 C3_lam050_nl4 logloss   -0.002577 -0.003818 -0.001275 
+ 6 C3_lam050_nl4 sq_total  -2.047    -2.639    -1.474    
+ 7 C2_lam025     sq_margin -0.4891   -2.007     1.086    
+ 8 C2_lam025     logloss   -0.003051 -0.004579 -0.001465 
+ 9 C2_lam025     sq_total  -2.749    -3.804    -1.733    
+10 C4_lam025_nl8 sq_margin  0.4401   -1.264     2.194    
+11 C4_lam025_nl8 logloss   -0.002118 -0.003815 -0.0003879
+12 C4_lam025_nl8 sq_total  -2.748    -3.743    -1.787    
+
+-- tuning seasons 2020-2023 | games 19573 --
+# A tibble: 5 x 9
+  model             n margin_mae margin_rmse logloss  brier total_mae total_rmse team_pts_rmse
+  <chr>         <int>      <dbl>       <dbl>   <dbl>  <dbl>     <dbl>      <dbl>         <dbl>
+1 V0_raw        19573      9.306       11.83  0.5602 0.1903     13.22      16.77         10.26
+2 C1_lam050     19573      9.233       11.73  0.5579 0.1894     13.37      16.95         10.31
+3 C3_lam050_nl4 19573      9.256       11.77  0.5591 0.1897     13.23      16.78         10.25
+4 C2_lam025     19573      9.211       11.70  0.5573 0.1892     13.51      17.13         10.37
+5 C4_lam025_nl8 19573      9.235       11.74  0.5586 0.1896     13.29      16.85         10.27
+# A tibble: 12 x 5
+   model         metric         diff      lo95        hi95
+   <chr>         <chr>         <dbl>     <dbl>       <dbl>
+ 1 C1_lam050     sq_margin -2.289    -2.960    -1.658     
+ 2 C1_lam050     logloss   -0.002347 -0.003329 -0.001276  
+ 3 C1_lam050     sq_total   6.047     4.859     7.239     
+ 4 C3_lam050_nl4 sq_margin -1.500    -2.196    -0.8295    
+ 5 C3_lam050_nl4 logloss   -0.001196 -0.002350  0.00009124
+ 6 C3_lam050_nl4 sq_total   0.2654   -0.3011    0.8209    
+ 7 C2_lam025     sq_margin -3.014    -3.952    -2.148     
+ 8 C2_lam025     logloss   -0.002899 -0.004274 -0.001416  
+ 9 C2_lam025     sq_total  12.06     10.08     14.12      
+10 C4_lam025_nl8 sq_margin -2.233    -3.206    -1.331     
+11 C4_lam025_nl8 logloss   -0.001658 -0.003264  0.00003447
+12 C4_lam025_nl8 sq_total   2.687     1.682     3.688     
+
+-- 2026 vs Vegas morning consensus --
+# A tibble: 5 x 7
+  model         spread_mae vegas_spread_mae spread_info total_mae vegas_total_mae total_info
+  <chr>              <dbl>            <dbl>       <dbl>     <dbl>           <dbl>      <dbl>
+1 V0_raw             9.460            9.020    0.02030      14.30           13.63    0.02980
+2 C1_lam050          9.411            9.020    0.01267      14.19           13.63    0.02682
+3 C3_lam050_nl4      9.428            9.020    0.01057      14.21           13.63    0.02808
+4 C2_lam025          9.434            9.020    0.009635     14.15           13.63    0.02562
+5 C4_lam025_nl8      9.457            9.020    0.008021     14.17           13.63    0.02687
+
+================= WBB =================
+
+-- held-out seasons 2025-2026 | games 10873 --
+# A tibble: 5 x 9
+  model             n margin_mae margin_rmse logloss  brier total_mae total_rmse team_pts_rmse
+  <chr>         <int>      <dbl>       <dbl>   <dbl>  <dbl>     <dbl>      <dbl>         <dbl>
+1 V0_raw        10873      10.29       13.06  0.4787 0.1599     12.78      16.15         10.38
+2 C1_lam050     10873      10.17       12.92  0.4748 0.1582     12.75      16.11         10.33
+3 C3_lam050_nl4 10873      10.18       12.94  0.4748 0.1582     12.75      16.11         10.33
+4 C2_lam025     10873      10.17       12.94  0.4739 0.1577     12.75      16.11         10.33
+5 C4_lam025_nl8 10873      10.18       12.96  0.4741 0.1577     12.75      16.11         10.34
+# A tibble: 12 x 5
+   model         metric         diff      lo95      hi95
+   <chr>         <chr>         <dbl>     <dbl>     <dbl>
+ 1 C1_lam050     sq_margin -3.610    -5.361    -1.992   
+ 2 C1_lam050     logloss   -0.003957 -0.005277 -0.002747
+ 3 C1_lam050     sq_total  -1.223    -1.787    -0.6867  
+ 4 C3_lam050_nl4 sq_margin -3.236    -5.151    -1.451   
+ 5 C3_lam050_nl4 logloss   -0.003879 -0.005388 -0.002470
+ 6 C3_lam050_nl4 sq_total  -1.213    -1.729    -0.7471  
+ 7 C2_lam025     sq_margin -3.165    -5.259    -1.073   
+ 8 C2_lam025     logloss   -0.004845 -0.006742 -0.003143
+ 9 C2_lam025     sq_total  -1.322    -2.233    -0.4570  
+10 C4_lam025_nl8 sq_margin -2.603    -4.829    -0.3987  
+11 C4_lam025_nl8 logloss   -0.004603 -0.006625 -0.002726
+12 C4_lam025_nl8 sq_total  -1.305    -2.173    -0.5098  
+
+-- tuning seasons 2023-2024 | games 10642 --
+# A tibble: 5 x 9
+  model             n margin_mae margin_rmse logloss  brier total_mae total_rmse team_pts_rmse
+  <chr>         <int>      <dbl>       <dbl>   <dbl>  <dbl>     <dbl>      <dbl>         <dbl>
+1 V0_raw        10642      10.26       13.21  0.5003 0.1667     13.07      16.51         10.57
+2 C1_lam050     10642      10.08       12.92  0.4936 0.1643     13.14      16.59         10.52
+3 C3_lam050_nl4 10642      10.09       12.94  0.4939 0.1644     13.04      16.47         10.47
+4 C2_lam025     10642      10.01       12.80  0.4912 0.1635     13.24      16.72         10.53
+5 C4_lam025_nl8 10642      10.02       12.82  0.4915 0.1636     13.10      16.53         10.46
+# A tibble: 12 x 5
+   model         metric          diff       lo95      hi95
+   <chr>         <chr>          <dbl>      <dbl>     <dbl>
+ 1 C1_lam050     sq_margin  -7.561     -9.595    -5.739   
+ 2 C1_lam050     logloss    -0.006634  -0.008476 -0.005031
+ 3 C1_lam050     sq_total    2.831      0.8871    4.735   
+ 4 C3_lam050_nl4 sq_margin  -7.000     -8.847    -5.351   
+ 5 C3_lam050_nl4 logloss    -0.006329  -0.008125 -0.004679
+ 6 C3_lam050_nl4 sq_total   -1.185     -2.205    -0.2513  
+ 7 C2_lam025     sq_margin -10.75     -13.69     -8.030   
+ 8 C2_lam025     logloss    -0.009092  -0.01183  -0.006745
+ 9 C2_lam025     sq_total    6.932      3.743     9.940   
+10 C4_lam025_nl8 sq_margin -10.25     -13.02     -7.685   
+11 C4_lam025_nl8 logloss    -0.008776  -0.01148  -0.006398
+12 C4_lam025_nl8 sq_total    0.9222    -0.8508    2.590   

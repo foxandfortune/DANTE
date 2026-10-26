@@ -7,7 +7,7 @@ library(tidyverse)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # Set season
-cur_yr <- 2025
+cur_yr <- 2026
 
 # Load full pbp and raw pbp, roster and team data ----------------------------------------------------
 pbp_raw <- wehoop::load_wbb_pbp(seasons = c({cur_yr},

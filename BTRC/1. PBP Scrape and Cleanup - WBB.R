@@ -12,10 +12,12 @@ all_positions <- c("ATH", "C", "F", "G", "PF", "PG", "SF", "SG")
 all_season_types <- c(2, 3)
 
 # Set season
-cur_yr <- 2026
+cur_yr <- 2027
 
 # Load full pbp and raw pbp, roster and team data ----------------------------------------------------
-pbp_full <- readRDS(glue::glue("BTRC/Stats/Team and Player Stats - WBB/PBP and Shot Data/pbp_wbb_{cur_yr}.rds"))
+# First run of a new season: no saved pbp file yet, so start from nothing
+pbp_file <- glue::glue("BTRC/Stats/Team and Player Stats - WBB/PBP and Shot Data/pbp_wbb_{cur_yr}.rds")
+pbp_full <- if (file.exists(pbp_file)) readRDS(pbp_file) else NULL
 
 pbp_raw <- wehoop::load_wbb_pbp(seasons = {cur_yr})
 

@@ -6,7 +6,7 @@ library(glmnet)
 #setwd('..')
 
 # Set season/country/tier
-season <- 2026
+season <- 2027
 
 # Negate in formula
 `%!in%` = Negate(`%in%`)

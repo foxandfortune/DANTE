@@ -16,7 +16,7 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 options(scipen = 999999)
 
 # Set reference year
-cur_yr <- 2026
+cur_yr <- 2027
 
 # Load data
 all_shots <- readRDS(glue::glue("pbp_raw_current.rds"))

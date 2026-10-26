@@ -44,8 +44,12 @@ games_from_summary <- function(summary) {
     distinct(game_id, .keep_all = TRUE)
 }
 
+# BT_PRIORS_DIR: read priors from another folder (same file names), e.g. priors
+# rebuilt by priors/_Build Priors.R
 load_priors <- function(league, season) {
   f <- bt_path(league, "priors", season = season)
+  pd <- Sys.getenv("BT_PRIORS_DIR", "")
+  if (nzchar(pd)) f <- file.path(pd, basename(f))
   if (!file.exists(f)) return(NULL)
   readRDS(f)
 }

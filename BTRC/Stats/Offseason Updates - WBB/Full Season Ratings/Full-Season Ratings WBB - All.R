@@ -9,7 +9,7 @@ setwd('..')
 setwd('..')
 
 # Set season/country/tier
-season <- 2025
+season <- 2026
 
 # Negate in formula
 `%!in%` = Negate(`%in%`)
@@ -40,7 +40,7 @@ list <- c('game_date', 'team_id', 'opp_id')
 ## Load weights -----
 wgt_var <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/single_season_wbb_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>%
+  filter(abs(year - season) == min(abs(year - season))) %>%
   pull(wgt)
 
 print(wgt_var)
@@ -48,7 +48,7 @@ print(wgt_var)
 ## Load lambda adj -----
 lambda_adj <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/single_season_wbb_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>%
+  filter(abs(year - season) == min(abs(year - season))) %>%
   pull(lambda_adj)
 
 print(lambda_adj)
@@ -75,7 +75,7 @@ list <- c('game_date', 'team_id', 'opp_id')
 ## Load weights -----
 wgt_var <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/single_season_wbb_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>%
+  filter(abs(year - season) == min(abs(year - season))) %>%
   pull(wgt)
 
 print(wgt_var)
@@ -83,7 +83,7 @@ print(wgt_var)
 ## Load lambda adj -----
 lambda_adj <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/single_season_wbb_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>%
+  filter(abs(year - season) == min(abs(year - season))) %>%
   pull(lambda_adj)
 
 print(lambda_adj)
@@ -110,7 +110,7 @@ list <- c('game_date', 'team_id', 'opp_id')
 ## Load weights -----
 wgt_var <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/single_season_wbb_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>%
+  filter(abs(year - season) == min(abs(year - season))) %>%
   pull(wgt)
 
 print(wgt_var)
@@ -118,7 +118,7 @@ print(wgt_var)
 ## Load lambda adj -----
 lambda_adj <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/single_season_wbb_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>%
+  filter(abs(year - season) == min(abs(year - season))) %>%
   pull(lambda_adj)
 
 print(lambda_adj)
@@ -145,7 +145,7 @@ list <- c('game_date', 'team_id', 'opp_id')
 ## Load weights -----
 wgt_var <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/single_season_wbb_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>%
+  filter(abs(year - season) == min(abs(year - season))) %>%
   pull(wgt)
 
 print(wgt_var)
@@ -153,7 +153,7 @@ print(wgt_var)
 ## Load lambda adj -----
 lambda_adj <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/single_season_wbb_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>%
+  filter(abs(year - season) == min(abs(year - season))) %>%
   pull(lambda_adj)
 
 print(lambda_adj)
@@ -181,7 +181,7 @@ list <- c('game_date', 'team_id', 'opp_id')
 ## Load weights -----
 wgt_var <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/single_season_wbb_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>%
+  filter(abs(year - season) == min(abs(year - season))) %>%
   pull(wgt)
 
 print(wgt_var)
@@ -189,7 +189,7 @@ print(wgt_var)
 ## Load lambda adj -----
 lambda_adj <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/single_season_wbb_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>%
+  filter(abs(year - season) == min(abs(year - season))) %>%
   pull(lambda_adj)
 
 print(lambda_adj)
@@ -218,7 +218,7 @@ list <- c('game_date', 'team_id', 'opp_id',
 ## Load weights -----
 wgt_var <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/single_season_wbb_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>%
+  filter(abs(year - season) == min(abs(year - season))) %>%
   pull(wgt)
 
 print(wgt_var)
@@ -226,7 +226,7 @@ print(wgt_var)
 ## Load lambda adj -----
 lambda_adj <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/single_season_wbb_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>%
+  filter(abs(year - season) == min(abs(year - season))) %>%
   pull(lambda_adj)
 
 print(lambda_adj)
@@ -270,7 +270,7 @@ list <- c('game_date', 'team_id', 'opp_id',
 ## Load weights -----
 wgt_var <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/single_season_wbb_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>%
+  filter(abs(year - season) == min(abs(year - season))) %>%
   pull(wgt)
 
 print(wgt_var)
@@ -278,7 +278,7 @@ print(wgt_var)
 ## Load lambda adj -----
 lambda_adj <- readRDS(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Weights/single_season_wbb_{stat_name}_wgt.rds')) %>%
   rename(year = season) %>%
-  filter(year == season) %>%
+  filter(abs(year - season) == min(abs(year - season))) %>%
   pull(lambda_adj)
 
 print(lambda_adj)
@@ -323,3 +323,11 @@ rtgs.all <- list(pace = {raw.coeff.pace},
 ## Save ratings --------
 saveRDS(rtgs.all,
         glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Full Season/ratings_all_wbb_{season}.rds"))
+
+### Also as input to the priors --------
+# "Full Season - Current Weights" holds every season fitted with the same (current)
+# weights, so the prior models train on one consistent scale. The Full Season folder
+# keeps the ratings as published for each year.
+dir.create("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Full Season - Current Weights", showWarnings = FALSE)
+saveRDS(rtgs.all,
+        glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Full Season - Current Weights/ratings_all_wbb_{season}.rds"))

@@ -34,7 +34,21 @@ comp_pred <- function(v, off_id, def_id) {
 model_components <- function(priors = TRUE, stretch = "prod", sigma = 13,
                              standardize = TRUE, fold_by_game = FALSE,
                              lambda_mult = NULL, situational_components = FALSE,
+                             netlevel_ratio = NULL, prior_mode = "blend",
+                             prior_lambda_mult = 1, blend_override = NULL,
                              label = "prod_components") {
+  # prior_mode: "blend" = production (fit shrinks to 0, then mix with the prior on
+  #   the games-played curve); "offset" = the ridge shrinks toward the prior instead
+  #   of toward 0 (lambda x prior_lambda_mult), so the data take over as games
+  #   accumulate with no separate curve. Intercept/covariates are then the current
+  #   fit's.
+  # blend_override: named list by component (pace, ast, oreb, to, rtg) of
+  #   list(prior_wgt, prior_min, max_games) replacing the with_priors weights
+  # lambda_mult: NULL = production (1 + lambda_adj); a single number for every
+  #   component; or a named list/vector by component (pace, ast, oreb, to, rtg),
+  #   missing names keep production
+  # netlevel_ratio: if set, the rtg model uses the net/level parameterization
+  #   with the level part penalized netlevel_ratio x as hard
   sit <- c("is_home", "neutral_site", "days_rest", "travel")
   list(
     label = label,
@@ -46,12 +60,25 @@ model_components <- function(priors = TRUE, stretch = "prod", sigma = 13,
         w <- load_weights(ctx$league, st, ctx$season)
         feats <- prod_features[[st]]
         if (situational_components && nm != "rtg") feats <- c(feats, sit)
-        lm <- if (is.null(lambda_mult)) 1 + w$single$lambda_adj else lambda_mult
+        lm <- if (is.null(lambda_mult)) NULL else if (length(lambda_mult) == 1 && is.null(names(lambda_mult)))
+          lambda_mult else lambda_mult[[nm]]
+        if (is.null(lm) || (length(lm) == 1 && is.na(lm))) lm <- 1 + w$single$lambda_adj
+        nl <- if (nm == "rtg") netlevel_ratio else NULL
+        use_prior <- priors && !is.null(ctx$priors)
+        offs <- NULL
+        if (use_prior && prior_mode == "offset") {
+          pr <- ctx$priors[[nm]]; pr <- pr[grepl("^(team|opp)_id_", pr$name), ]
+          offs <- setNames(pr$value, pr$name); lm <- lm * prior_lambda_mult
+        }
         cf <- cached_ridge(ctx, paste(label, nm), train, st, feats, w$single$wgt,
                            lambda_mult = lm, standardize = standardize,
-                           fold_by_game = fold_by_game)
-        if (priors && !is.null(ctx$priors))
-          cf <- blend_with_prior(cf, ctx$priors[[nm]], gp, w$prior)
+                           fold_by_game = fold_by_game, netlevel_ratio = nl,
+                           offset_prior = offs)
+        if (use_prior && prior_mode == "blend") {
+          wp <- w$prior
+          if (!is.null(blend_override[[nm]])) for (k in names(blend_override[[nm]])) wp[[k]] <- blend_override[[nm]][[k]]
+          cf <- blend_with_prior(cf, ctx$priors[[nm]], gp, wp)
+        }
         out[[nm]] <- coef_vec(cf)
       }
       out

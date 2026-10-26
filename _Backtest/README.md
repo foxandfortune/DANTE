@@ -29,11 +29,16 @@ These are scored against outcomes:
 | `R/08_report.R` | Cross-season walk-forward calibration and helpers |
 | `R/09_postcal.R` | Calibration layer: `fit_calibration()` (phase scale/sd, total bias/sd, home-court) and walk-forward `calibrate_layers()` |
 | `R/10_tuning.R` | One-change-at-a-time tuning engine (shares non-target component fits across configs) |
-| `build_calibration.R` | Builds the production `calibration_*.rds` files from `pred_V0_raw_*` |
+| `build_calibration.R` | Builds the production `calibration_*.rds` files from `pred_V0_raw_*` (or another variant via `BT_CAL_VARIANT`; `BT_CAL_OUT_DIR` writes elsewhere) |
 | `run_tuning.R` | `Rscript _Backtest/run_tuning.R <MBB/WBB> <pace/ast/oreb/to/rtg>` → `output/tune_eval_*.csv` |
 | `compare_xshoot.R` | Expected-rating + shooting models vs production |
+| `compare_combo.R` | Combined tuning winners (C1–C4) vs production, held-out vs tuning seasons, plus Vegas 2026 |
 | `PIPELINE_CHANGES.md` | What changed in the production sims and how to revert |
 | `RESULTS_round2.md` | Calibration, tuning and expected-rating results |
+| `RESULTS_round3.md` | Combined tuning winners on the held-out seasons, and the recommended production change |
+| `RESULTS_round4.md` | Priors: how they're created (per-stat test) and how they're blended (game level) |
+| `priors/` | Prior test bench: `_Test Priors - All Stats.R` (EuroLeagues-style rolling-origin test), `_Build Priors.R` (priors for any season from the chosen models), `prior_data.R`, `fullseason_fast.R` |
+| `compare_priors.R` | Game-level comparison of prior methods and blending variants (round 4) |
 | `variants.R` | The experiment definitions |
 | `run_variant.R` | `Rscript _Backtest/run_variant.R <variant> <MBB/WBB>` → `output/pred_<variant>_<league>.rds` |
 | `compare_variants.R` | `Rscript _Backtest/compare_variants.R` → comparison tables and CSVs in `output/` |

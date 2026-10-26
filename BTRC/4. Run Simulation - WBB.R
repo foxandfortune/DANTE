@@ -9,7 +9,7 @@ library(gsubfn)
 `%!in%` = Negate(`%in%`)
 
 # Set reference year
-cur_yr <- 2026
+cur_yr <- 2027
 
 # Sim method ------------------------
 # "calibrated" = calibrated engine: phase-specific margin scale and sd, separate

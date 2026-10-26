@@ -10,7 +10,7 @@ library(sp)
 `%!in%` = Negate(`%in%`)
 
 # Set reference year
-cur_yr <- 2026
+cur_yr <- 2027
 
 # Load teams and venue data -----
 teams <- readRDS(glue::glue("_Helper Files/Team Data/team_database.rds"))

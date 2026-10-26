@@ -6,7 +6,7 @@ library(tidyverse)
 #setwd('..')
 
 # Set season
-cur_yr <- 2026
+cur_yr <- 2027
 
 `%!in%` = Negate(`%in%`)
 
@@ -15,7 +15,9 @@ all_positions <- c("ATH", "C", "F", "G", "PF", "PG", "SF", "SG")
 all_season_types <- c(2, 3)
 
 # Load full pbp and raw pbp, roster and team data ----------------------------------------------------
-pbp_full <- readRDS(glue::glue("VRGL/Stats/Team and Player Stats/PBP and Shot Data/pbp_{cur_yr}.rds"))
+# First run of a new season: no saved pbp file yet, so start from nothing
+pbp_file <- glue::glue("VRGL/Stats/Team and Player Stats/PBP and Shot Data/pbp_{cur_yr}.rds")
+pbp_full <- if (file.exists(pbp_file)) readRDS(pbp_file) else NULL
 
 pbp_raw <- hoopR::load_mbb_pbp(seasons = {cur_yr}) #%>% 
   #mutate(type_id = case_when(
