@@ -156,7 +156,7 @@ transfers |>
 
 ## If good, add to transfers
 transfers <- transfers |>  
-  filter(rating > min_rtg) |>  
+  filter(rating > transf_min$min_rtg) |>  
   with_groups(.groups = season, mutate,
               percentile = cume_dist(rating)) |> 
   mutate(class = case_when(
@@ -165,7 +165,7 @@ transfers <- transfers |>
     percentile >= .6 ~ 3,
     percentile < .60 ~ 4)) |>  
   bind_rows(transfers |>  
-              filter(rating <= min_rtg) |>  
+              filter(rating <= transf_min$min_rtg) |>  
               mutate(class = 5,
                      rating = transf_min$min_rtg - 0.05))
 
