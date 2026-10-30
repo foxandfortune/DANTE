@@ -10,7 +10,8 @@ library(sp)
 `%!in%` = Negate(`%in%`)
 
 # Set reference year
-cur_yr <- 2027
+source("_Helper Files/season.R")
+cur_yr <- dante_season
 
 # Load teams and venue data -----
 teams <- readRDS(glue::glue("_Helper Files/Team Data/team_database_wbb.rds"))

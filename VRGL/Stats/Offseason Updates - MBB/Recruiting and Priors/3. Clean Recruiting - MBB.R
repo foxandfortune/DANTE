@@ -2,11 +2,19 @@ library(tidyverse)
 #devtools::install_github("andreweatherman/cbbdata")
 
 # Set working directory
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-setwd('..')
-setwd('..')
-setwd('..')
-setwd('..')
+# Find the DANTE folder: from this script's location when it is open in RStudio,
+# else from the working directory (Rscript, GitHub Actions). The DANTE project
+# doesn't need to be open.
+dante_root <- local({
+  starts <- c(tryCatch(dirname(rstudioapi::getSourceEditorContext()$path), error = function(e) ""), getwd())
+  for (s in starts[nzchar(starts)]) {
+    r <- tryCatch(rprojroot::find_root(rprojroot::has_file("DANTE.Rproj"), path = s), error = function(e) NULL)
+    if (!is.null(r)) return(r)
+  }
+  stop("Can't find the DANTE folder (DANTE.Rproj): open the DANTE project or setwd() into it")
+})
+dante_path <- function(...) file.path(dante_root, ...)
+setwd(dante_path())
 
 # Negate in formula
 `%!in%` = Negate(`%in%`)
@@ -18,7 +26,8 @@ setwd('..')
 source('_Helper Files/Function Scripts/torvik_player_season.R')
   
 # Set season ---------
-cruit_yr <- 2026
+source(dante_path("_Helper Files", "season.R"))
+cruit_yr <- dante_completed
 
 # Load Teams 
 teams <- readRDS('_Helper Files/Team Data/team_database.rds')

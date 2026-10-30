@@ -44,7 +44,9 @@ bt_path <- function(league, key, ...) {
 
 # Seasons available for walk-forward testing (first season of data is used only
 # as the source of the "simple" prior for the next season)
-bt_seasons <- list(MBB = 2019:2026, WBB = 2022:2026)
+# Through the last finished season, from _Helper Files/season.R
+source("_Helper Files/season.R")
+bt_seasons <- list(MBB = 2019:dante_completed, WBB = 2022:dante_completed)
 
 # Production component / rating specs ------------------------------------------
 prod_stats <- c(pace = "poss_per_40", ast = "ast_rt", oreb = "oreb_rt",

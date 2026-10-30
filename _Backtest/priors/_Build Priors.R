@@ -22,7 +22,9 @@ METHOD <- if (length(args) >= 3) args[3] else "chosen"
 FS_DIR <- if (length(args) >= 4 && nzchar(args[4])) args[4] else NULL
 bt_dir <- if (dir.exists("_Backtest")) "_Backtest" else "/home/claude/_Backtest"
 OUT_DIR <- if (length(args) >= 5) args[5] else file.path(bt_dir, "priors", "output", paste0("priors_", METHOD))
-source(file.path(bt_dir, "priors", "prior_data.R"))
+pf <- "_Helper Files/Function Scripts/prior_functions.R"
+source(if (file.exists(pf)) pf else file.path(bt_dir, "priors", "prior_data.R"))
+if (is.null(FS_DIR)) FS_DIR <- file.path(dirname(dirname(lg_paths(LEAGUE)$fs)), "Full Season - Current Weights")
 
 first_season <- if (LEAGUE == "MBB") 2018 else 2021
 seasons <- first_season:(S - 1)

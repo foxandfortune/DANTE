@@ -3,11 +3,24 @@ library(fastDummies)
 library(splitTools)
 library(dials)
 library(xgboost)
+cat("xgboost version:", as.character(packageVersion("xgboost")), "\n")
 library(ggplot2)
 library(tidyverse)
 
 # Set working directory
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+# Find the DANTE folder: from this script's location when it is open in RStudio,
+# else from the working directory (Rscript, GitHub Actions). The DANTE project
+# doesn't need to be open.
+dante_root <- local({
+  starts <- c(tryCatch(dirname(rstudioapi::getSourceEditorContext()$path), error = function(e) ""), getwd())
+  for (s in starts[nzchar(starts)]) {
+    r <- tryCatch(rprojroot::find_root(rprojroot::has_file("DANTE.Rproj"), path = s), error = function(e) NULL)
+    if (!is.null(r)) return(r)
+  }
+  stop("Can't find the DANTE folder (DANTE.Rproj): open the DANTE project or setwd() into it")
+})
+dante_path <- function(...) file.path(dante_root, ...)
+setwd(dante_path("BTRC", "Stats", "Offseason Updates - WBB", "Shooting Models"))
 
 #Add NOT IN function:
 `%!in%` = Negate(`%in%`)
@@ -16,7 +29,8 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 options(scipen = 999999)
 
 # Set reference year
-cur_yr <- 2027
+source(dante_path("_Helper Files", "season.R"))
+cur_yr <- dante_season
 
 # Load data
 all_shots <- readRDS(glue::glue("pbp_raw_current.rds"))
@@ -121,6 +135,18 @@ xfg_model <- xgboost::xgboost(
 # Save model for each year
 xgb.save(xfg_model, glue::glue("Models/xfg wbb {cur_yr}.model"))
 
+# Script 1 (and the GitHub workflow) load the .json version: save it here too,
+# then reload it and check it predicts exactly what the fitted model does
+json_file <- glue::glue("Models/xfg wbb {cur_yr}.json")
+xgb.save(xfg_model, json_file)
+check_rows <- head(as.matrix(train_data), 2000)
+stopifnot("The saved .json model does not match the fitted model" =
+            isTRUE(all.equal(as.numeric(predict(xfg_model, check_rows)),
+                             as.numeric(predict(xgb.load(json_file), check_rows)),
+                             tolerance = 1e-6)))
+cat("Saved and checked", json_file, "\n")
+rm(json_file, check_rows)
+
 rm(best_model, params, 
    shots_model, train_data, train_labels,
    xfg_model, nrounds)
@@ -216,6 +242,18 @@ xfg_model <- xgboost::xgboost(
 
 # Save model for each year
 xgb.save(xfg_model, glue::glue("Models/xfg noloc wbb {cur_yr}.model"))
+
+# Script 1 (and the GitHub workflow) load the .json version: save it here too,
+# then reload it and check it predicts exactly what the fitted model does
+json_file <- glue::glue("Models/xfg noloc wbb {cur_yr}.json")
+xgb.save(xfg_model, json_file)
+check_rows <- head(as.matrix(train_data), 2000)
+stopifnot("The saved .json model does not match the fitted model" =
+            isTRUE(all.equal(as.numeric(predict(xfg_model, check_rows)),
+                             as.numeric(predict(xgb.load(json_file), check_rows)),
+                             tolerance = 1e-6)))
+cat("Saved and checked", json_file, "\n")
+rm(json_file, check_rows)
 
 rm(best_model, params, 
    shots_model, train_data, train_labels,

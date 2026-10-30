@@ -6,7 +6,8 @@ library(glmnet)
 #setwd('..')
 
 # Set season/country/tier
-season <- 2027
+source("_Helper Files/season.R")
+season <- dante_season
 
 # Negate in formula
 `%!in%` = Negate(`%in%`)

@@ -134,3 +134,22 @@ Tested in `RESULTS_round4.md`.
 3. **At season start:** re-enable the schedule in `vrgl-pipeline.yml`, then commit and push.
 
 **Proposed, not applied:** efficiency prior_wgt 0.97 → 0.90 in `with_priors_rtg_wgt.rds` (shared by both leagues), together with the calibration in `output/candidate_Q_rtg90_pch/`.
+
+## Change 4 (2026-10-30): one season setting, and a scripted offseason
+**One season setting.**
+- **`_Helper Files/season.R`** holds `dante_season` (the coming season) and `dante_completed` (the one that just finished).
+- **Every script that held a year now reads it:** the daily and tournament scripts, preseason tables, conferences, venues, recruiting scrapes and cleaning, full-season ratings, shot models, the json conversion, priors and the backtest.
+- **Working directories.** Scripts that used `setwd(dirname(rstudioapi::...))` now find the DANTE folder (the one with `DANTE.Rproj`) from the script's location in RStudio, or from the working directory under `Rscript`, and `setwd()` to the same folder as before. They work with or without the project open. (A first version used `here::here()`, which failed when the project wasn't open; replaced 2026-10-30.)
+
+**`_Offseason Update/`.**
+- `README.md`: the runbook, steps 0–9.
+- `Run Offseason Update.R`: runs steps 3–8 in order, with logs.
+- `5. Refresh Prior Models.R`: re-tests and saves the prior models.
+- `7. Rebuild Calibration.R`: backtests production as configured (variant `PROD`) with rebuilt priors and refits the calibration.
+- `8. Check Season Ready.R`: the readiness check.
+
+**Workflow.** `vrgl-pipeline.yml` now updates xgboost to 3.x if the cached copy is older. The 2027 shot models are saved by xgboost 3.x, and 1.7 cannot read them.
+
+**2027 data added:**
+- **Shot models:** `xfg 2027.json` / `xfg noloc 2027.json` (MBB) and the WBB pair, converted from Mat's `.model` files. Predictions are identical to the `.model` files.
+- **Priors:** rebuilt with the 2027 conference files and the updated transfer file. New D1 teams: West Florida, New Haven.

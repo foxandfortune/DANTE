@@ -12,7 +12,8 @@ all_positions <- c("ATH", "C", "F", "G", "PF", "PG", "SF", "SG")
 all_season_types <- c(2, 3)
 
 # Set season
-cur_yr <- 2027
+source("_Helper Files/season.R")
+cur_yr <- dante_season
 
 # Load full pbp and raw pbp, roster and team data ----------------------------------------------------
 # First run of a new season: no saved pbp file yet, so start from nothing

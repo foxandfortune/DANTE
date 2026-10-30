@@ -9,7 +9,8 @@ library(gsubfn)
 `%!in%` = Negate(`%in%`)
 
 # Set reference year
-cur_yr <- 2027
+source("_Helper Files/season.R")
+cur_yr <- dante_season
 
 # Sim method ------------------------
 # "calibrated" = calibrated engine: phase-specific margin scale and sd, separate

@@ -1,7 +1,19 @@
 library(geonames)
 library(tidyverse)
 
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+# Find the DANTE folder: from this script's location when it is open in RStudio,
+# else from the working directory (Rscript, GitHub Actions). The DANTE project
+# doesn't need to be open.
+dante_root <- local({
+  starts <- c(tryCatch(dirname(rstudioapi::getSourceEditorContext()$path), error = function(e) ""), getwd())
+  for (s in starts[nzchar(starts)]) {
+    r <- tryCatch(rprojroot::find_root(rprojroot::has_file("DANTE.Rproj"), path = s), error = function(e) NULL)
+    if (!is.null(r)) return(r)
+  }
+  stop("Can't find the DANTE folder (DANTE.Rproj): open the DANTE project or setwd() into it")
+})
+dante_path <- function(...) file.path(dante_root, ...)
+setwd(dante_path("_Helper Files", "Team Data"))
 #setwd('..')
 
 # Negate in formula
@@ -16,7 +28,8 @@ venues <- readRDS("team_venues.rds") %>%
   distinct()
 
 # Get schedule
-schedule <- hoopR::load_mbb_schedule(seasons = c(2026))
+source(dante_path("_Helper Files", "season.R"))
+schedule <- hoopR::load_mbb_schedule(seasons = c(dante_season))
 
 missing_venues <- schedule %>% 
   filter(venue_id %!in% venues$venue_id, !is.na(venue_id)) %>% 

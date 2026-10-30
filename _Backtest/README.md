@@ -43,6 +43,9 @@ These are scored against outcomes:
 | `run_variant.R` | `Rscript _Backtest/run_variant.R <variant> <MBB/WBB>` → `output/pred_<variant>_<league>.rds` |
 | `compare_variants.R` | `Rscript _Backtest/compare_variants.R` → comparison tables and CSVs in `output/` |
 
+## Yearly use
+The routine offseason refresh (prior models, priors, calibration) is scripted in `_Offseason Update/`; see its README. The year comes from `_Helper Files/season.R`, and `bt_seasons` runs through `dante_completed`. This folder is for re-testing modeling choices.
+
 ## Running it (from the DANTE repo root, as with the production scripts)
 ```r
 # one-time: install.packages(c("glmnet", "fastDummies", "dplyr", "tidyr", "purrr", "stringr", "glue", "Matrix"))

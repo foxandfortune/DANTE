@@ -9,9 +9,22 @@ library(rvest)
 # the files are only written after the duplicate and coverage checks pass.
 
 # Set season --------
-season <- 2027
+# Find the DANTE folder: from this script's location when it is open in RStudio,
+# else from the working directory (Rscript, GitHub Actions). The DANTE project
+# doesn't need to be open.
+dante_root <- local({
+  starts <- c(tryCatch(dirname(rstudioapi::getSourceEditorContext()$path), error = function(e) ""), getwd())
+  for (s in starts[nzchar(starts)]) {
+    r <- tryCatch(rprojroot::find_root(rprojroot::has_file("DANTE.Rproj"), path = s), error = function(e) NULL)
+    if (!is.null(r)) return(r)
+  }
+  stop("Can't find the DANTE folder (DANTE.Rproj): open the DANTE project or setwd() into it")
+})
+dante_path <- function(...) file.path(dante_root, ...)
+source(dante_path("_Helper Files", "season.R"))
+season <- dante_season
 
-conf_dir <- here::here('_Helper Files/Team Data/Conferences')
+conf_dir <- dante_path('_Helper Files/Team Data/Conferences')
 
 # Load conference IDs ----
 # Every ID is scraped every season. A conference that doesn't exist in a given

@@ -50,3 +50,8 @@ variants$Q_min30 <- model_components(stretch = 1, lambda_mult = 0.5, blend_overr
 variants$Q_rtg90   <- model_components(stretch = 1, lambda_mult = 0.5, blend_override = list(rtg = list(prior_wgt = 0.90)), label = "Q_rtg90")
 variants$Q_rtg85   <- model_components(stretch = 1, lambda_mult = 0.5, blend_override = list(rtg = list(prior_wgt = 0.85)), label = "Q_rtg85")
 variants$Q_rtgmin0 <- model_components(stretch = 1, lambda_mult = 0.5, blend_override = list(rtg = list(prior_min = 0)), label = "Q_rtgmin0")
+
+# Production as configured: shrinkage and decays read from the weight files, prior
+# blend from with_priors_*_wgt.rds, no stretch (the calibration layer scales).
+# _Offseason Update/7. Rebuild Calibration.R backtests this one.
+variants$PROD <- model_components(stretch = 1, label = "PROD")

@@ -12,9 +12,12 @@
 #
 # Usage (from the DANTE repo root):
 #   Rscript "_Backtest/priors/_Test Priors - All Stats.R" MBB [lm|stan] [fs_dir]
-#   fs_dir: folder of ratings_all_*.rds to use as ratings/targets (default: the
-#           production Full Season folder). The backtest uses ratings refit with
-#           the current (C1) weights so targets match the in-season scale.
+#   fs_dir: folder of ratings_all_*.rds to use as ratings/targets (default:
+#           "Full Season - Current Weights", every season refit with the current
+#           weights so targets match the in-season scale).
+#   Seasons run through dante_completed in _Helper Files/season.R.
+#   Each offseason: _Offseason Update/5. Refresh Prior Models.R runs this for both
+#   leagues and saves the winners as prior_models_*.rds.
 # Output: _Backtest/priors/output/prior_model_tests_<league>.rds with
 #   leaderboard, chosen, predictions, candidates, features, config.
 #
@@ -47,13 +50,17 @@ LEAGUE  <- if (length(args) >= 1) args[1] else "MBB"
 ENGINE  <- if (length(args) >= 2) args[2] else "lm"     # "lm" to screen, "stan" to confirm
 FS_DIR  <- if (length(args) >= 3) args[3] else NULL
 bt_dir  <- if (dir.exists("_Backtest")) "_Backtest" else "/home/claude/_Backtest"
-source(file.path(bt_dir, "priors", "prior_data.R"))
+# Same functions production uses (falls back to the backtest copy)
+pf <- "_Helper Files/Function Scripts/prior_functions.R"
+source(if (file.exists(pf)) pf else file.path(bt_dir, "priors", "prior_data.R"))
+source("_Helper Files/season.R")
+if (is.null(FS_DIR)) FS_DIR <- file.path(dirname(dirname(lg_paths(LEAGUE)$fs)), "Full Season - Current Weights")
 
 # ── CONFIGURATION ──────────────────────────────────────────────────────────────
 STATS <- c("pace", "ast", "oreb", "to", "rtg", "raw_rating", "efg")
 SIDES <- c("off", "def")
-SEASONS      <- if (LEAGUE == "MBB") 2018:2026 else 2021:2026
-TEST_SEASONS <- if (LEAGUE == "MBB") 2021:2026 else 2023:2026
+SEASONS      <- if (LEAGUE == "MBB") 2018:dante_completed else 2021:dante_completed
+TEST_SEASONS <- if (LEAGUE == "MBB") 2021:dante_completed else 2023:dante_completed
 PARSIMONY_TOL <- 0.01   # simplest model within 1% of the best RMSE wins
 CHAINS <- 4; ITER <- 1000
 options(mc.cores = parallel::detectCores(), width = 220)

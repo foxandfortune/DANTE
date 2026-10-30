@@ -8,16 +8,29 @@ library(gtExtras)
 `%!in%` = Negate(`%in%`)
 
 # Set season
-season <- 2027
+# Find the DANTE folder: from this script's location when it is open in RStudio,
+# else from the working directory (Rscript, GitHub Actions). The DANTE project
+# doesn't need to be open.
+dante_root <- local({
+  starts <- c(tryCatch(dirname(rstudioapi::getSourceEditorContext()$path), error = function(e) ""), getwd())
+  for (s in starts[nzchar(starts)]) {
+    r <- tryCatch(rprojroot::find_root(rprojroot::has_file("DANTE.Rproj"), path = s), error = function(e) NULL)
+    if (!is.null(r)) return(r)
+  }
+  stop("Can't find the DANTE folder (DANTE.Rproj): open the DANTE project or setwd() into it")
+})
+dante_path <- function(...) file.path(dante_root, ...)
+source(dante_path("_Helper Files", "season.R"))
+season <- dante_season
 
 # Dante header function
-gt_dante_title <- readRDS(here::here('_Helper Files/Simulation Functions', 'gt_dante_title.rds'))
+gt_dante_title <- readRDS(dante_path('_Helper Files/Simulation Functions', 'gt_dante_title.rds'))
 
 # Create Table Function -------------------------
-create_ratings_table <- readRDS(here::here('_Helper Files/Other/create_ratings_table_preseason.rds'))
+create_ratings_table <- readRDS(dante_path('_Helper Files/Other/create_ratings_table_preseason.rds'))
 
 # MBB Theme -------------------------
-rank_theme <- readRDS(here::here('_Helper Files/Other/rank_theme_mbb.rds'))
+rank_theme <- readRDS(dante_path('_Helper Files/Other/rank_theme_mbb.rds'))
 
 # Check to see if season is finished -------------
 season_comp_status <- FALSE
@@ -28,9 +41,9 @@ season_comp_status <- FALSE
 
 # Load ratings 
 if(season_comp_status == TRUE){
-  ratings_all <- readRDS(here::here(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/Full Season/ratings_all_{season}.rds')))
+  ratings_all <- readRDS(dante_path(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/Full Season/ratings_all_{season}.rds')))
 } else {
-  ratings_all <- readRDS(here::here(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_{season}.rds')))
+  ratings_all <- readRDS(dante_path(glue::glue('VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_{season}.rds')))
 }
 
 ratings.pace <- ratings_all$pace
@@ -41,9 +54,9 @@ ratings.efg <- ratings_all$efg
 ratings.rtg <- ratings_all$raw_rating
 
 # Load Teams
-teams <- readRDS(here::here('_Helper Files/Team Data/team_database.rds'))
-conf <- readRDS(here::here(glue::glue('_Helper Files/Team Data/Conferences/mbb_conf_{season}.rds'))) %>% 
-  left_join(read.csv(here::here('_Helper Files/Team Data/Conferences/cbb_conference_ids.csv')) %>% 
+teams <- readRDS(dante_path('_Helper Files/Team Data/team_database.rds'))
+conf <- readRDS(dante_path(glue::glue('_Helper Files/Team Data/Conferences/mbb_conf_{season}.rds'))) %>% 
+  left_join(read.csv(dante_path('_Helper Files/Team Data/Conferences/cbb_conference_ids.csv')) %>% 
               select(conf_id, conference_short_name), by = 'conf_id') %>% 
   transmute(team_id, 
             conference_short_name) %>% 

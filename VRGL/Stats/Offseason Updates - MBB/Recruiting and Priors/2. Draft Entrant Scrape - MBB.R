@@ -3,10 +3,24 @@ library(rvest)
 library(tidyverse)
 
 # Set working directory --------------
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+# Find the DANTE folder: from this script's location when it is open in RStudio,
+# else from the working directory (Rscript, GitHub Actions). The DANTE project
+# doesn't need to be open.
+dante_root <- local({
+  starts <- c(tryCatch(dirname(rstudioapi::getSourceEditorContext()$path), error = function(e) ""), getwd())
+  for (s in starts[nzchar(starts)]) {
+    r <- tryCatch(rprojroot::find_root(rprojroot::has_file("DANTE.Rproj"), path = s), error = function(e) NULL)
+    if (!is.null(r)) return(r)
+  }
+  stop("Can't find the DANTE folder (DANTE.Rproj): open the DANTE project or setwd() into it")
+})
+dante_path <- function(...) file.path(dante_root, ...)
+setwd(dante_path("VRGL", "Stats", "Offseason Updates - MBB", "Recruiting and Priors"))
 
 # Set season and create URL --------
-season <- 2026
+source(dante_path("_Helper Files", "season.R"))
+season <- dante_completed
+# Hoops Rumors' URL changes every year: paste this year's early-entrant list here
 url <- "https://www.hoopsrumors.com/2026/06/nba-announces-final-list-of-2026-draft-early-entrants.html"
 #url <- 'https://www.hoopsrumors.com/2021/07/official-early-entrants-list-for-{season}-nba-draft.html'
 

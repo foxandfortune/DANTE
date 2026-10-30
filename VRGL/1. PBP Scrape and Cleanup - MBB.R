@@ -6,7 +6,8 @@ library(tidyverse)
 #setwd('..')
 
 # Set season
-cur_yr <- 2027
+source("_Helper Files/season.R")
+cur_yr <- dante_season
 
 `%!in%` = Negate(`%in%`)
 
