@@ -70,6 +70,15 @@ jobs:
                        "glmnet", "gsubfn", "jsonlite", "odds.converter", 
                        "lubridate", "data.table", "here", "gt", "gtExtras")
           
+          # The 2027+ shot models are saved by xgboost 3.x, which older versions
+          # cannot read; update a cached older copy before loading anything
+          ip <- installed.packages()
+          if ("xgboost" %in% rownames(ip) && package_version(ip["xgboost", "Version"]) < "3.0.0") {
+            cat("Updating xgboost", ip["xgboost", "Version"], "to the current CRAN version\n")
+            install.packages("xgboost", Ncpus = 2)
+          }
+
+
           for (pkg in packages) {
             cat("\n=== Installing", pkg, "===\n")
             tryCatch({
