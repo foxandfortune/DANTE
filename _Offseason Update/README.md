@@ -19,7 +19,7 @@ Every daily, tournament, offseason and backtest script reads it. **Change it onc
 
 | Step | What | Script(s) | Run by | Time |
 |---|---|---|---|---|
-| 0 | Set the coming season | `_Helper Files/season.R` | you | 1 min |
+| 0 | Set the coming season, then archive last season's ratings pages | `_Helper Files/season.R`, then `_Offseason Update/0. Archive Ratings Pages.R` | you | 2 min |
 | 1 | Team data and conferences | `_Helper Files/Team Data/_Get CBB Conferences.R`; `VRGL/.../Recruiting and Priors/0. Update 247 Teams.R`; as needed: `_Fix Team Database.R`, `_Get Missing Venues.R` (and `- WBB`) | you | 30 min |
 | 2 | Men's recruiting, transfers, draft entrants | `VRGL/.../Recruiting and Priors/1. Recruiting and Transfer Scrape - MBB.R`, `2. Draft Entrant Scrape - MBB.R` (paste that year's Hoops Rumors URL), `3. Clean Recruiting - MBB.R` | you | 1–2 h |
 | 3 | Full-season ratings for the finished season | `VRGL/.../Full Season Ratings/Full-Season Ratings - All.R`, `BTRC/.../Full-Season Ratings WBB - All.R` | runner | 10–20 min |
@@ -33,7 +33,7 @@ Every daily, tournament, offseason and backtest script reads it. **Change it onc
 To run steps 3–8: open `Run Offseason Update.R`, set `run_steps` (default `c(3, 4, 5, 6, 7, 8)`), and source it. If a step fails, fix it and rerun from that step, e.g. `run_steps <- c(6, 7, 8)`.
 
 **When each step can happen:**
-- Step 0: right after the tournaments.
+- Step 0: right after the tournaments (both national championships played).
 - Step 3: any time after that.
 - Step 2: needs the draft withdrawal deadline (June) and most of the portal and signing period. In practice, September–October.
 - Steps 5–7: need steps 2 and 3.
@@ -83,6 +83,24 @@ To run steps 3–8: open `Run Offseason Update.R`, set `run_steps` (default `c(3
   - the Results folder;
   - that no daily script still has its own year.
 - It prints PASS / WARN / FAIL and errors if anything fails.
+
+## The website
+The ratings pages are in `Pages/`. Shared code is in `_Helper Files/Function Scripts/ratings_page.R`.
+
+- **Current pages:** `vrgl_ratings.qmd` and `btrc_ratings.qmd` follow `dante_season`. Nothing to edit each year.
+  - What they show:
+    - before step 6: a "posted once the preseason ratings are built" note;
+    - after step 6: the preseason priors (the in-season starter file);
+    - once the daily run starts: the in-season ratings;
+    - after the national championship: the full-season fit.
+  - The line above the table says which one it is: Preseason, "through games of <date>", or Final.
+- **Honors update by themselves** from the hoopR/wehoop schedule on every site build:
+  - star: conference regular-season leader during conference play, then champion; half star = tied;
+  - gray trophy: conference tournament champion, as each final is played;
+  - (n): NCAA seed, once the bracket games are on the schedule;
+  - gold trophy: national champion.
+- **Archive pages:** `vrgl_ratings_<year>.qmd` / `btrc_ratings_<year>.qmd`. Step 0's script makes the new one, a copy of the current page fixed to the finished season.
+- **"Other Seasons" line:** every page builds it from the archive pages that exist, so a new season appears everywhere without edits.
 
 ## Start of the season
 1. **Run step 8.** Fix any FAIL.

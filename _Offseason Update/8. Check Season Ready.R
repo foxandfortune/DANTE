@@ -162,6 +162,17 @@ for (lg in names(L)) {
   must(dir.exists(rf), paste("results folder", rf))
 }
 
+## Website: last season's archive pages and the current pages
+cat("\n===== Website =====\n")
+for (lg in c("vrgl", "btrc")) {
+  f <- file.path("Pages", sprintf("%s_ratings_%d.qmd", lg, C))
+  chk(if (file.exists(f)) "PASS" else "WARN", paste("archive page", basename(f)),
+      if (file.exists(f)) "" else "run _Offseason Update/0. Archive Ratings Pages.R")
+  cur <- readLines(file.path("Pages", sprintf("%s_ratings.qmd", lg)), warn = FALSE)
+  must(any(grepl("^season <- dante_season", cur)), paste(lg, "_ratings.qmd follows dante_season", sep = ""),
+       "the current page should set season <- dante_season")
+}
+
 ## Scripts still holding their own year
 cat("\n===== Scripts =====\n")
 daily <- c(list.files("VRGL", "\\.R$", full.names = TRUE), list.files("BTRC", "\\.R$", full.names = TRUE))

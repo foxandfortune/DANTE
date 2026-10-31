@@ -6,65 +6,49 @@ execute:
 
 ```{r}
 #| output: false
-
 library(tidyverse)
-library(hoopR)
-#library(cbbreadr)
+library(wehoop)
 library(gt)
 library(gtExtras)
 
-# Add NOT IN function:
-`%!in%` = Negate(`%in%`)
-
-# Add NOT IN function:
-`%!in%` = Negate(`%in%`)
+# Season and shared page helpers (season links, honors, status) -------------
+source(here::here('_Helper Files/season.R'))
+source(here::here('_Helper Files/Function Scripts/ratings_page.R'))
 
 # Set season
-season <- 2026
+season <- dante_season   # from _Helper Files/season.R
 
 # Dante header function
 gt_dante_title <- readRDS(here::here('_Helper Files/Simulation Functions', 'gt_dante_title.rds'))
 
 # Create Table Function -------------------------
-create_ratings_table <- readRDS(here::here('_Helper Files/Other/create_ratings_table_inseason.rds'))
+create_ratings_table <- readRDS(here::here('_Helper Files/Other/create_ratings_table.rds'))
 
 # WBB Theme -------------------------
 rank_theme <- readRDS(here::here('_Helper Files/Other/rank_theme_wbb.rds'))
 
-# Check to see if season is finished -------------
-season_comp_status <- FALSE
-#season_comp_status <- wehoop::load_wbb_schedule({season}) %>% 
-#  filter(tournament_id == 22,
-#         str_detect(notes_headline, "National Championship")) %>% 
-#  pull(status_type_completed)
+# Schedule (honors, status) and standings (W-L) -------------
+# Either can be missing early in the season; the page still builds without them.
+scoreboard <- dante_try(wehoop::load_wbb_schedule(season))
+standings <- dante_try(wehoop::espn_wbb_standings(season))
+season_comp_status <- season_finished(scoreboard)
 
-# Load ratings 
-if(season_comp_status == TRUE){
-  ratings_all <- readRDS(here::here(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Full Season/ratings_all_wbb_{season}.rds')))
-} else {
-  ratings_all <- readRDS(here::here(glue::glue('BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Team Ratings/Inseason/inseason_ratings_all_wbb_{season}.rds')))
-}
-
-ratings.pace <- ratings_all$pace
-ratings.ast <- ratings_all$ast
-ratings.to <- ratings_all$to
-ratings.reb <- ratings_all$oreb
-ratings.efg <- ratings_all$efg
-ratings.rtg <- ratings_all$raw_rating
+# Load ratings: full season once finished, else in-season (preseason priors until the first daily run)
+ratings_file <- pick_ratings_file('btrc', season, season_comp_status)
+have_ratings <- !is.null(ratings_file)
 
 # Load Teams
 teams <- readRDS(here::here('_Helper Files/Team Data/team_database_wbb.rds'))
-conf <- readRDS(here::here(glue::glue('_Helper Files/Team Data/Conferences/wbb_conf_{season}.rds'))) %>% 
-  left_join(read.csv(here::here('_Helper Files/Team Data/Conferences/cbb_conference_ids.csv')) %>% 
-              select(conf_id, conference_short_name), by = 'conf_id') %>% 
-  transmute(team_id, 
-            conference_short_name) %>% 
-  as.data.frame()
+conf <- season_conferences('btrc', season)
 
-team_logos <- wehoop::espn_wbb_teams(year = {season}) %>% 
+team_logos <- dante_try(wehoop::espn_wbb_teams(year = season))
+if (is.null(team_logos) || nrow(team_logos) == 0) team_logos <- dante_try(wehoop::espn_wbb_teams(year = season - 1))
+if (is.null(team_logos)) team_logos <- tibble(team_id = character(), logo = character())
+team_logos <- team_logos %>%
   transmute(team_id = as.character(team_id),
-            logo) %>% 
-  full_join(conf, by = 'team_id') %>% 
+            logo) %>%
+  distinct(team_id, .keep_all = TRUE) %>%
+  full_join(conf, by = 'team_id') %>%
   mutate(logo = case_when(
     is.na(logo) ~ paste0('https://a.espncdn.com/i/teamlogos/ncaa/500/',
                          team_id,
@@ -72,170 +56,72 @@ team_logos <- wehoop::espn_wbb_teams(year = {season}) %>%
     TRUE ~ logo))
 
 ## Add logos and conferences to teams
-teams <- teams %>% 
+teams <- teams %>%
   left_join(team_logos,
-            by = 'team_id') %>% 
-  filter(team_id != '107554') %>% 
+            by = 'team_id') %>%
+  filter(team_id != '107554') %>%
   filter(!is.na(conference_short_name))
 
-# Get base ratings for all stats + adjustment for pace -----------
-base.pace <- ratings.pace$value[ratings.pace$name == "(Intercept)"]
-pace_adj <- ratings.rtg$value[ratings.rtg$name == 'poss_per_40']
-base.ast <- ratings.ast$value[ratings.ast$name == "(Intercept)"]
-base.to <- ratings.to$value[ratings.to$name == "(Intercept)"]
-base.reb <- ratings.reb$value[ratings.reb$name == "(Intercept)"]
-base.efg <- ratings.efg$value[ratings.efg$name == "(Intercept)"]
-base.rtg <- ratings.rtg$value[ratings.rtg$name == "(Intercept)"]
+# Honors: NCAA seed, conference regular-season leader/champion, conference tournament
+# champion, national champion. Updates through the season from the schedule.
+honors <- season_honors(scoreboard, conf)
 
+# W-L records
+records <- season_records(scoreboard, standings, teams$team_id)
 
-# Make team ratings tables for each stat ----
-## Pace -------------
-tm.pace <- ratings.pace %>% 
-  filter(str_detect(name, "team_id_")) %>% 
-  mutate(team_id = str_remove_all(name, c("team_id_")),
-         team_id = str_replace_all(team_id, "_", " ")) %>% 
-  rename(OffRtg = value) %>% 
-  left_join(ratings.pace %>% 
-              filter(str_detect(name, "opp_id_")) %>% 
-              mutate(team_id = str_remove_all(name, c("opp_id_")),
-                     team_id = str_replace_all(team_id, "_", " ")) %>% 
-              rename(DefRtg = value), by = "team_id") %>% 
-  select(team_id, OffRtg, DefRtg) %>% 
-  mutate(OffRtg = OffRtg + base.pace,
-         DefRtg = DefRtg + base.pace) %>% 
-  mutate(pace = (OffRtg + DefRtg) / 2) %>% 
-  select(-c(OffRtg, DefRtg))
+if (have_ratings) {
+  # Create full ratings table ----------------------------------------------
+  ratings_all <- readRDS(ratings_file)
+  ratings_tbl <- ratings_stat_table(ratings_all) %>%
+    left_join(teams %>%
+                select(team_id, team,
+                       logo, conference_short_name), by = "team_id") %>%
+    filter(!is.na(conference_short_name)) %>%
+    left_join(records, by = 'team_id') %>%
+    left_join(honors, by = 'team_id') %>%
+    mutate(across(c(seed, reg_season, conf_tourn, title), ~ coalesce(.x, ''))) %>%
+    arrange(desc(netrtg)) %>%
+    mutate(rank = dense_rank(desc(netrtg))) %>%
+    select(rank, logo, team, seed,
+           reg_season, conf_tourn, title,
+           conference_short_name, total,
+           pace, oreb_rt, dreb_rt,
+           to_rt, to_opp_rt, ast_rt,
+           tm_efg, opp_efg,
+           ortg, drtg, netrtg)
 
-## Assist Rate ---------------
-tm.ast <- ratings.ast %>% 
-  filter(str_detect(name, "team_id_")) %>% 
-  mutate(team_id = str_remove_all(name, c("team_id_")),
-         team_id = str_replace_all(team_id, "_", " ")) %>% 
-  rename(OffRtg = value) %>% 
-  select(team_id, OffRtg) %>% 
-  mutate(OffRtg = OffRtg + base.ast)
+  # Make table header ------------------
+  gt_title <- gt_dante_title(title = glue::glue("{season} BTRC Ratings for Women's Basketball"),
+                             subtitle = "Defense-Adjusted Net Team Efficiency (D.A.N.T.E.)",
+                             filepath = '',
+                             type = "wbb",
+                             logo_height = 75)
 
-## Turnover Rate -----------------
-tm.to <- ratings.to %>% 
-  filter(str_detect(name, "team_id_")) %>% 
-  mutate(team_id = str_remove_all(name, c("team_id_")),
-         team_id = str_replace_all(team_id, "_", " ")) %>% 
-  rename(OffRtg = value) %>% 
-  left_join(ratings.to %>% 
-              filter(str_detect(name, "opp_id_")) %>% 
-              mutate(team_id = str_remove_all(name, c("opp_id_")),
-                     team_id = str_replace_all(team_id, "_", " ")) %>% 
-              rename(DefRtg = value), by = "team_id") %>% 
-  select(team_id, OffRtg, DefRtg) %>% 
-  mutate(OffRtg = OffRtg + base.to,
-         DefRtg = DefRtg + base.to) 
+  # Create table -------------------------
+  # (falls back to the plain in-season table if the honors columns ever fail to format)
+  table <- dante_try(create_ratings_table(ratings_tbl))
+  if (is.null(table)) {
+    create_ratings_table_inseason <- readRDS(here::here('_Helper Files/Other/create_ratings_table_inseason.rds'))
+    table <- create_ratings_table_inseason(ratings_tbl %>% select(-c(seed, reg_season, conf_tourn, title)))
+  }
+  table <- table %>% 
+    tab_options(table.width = 1000,
+                container.width = 1000)
 
-## Rebound rate -----------------
-tm.reb <- ratings.reb %>% 
-  filter(str_detect(name, "team_id_")) %>% 
-  mutate(team_id = str_remove_all(name, c("team_id_")),
-         team_id = str_replace_all(team_id, "_", " ")) %>% 
-  rename(OffRtg = value) %>% 
-  left_join(ratings.reb %>% 
-              filter(str_detect(name, "opp_id_")) %>% 
-              mutate(team_id = str_remove_all(name, c("opp_id_")),
-                     team_id = str_replace_all(team_id, "_", " ")) %>% 
-              rename(DefRtg = value), by = "team_id") %>% 
-  select(team_id, OffRtg, DefRtg) %>% 
-  mutate(OffRtg = OffRtg + base.reb,
-         DefRtg = DefRtg + base.reb)
-
-## True shooting/EFG -----------------
-tm.efg <- ratings.efg %>% 
-  filter(str_detect(name, "team_id_")) %>% 
-  mutate(team_id = str_remove_all(name, c("team_id_")),
-         team_id = str_replace_all(team_id, "_", " ")) %>% 
-  rename(OffRtg = value) %>% 
-  left_join(ratings.efg %>% 
-              filter(str_detect(name, "opp_id_")) %>% 
-              mutate(team_id = str_remove_all(name, c("opp_id_")),
-                     team_id = str_replace_all(team_id, "_", " ")) %>% 
-              rename(DefRtg = value), by = "team_id") %>% 
-  select(team_id, OffRtg, DefRtg) %>% 
-  mutate(OffRtg = OffRtg + base.efg,
-         DefRtg = DefRtg + base.efg)
-
-## Team rating ---------------
-tm.rtg <- ratings.rtg %>% 
-  filter(str_detect(name, "team_id_")) %>% 
-  mutate(team_id = str_remove_all(name, c("team_id_")),
-         team_id = str_replace_all(team_id, "_", " ")) %>% 
-  rename(OffRtg = value) %>% 
-  left_join(ratings.rtg %>% 
-              filter(str_detect(name, "opp_id_")) %>% 
-              mutate(team_id = str_remove_all(name, c("opp_id_")),
-                     team_id = str_replace_all(team_id, "_", " ")) %>% 
-              rename(DefRtg = value), by = "team_id") %>% 
-  select(team_id, OffRtg, DefRtg) %>% 
-  mutate(OffRtg = OffRtg + base.rtg,
-         DefRtg = DefRtg + base.rtg) 
-
-# Get results from season --------------------------------
-results <- wehoop::espn_wbb_standings({season})
-
-## Team W-L records --------------
-records <- results %>% 
-  transmute(team_id = as.character(team_id),
-            total)
-
-
-# Create full ratings table ----------------------------------------------
-ratings_tbl <- tm.pace %>% 
-  left_join(tm.ast, by = 'team_id') %>%
-  rename(ast_rt = OffRtg) %>% 
-  left_join(tm.efg, by = 'team_id') %>% 
-  rename(tm_efg = OffRtg,
-         opp_efg = DefRtg) %>% 
-  left_join(tm.reb, by = 'team_id') %>% 
-  rename(oreb_rt = OffRtg,
-         dreb_rt = DefRtg) %>% 
-  left_join(tm.to, by = 'team_id') %>% 
-  rename(to_rt = OffRtg,
-         to_opp_rt = DefRtg) %>% 
-  left_join(tm.rtg, by = 'team_id') %>% 
-  rename(ortg = OffRtg,
-         drtg = DefRtg) %>% 
-  mutate(ortg = ortg + pace * pace_adj,
-         drtg = drtg + pace * pace_adj,
-         netrtg = ortg - drtg) %>% 
-  left_join(teams %>% 
-              select(team_id, team,
-                     logo, conference_short_name), by = "team_id") %>% 
-  arrange(desc(netrtg)) %>% 
-  filter(!is.na(conference_short_name)) %>% 
-  left_join(records, by = 'team_id') %>% 
-  mutate(rank = dense_rank(desc(netrtg))) %>% 
-  select(rank, logo, team, 
-         conference_short_name, total,
-         pace, oreb_rt, dreb_rt,
-         to_rt, to_opp_rt, ast_rt,
-         tm_efg, opp_efg,
-         ortg, drtg, netrtg)
-
-# Make table header ------------------
-gt_title <- gt_dante_title(title = glue::glue("{season} BTRC Ratings for Women's Basketball"),
-                           subtitle = "Defense-Adjusted Net Team Efficiency (D.A.N.T.E.)",
-                           filepath = '',
-                           type = "wbb",
-                           logo_height = 75)
-
-# Create table -------------------------
-table <- create_ratings_table(ratings_tbl) %>% 
-  tab_options(table.width = 1000,
-              container.width = 1000)
-
+  status_text <- season_status(scoreboard, season, preseason = ratings_are_priors('btrc', season, ratings_all))
+} else {
+  table <- ''
+  status_text <- glue::glue("Ratings for the {season - 1}-{season - 2000} season will be posted once the preseason ratings are built.")
+}
 
 ```
 
-Preseason ratings for the `r glue::glue("{season-1}-{season - 2000}")` season.
+`r status_text`
 
 ::: {style="text-align: center;"}
-[***Other Seasons:***]{.underline} [2020-21](https://foxandfortune.github.io/DANTE/Pages/btrc_ratings_2021.html "2021 WBB Ratings") **/** [2021-22](https://foxandfortune.github.io/DANTE/Pages/btrc_ratings_2022.html "2022 WBB Ratings") **/** [2022-23](https://foxandfortune.github.io/DANTE/Pages/btrc_ratings_2023.html "2023 WBB Ratings") **/** [2023-24](https://foxandfortune.github.io/DANTE/Pages/btrc_ratings_2024.html "2024 WBB Ratings") **/** [2024-25](https://foxandfortune.github.io/DANTE/Pages/btrc_ratings_2025.html "2025 WBB Ratings") **/** 2025-26
+`r season_links('btrc', season)`
 :::
+
+`r honors_legend(honors)`
 
 `r table`

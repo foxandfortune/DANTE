@@ -17,3 +17,5 @@ VRGL/Stats/Team and Player Stats/Power Ratings/Team Ratings/desktop.ini
 VRGL/Stats/Offseason Updates - MBB/Shooting Models/pbp_raw_current.rds
 BTRC/Stats/Offseason Updates - WBB/Shooting Models/pbp_raw_current.rds
 _Offseason Update/logs/
+
+**/*.quarto_ipynb
