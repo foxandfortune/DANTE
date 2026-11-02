@@ -768,4 +768,4 @@ head(coords, 10)
 # Save --------------------------
 saveRDS(coords, glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Raw Data/poss_stats_with_types_wbb_{cur_yr}.rds"))
 Sys.setFileTime(glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Raw Data/poss_stats_with_types_wbb_{cur_yr}.rds"),
-                Sys.time()) 
+                Sys.time()) 
