@@ -35,6 +35,16 @@ summary <- readRDS(summary_file) %>%
   as.data.frame() %>% 
   rename(opp_id = opponent_team_id)
 
+# Too few games for a stable fit (opening night, a lone early game): keep the
+# preseason priors for now. With only a handful of games the fit can fail outright
+# (e.g. a stat that is identical for both teams) or swing the league-wide terms.
+min_games <- 50
+n_games <- n_distinct(summary$game_id)
+if (n_games < min_games) {
+  message(n_games, " game(s) played so far (fewer than ", min_games, "); in-season ratings stay at the preseason priors.")
+  if (interactive()) invokeRestart("abort") else quit(save = "no", status = 0)
+}
+
 ## Get games played/to be played for each team -----
 games_played <- summary %>% 
   mutate(name = paste0("team_id_", team_id)) %>% 

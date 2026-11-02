@@ -11,6 +11,18 @@ library(tidyverse)
 all_positions <- c("ATH", "C", "F", "G", "PF", "PG", "SF", "SG")
 all_season_types <- c(2, 3)
 
+# Dummy columns for position and season type, as the shot models expect them
+# (pos_C ... pos_SG, season_type_3). fastDummies fails on an empty data frame,
+# e.g. a day when every shot has a location so there are no no-location shots.
+add_shot_dummies <- function(df) {
+  if (nrow(df) == 0) {
+    for (p in all_positions[-1]) df[[paste0("pos_", p)]] <- integer()
+    for (s in all_season_types[-1]) df[[paste0("season_type_", s)]] <- integer()
+    return(df)
+  }
+  fastDummies::dummy_cols(df, select_columns = c("pos", "season_type"), remove_first_dummy = TRUE)
+}
+
 # Set season
 source("_Helper Files/season.R")
 cur_yr <- dante_season
@@ -263,7 +275,7 @@ shots_loc <- pbp_raw %>%
     season_type) %>% 
   # Create dummy variables for position and shot type
   # because xgboost doesn't like these for some reason
-  fastDummies::dummy_cols(select_columns = c("pos", "season_type"), remove_first_dummy = TRUE) %>% 
+  add_shot_dummies() %>% 
   # Drop extra columns from dummy variables
   select(-c(pos, season_type))
 
@@ -302,7 +314,7 @@ shots_noloc <- pbp_raw %>%
     season_type) %>% 
   # Create dummy variables for position and shot type
   # because xgboost doesn't like these for some reason
-  fastDummies::dummy_cols(select_columns = c("pos", "season_type"), remove_first_dummy = TRUE) %>% 
+  add_shot_dummies() %>% 
   # Drop extra columns from dummy variables
   select(-c(pos, season_type))
 
