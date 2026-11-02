@@ -20,7 +20,15 @@ all_season_types <- c(2, 3)
 pbp_file <- glue::glue("VRGL/Stats/Team and Player Stats/PBP and Shot Data/pbp_{cur_yr}.rds")
 pbp_full <- if (file.exists(pbp_file)) readRDS(pbp_file) else NULL
 
-pbp_raw <- hoopR::load_mbb_pbp(seasons = {cur_yr}) #%>% 
+pbp_raw <- tryCatch(hoopR::load_mbb_pbp(seasons = {cur_yr}),
+                    error = function(e) { message("No play-by-play file yet: ", conditionMessage(e)); NULL })
+
+# Before the first games of the season there is no play-by-play: nothing to do.
+# Scripts 2 and 4 then keep using the preseason priors.
+if (is.null(pbp_full) && NROW(pbp_raw) == 0) {
+  message("No ", cur_yr, " play-by-play yet; nothing to scrape. Ratings stay at the preseason priors.")
+  if (interactive()) invokeRestart("abort") else quit(save = "no", status = 0)
+}
   #mutate(type_id = case_when(
     #type_id == 20437 ~ 437,
     #type_id == 20558 ~ 558,

@@ -20,7 +20,15 @@ cur_yr <- dante_season
 pbp_file <- glue::glue("BTRC/Stats/Team and Player Stats - WBB/PBP and Shot Data/pbp_wbb_{cur_yr}.rds")
 pbp_full <- if (file.exists(pbp_file)) readRDS(pbp_file) else NULL
 
-pbp_raw <- wehoop::load_wbb_pbp(seasons = {cur_yr})
+pbp_raw <- tryCatch(wehoop::load_wbb_pbp(seasons = {cur_yr}),
+                    error = function(e) { message("No play-by-play file yet: ", conditionMessage(e)); NULL })
+
+# Before the first games of the season there is no play-by-play: nothing to do.
+# Scripts 2 and 4 then keep using the preseason priors.
+if (is.null(pbp_full) && NROW(pbp_raw) == 0) {
+  message("No ", cur_yr, " play-by-play yet; nothing to scrape. Ratings stay at the preseason priors.")
+  if (interactive()) invokeRestart("abort") else quit(save = "no", status = 0)
+}
 
 pbp_raw <- pbp_raw %>% 
   filter(game_id %!in% pbp_full$game_id)
@@ -748,4 +756,4 @@ head(coords, 10)
 # Save --------------------------
 saveRDS(coords, glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Raw Data/poss_stats_with_types_wbb_{cur_yr}.rds"))
 Sys.setFileTime(glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Raw Data/poss_stats_with_types_wbb_{cur_yr}.rds"),
-                Sys.time()) 
+                Sys.time()) 

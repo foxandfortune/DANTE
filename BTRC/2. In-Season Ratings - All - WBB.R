@@ -16,7 +16,16 @@ season <- dante_season
 teams <- readRDS(glue::glue("_Helper Files/Team Data/team_database_wbb.rds"))
 
 # Load summary data ----------
-summary <- readRDS(glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Raw Data/poss_stats_with_types_wbb_{season}.rds")) %>% 
+# Before the first games there is no game data: keep the preseason priors (the
+# in-season file is a copy of them) and stop here. Teams that haven't played yet
+# keep their prior once others have games (their prior is used as-is below).
+summary_file <- glue::glue("BTRC/Stats/Team and Player Stats - WBB/Power Ratings/Raw Data/poss_stats_with_types_wbb_{season}.rds")
+if (!file.exists(summary_file) || nrow(readRDS(summary_file)) == 0) {
+  message("No ", season, " game data yet; in-season ratings stay at the preseason priors.")
+  if (interactive()) invokeRestart("abort") else quit(save = "no", status = 0)
+}
+
+summary <- readRDS(summary_file) %>% 
   # Filter out teams in team dataset
   filter(team_id %in% teams$team_id & opponent_team_id %in% teams$team_id) %>% 
   with_groups(game_id, mutate, tm_ct = n()) %>%

@@ -44,9 +44,9 @@ schedule <- hoopR::load_mbb_schedule(seasons = {cur_yr}) %>%
 
 # Calculate days rest based on schedule ---------------
 sched_doubled <- schedule %>% 
-  select(game_id = id, game_date, team_id = home_id, venue_id, neutral_site) %>% 
+  select(game_id = id, game_date, team_id = home_id, home_id, venue_id, neutral_site) %>% 
   bind_rows(schedule %>% 
-              select(game_id = id, game_date, team_id = away_id, venue_id, neutral_site)) %>% 
+              select(game_id = id, game_date, team_id = away_id, home_id, venue_id, neutral_site)) %>% 
   distinct() %>% 
   arrange(game_date) %>% 
   with_groups(.groups = c(team_id), mutate, days_rest = as.numeric(game_date - lag(game_date))) %>% 
@@ -66,13 +66,22 @@ coords <- sched_doubled %>%
                      tm_lat = latitude, tm_lng = longitude, tm_tz = tz_offset),
             by = c("team_id"),
             relationship = "many-to-many") %>% 
-  # For neutral sites where 
+  # Add the home team's location (for games with no venue listed yet)
+  left_join(team_coords %>% 
+              mutate(home_id = as.integer(team_id)) %>% 
+              select(home_id, hm_lat = latitude, hm_lng = longitude),
+            by = c("home_id")) %>% 
+  # Neutral sites with no venue: the team's own location (travel is 0 anyway).
+  # Home games with no venue listed: the home team's location.
   mutate(ven_lat = case_when(
     neutral_site == TRUE & is.na(ven_lat) ~ tm_lat,
+    is.na(ven_lat) ~ hm_lat,
     TRUE ~ ven_lat),
     ven_lng = case_when(
       neutral_site == TRUE & is.na(ven_lng) ~ tm_lng,
+      is.na(ven_lng) ~ hm_lng,
       TRUE ~ ven_lng)) %>% 
+  select(-c(home_id, hm_lat, hm_lng)) %>% 
   distinct() %>% 
   filter(team_id %in% teams$team_id)
 
@@ -95,10 +104,18 @@ distances <- data.frame()
 
 for(i in 1:length(coords$tm_lat)){
   
-  temp.dist <- ifelse(coords$neutral_site[i] == TRUE,
-                      0,
-                      (0.621371* sp::spDistsN1(pts = matrix(c(coords$tm_lng[i], coords$tm_lat[i]), ncol = 2),
-                                               pt = c(coords$ven_lng[i], coords$ven_lat[i]), longlat = TRUE)))
+  # Neutral site: no travel. Missing coordinates (e.g. a non-D1 home team with no
+  # venue listed): NA instead of stopping the script.
+  temp.dist <- if (is.na(coords$neutral_site[i])) {
+    NA_real_
+  } else if (coords$neutral_site[i] == TRUE) {
+    0
+  } else if (anyNA(c(coords$tm_lng[i], coords$tm_lat[i], coords$ven_lng[i], coords$ven_lat[i]))) {
+    NA_real_
+  } else {
+    0.621371 * sp::spDistsN1(pts = matrix(c(coords$tm_lng[i], coords$tm_lat[i]), ncol = 2),
+                             pt = c(coords$ven_lng[i], coords$ven_lat[i]), longlat = TRUE)
+  }
   
   temp.df <- data.frame(game_id = coords$game_id[i],
                         team_id = coords$team_id[i],
