@@ -42,6 +42,32 @@ if (is.null(pbp_full) && NROW(pbp_raw) == 0) {
   if (interactive()) invokeRestart("abort") else quit(save = "no", status = 0)
 }
 
+# hoopR/wehoop sometimes change a column's type from one day's data to the next
+# (2026-11-04: play `id` came as text; the saved file has it as a number), and
+# bind_rows() then stops. Give the new play-by-play the saved file's types.
+match_col_types <- function(new, old) {
+  if (is.null(old) || NROW(new) == 0) return(new)
+  changed <- character(0)
+  for (col in intersect(names(new), names(old))) {
+    target <- class(old[[col]])[1]
+    if (class(new[[col]])[1] != target &&
+        target %in% c("numeric", "integer", "character", "logical")) {
+      new[[col]] <- suppressWarnings(switch(target,
+                                            numeric   = as.numeric(new[[col]]),
+                                            integer   = as.integer(new[[col]]),
+                                            character = as.character(new[[col]]),
+                                            logical   = as.logical(new[[col]])))
+      changed <- c(changed, col)
+    }
+  }
+  if (length(changed) > 0) {
+    message("Matched column types to the saved play-by-play: ", paste(changed, collapse = ", "))
+  }
+  new
+}
+
+pbp_raw <- match_col_types(pbp_raw, pbp_full)
+
 pbp_raw <- pbp_raw %>% 
   filter(game_id %!in% pbp_full$game_id)
 

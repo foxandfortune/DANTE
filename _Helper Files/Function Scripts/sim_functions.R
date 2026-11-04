@@ -1252,6 +1252,36 @@ add_no_prior_results <- function(all_results, all_results_no_prior = NULL) {
     relocate(result_noprior, .after = result)
 }
 
+# Drops games whose odds contradict themselves. Action Network occasionally posts
+# a game's moneylines and team totals on the wrong sides while the spread is right
+# (2026-11-03: Arkansas at +3300 and a 62.5 team total against Arkansas-Pine Bluff,
+# with Pine Bluff +38.5). When a team favored by 3+ on the spread has the longer
+# moneyline or the lower team total, there's no telling which numbers are right,
+# so all of that game's odds are dropped.
+drop_inconsistent_odds <- function(odds, min_spread = 3) {
+  checks <- odds %>%
+    filter(!is.na(spread)) %>%
+    group_by(game_id) %>%
+    filter(n() == 2) %>%
+    summarise(
+      fav_by   = -min(spread),
+      ml_wrong = !anyNA(ml) && ml[which.min(spread)] > ml[which.max(spread)],
+      tt_wrong = !anyNA(tm_total) && tm_total[which.min(spread)] < tm_total[which.max(spread)],
+      teams    = paste(team, collapse = " vs "),
+      .groups  = "drop"
+    ) %>%
+    filter(fav_by >= min_spread, ml_wrong | tt_wrong)
+
+  for (i in seq_len(nrow(checks))) {
+    what <- c("moneyline", "team totals")[c(checks$ml_wrong[i], checks$tt_wrong[i])]
+    report(paste0("Dropped odds for ", checks$teams[i], ": ",
+                  paste(what, collapse = " and "), " on the wrong side of the spread"),
+           .cli_fct = cli::cli_alert_warning)
+  }
+
+  odds %>% filter(!game_id %in% checks$game_id)
+}
+
 # Bets with value against the odds: moneyline, wrong team favored, spread, team
 # over/under, game over/under. Returns NULL when there are no odds.
 build_bets <- function(object, odds, schedule) {
@@ -1259,6 +1289,7 @@ build_bets <- function(object, odds, schedule) {
     report("No odds found; skipping bets")
     return(NULL)
   }
+  odds <- drop_inconsistent_odds(odds)
   us2prob <- odds.converter::odds.us2prob
   
   game_ids <- schedule %>% 
@@ -1344,7 +1375,8 @@ build_bets <- function(object, odds, schedule) {
              spread_line < 0 ~ -100 / spread_line)) %>% 
     filter(spread_val >= 0.5) %>% 
     select(game_date = date, team_id, team,
-           spread_line, payout, result, spread, spread_val) %>% 
+           spread_line, payout, result, spread, spread_val,
+           cover) %>%
     left_join(game_ids, by = c("game_date", "team_id")) %>% 
     relocate(game_id)
   
