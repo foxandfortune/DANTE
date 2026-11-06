@@ -18,9 +18,52 @@ permissions:
   id-token: write
 
 jobs:
-  run-vrgl-pipeline:
+  # GitHub sometimes starts scheduled runs hours late. If today's results are
+  # already in the repo (e.g. from a run started by hand that morning), a
+  # scheduled run stops here, so it can't replace the morning bets with later
+  # lines. Runs started by hand always go ahead.
+  check-already-ran:
     runs-on: ubuntu-latest
-    
+    outputs:
+      run: ${{ steps.check.outputs.run }}
+    steps:
+      - name: Check for today's results
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "Started by hand: running."
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          season=$(gh api "repos/$REPO/contents/_Helper%20Files/season.R" \
+                     -H "Accept: application/vnd.github.raw" \
+                   | grep -oP '^dante_season\s*<-\s*\K[0-9]{4}' || true)
+          today=$(TZ=America/Chicago date +%F)
+
+          if [ -z "$season" ]; then
+            echo "Couldn't read the season from season.R: running."
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          results="VRGL/Stats/Season Schedules/Results/$season/all_results_$today.rds"
+          if gh api "repos/$REPO/contents/${results// /%20}" --silent 2>/dev/null; then
+            echo "$results already exists, so today's run has happened: skipping."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "No results for $today yet: running."
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  run-vrgl-pipeline:
+    needs: check-already-ran
+    if: needs.check-already-ran.outputs.run == 'true'
+    runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
