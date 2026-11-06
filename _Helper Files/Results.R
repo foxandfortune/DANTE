@@ -1,7 +1,9 @@
 library(tidyverse)
 
 # Set library
-setwd("C:/Users/bxc7497/OneDrive - The Friedkin Group/Documents/Github/DANTE")
+# Set working directory
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+setwd('..')
 
 ## Set season and date ----------
 season <- 2027
