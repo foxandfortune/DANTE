@@ -772,6 +772,45 @@ coords <- summary %>%
       TRUE ~ ven_lng)) %>% 
   distinct()
 
+### Venues missing from the venue files: use the home team's arena -------
+# A game at a venue that isn't in team_venues / neutral_sites used to stop the
+# run (2026-11-08: IUPUI's home game, game 401921174). Those games now get the
+# home team's arena, with a warning naming them, so the venue can be added
+# later with _Get Missing Venues.R.
+missing_venue <- coords %>%
+  filter(is.na(ven_lat) | is.na(ven_lng)) %>%
+  distinct(game_id, game_date, venue_id)
+
+if (nrow(missing_venue) > 0) {
+  warning("Venue not in the venue files for ", nrow(missing_venue), " game(s); ",
+          "using the home team's arena. game_id (venue_id): ",
+          paste0(missing_venue$game_id, " (", missing_venue$venue_id, ")", collapse = ", "),
+          call. = FALSE, immediate. = TRUE)
+
+  home_arena <- coords %>%
+    filter(is_home == TRUE) %>%
+    distinct(game_id, home_lat = tm_lat, home_lng = tm_lng, home_tz = tm_tz) %>%
+    distinct(game_id, .keep_all = TRUE)
+
+  coords <- coords %>%
+    left_join(home_arena, by = "game_id") %>%
+    mutate(fill    = is.na(ven_lat) | is.na(ven_lng),
+           ven_lat = if_else(fill, home_lat, ven_lat),
+           ven_lng = if_else(fill, home_lng, ven_lng),
+           ven_tz  = if_else(fill & is.na(ven_tz), home_tz, ven_tz)) %>%
+    select(-c(fill, home_lat, home_lng, home_tz))
+}
+
+# Anything still without coordinates (no home team, or a team with no arena on
+# file) gets no travel rather than stopping the run
+no_coords <- is.na(coords$ven_lat) | is.na(coords$ven_lng) |
+  is.na(coords$tm_lat) | is.na(coords$tm_lng)
+if (any(no_coords)) {
+  warning("No coordinates for ", sum(no_coords), " team-game(s); travel set to 0: ",
+          paste(unique(coords$game_id[no_coords]), collapse = ", "),
+          call. = FALSE, immediate. = TRUE)
+}
+
 ### Check for NA values --------------------
 coords %>% 
   filter(is.na(ven_lat) | is.na(ven_lng) | is.na(tm_lat) | is.na(tm_lng)) #%>%
@@ -793,7 +832,7 @@ distances <- data.frame()
 
 for(i in 1:length(coords$tm_lat)){
   
-  temp.dist <- ifelse(coords$neutral_site[i] == TRUE,
+  temp.dist <- ifelse(coords$neutral_site[i] == TRUE | no_coords[i],
                       0,
                       (0.621371* sp::spDistsN1(pts = matrix(c(coords$tm_lng[i], coords$tm_lat[i]), ncol = 2),
                                                pt = c(coords$ven_lng[i], coords$ven_lat[i]), longlat = TRUE)))
