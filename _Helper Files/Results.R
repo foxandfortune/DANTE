@@ -31,7 +31,7 @@ results_mbb %>%
 
 ## SPREAD -----------------------------
 bets$spread %>%
-  filter(spread_val > 0.5) %>% 
+  filter(spread_val > 1.0) %>% 
   arrange(team)
 
 
