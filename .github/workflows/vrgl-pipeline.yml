@@ -245,7 +245,22 @@ jobs:
           else
             git commit -m "Update VRGL analysis results - $(date +'%Y-%m-%d %H:%M:%S')"
             echo "=== Pushing to remote ==="
-            git push
+            # Anything pushed to main while the run was going (e.g. a graded
+            # bets file) would make a plain push fail and lose the day's
+            # results, so bring those commits in first, then push. Retries
+            # cover a push that lands in the few seconds between the two.
+            for attempt in 1 2 3; do
+              if git pull --rebase origin main && git push origin HEAD:main; then
+                break
+              fi
+              git rebase --abort 2>/dev/null || true
+              if [ "$attempt" -eq 3 ]; then
+                echo "Couldn't push after 3 attempts"
+                exit 1
+              fi
+              echo "Push attempt $attempt failed; retrying in 15s"
+              sleep 15
+            done
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
