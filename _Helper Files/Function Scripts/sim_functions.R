@@ -1039,117 +1039,97 @@ is_single_digit_numeric <- function(x) is.numeric(x) && length(x) == 1L && !is.n
 is_sequential <- function() inherits(future::plan(), "sequential")
 
 # Odds ------------------------------------------------------------------------------
+# Action Network scoreboard odds for each date in df$game_date, one row per team
+# per game. Uses `teams` from the calling script (action_network_id -> team_id).
+#
+# Reads Action Network's v2 scoreboard. The v1 scoreboard this used to read went
+# away on 2026-11-11 (404 for every date). In v2 each book's prices sit under
+# games[[i]]$markets[[book_id]]$event, and every price carries the team it's for,
+# so the away/home columns can't get crossed. Only pregame, full-game, main
+# lines are kept: games already underway also carry live prices.
 get_odds <- function(df,
                      bk_name = c("Consensus", "Open", "DraftKings",
                                  "FanDuel", "PointsBet", "BetMGM"),
                      league_nm = c("ncaab", "ncaaw")){
-  
-  if (!(bk_name %in% c("Consensus", "Open", "DraftKings",
-                       "FanDuel", "PointsBet", "BetMGM"))) {
-    cli::cli_abort("The book you have selected is not a valid option!")
-  }
-  
-  odds <- data.frame()
-  books <- readRDS('_Helper Files/Other/books.rds')
-  
-  
-  for(i in 1:length(df$game_date)){
-    day <- df$game_date[i]
-    
-    URL = case_when(
-      lubridate::day(day) < 10 & lubridate::month(day) < 10 ~
-        paste0('https://api.actionnetwork.com/web/v1/scoreboard/',
-               {league_nm},'?division=D1&date=',
-               lubridate::year(day), 0, lubridate::month(day), 0, lubridate::day(day)),
-      lubridate::day(day) < 10 & lubridate::month(day) >= 10 ~
-        paste0('https://api.actionnetwork.com/web/v1/scoreboard/',
-               {league_nm},'?division=D1&date=',
-               lubridate::year(day), lubridate::month(day), 0, lubridate::day(day)),
-      lubridate::day(day) >= 10 & lubridate::month(day) < 10 ~
-        paste0('https://api.actionnetwork.com/web/v1/scoreboard/',
-               {league_nm},'?division=D1&date=',
-               lubridate::year(day), 0, lubridate::month(day), lubridate::day(day)),
-      lubridate::day(day) >= 10 & lubridate::month(day) >= 10 ~
-        paste0('https://api.actionnetwork.com/web/v1/scoreboard/',
-               {league_nm},'?division=D1&date=',
-               lubridate::year(day), lubridate::month(day), lubridate::day(day))
-    )
-    
-    # Read in odds from Action Network
-    data <- suppressWarnings(jsonlite::fromJSON(readLines(URL)))
-    
-    matches <- data.frame(data$games)
-    
-    if(length(matches) != 0){
-      matchups.AN <- data.frame(game_id = matches$id,
-                                type = "away",
-                                team_id = matches$away_team_id,
-                                opp_id = matches$home_team_id) %>%
-        rbind(data.frame(game_id = matches$id,
-                         type = "home",
-                         team_id = matches$home_team_id, 
-                         opp_id = matches$away_team_id)) %>% 
-        arrange(game_id) %>% 
-        left_join(teams %>% 
-                    select(team, 
-                           espn_tm = team_id,
-                           action_network_id), by = c("team_id" = "action_network_id")) %>%
-        left_join(teams %>% 
-                    select(opponent = team, 
-                           espn_opp = team_id,
-                           action_network_id), by = c("opp_id" = "action_network_id")) %>% 
-        mutate(date = day) %>% 
-        filter(!is.na(team), !is.na(opponent))
-      
-      
-      temp.odds <- data.frame()
-      
-      for(j in 1:length(matches$id)){
-        temp = if(!is.null(matches$odds[[j]]) & length(matches$odds[[j]]) > 0){
-          data.frame(matches$odds[[j]]) %>% 
-            left_join(books, by = "book_id") %>% 
-            filter(type == "game", book_name == {bk_name}) %>% 
-            select(ml = ml_away, spread = spread_away, spread_line = spread_away_line,
-                   tm_total = away_total, tm_over = away_over, tm_under = away_under,
-                   total, over, under) %>% 
-            bind_rows(data.frame(matches$odds[[j]]) %>% 
-                        left_join(books, by = "book_id") %>% 
-                        filter(type == "game", book_name == {bk_name}) %>% 
-                        select(ml = ml_home, spread = spread_home, spread_line = spread_home_line,
-                               tm_total = home_total, tm_over = home_over, tm_under = home_under,
-                               total, over, under))
-        }
-        
-        if(length(temp$ml) == 2){
-          temp = temp %>% 
-            cbind(type = c("away", "home")) %>% 
-            mutate(game_id = matches$id[[j]]) %>% 
-            relocate(type) %>% 
-            left_join(matchups.AN, by = c("game_id", "type")) %>% 
-            mutate(date = df$game_date[i]) %>% 
-            rename(action_id = team_id)
-        }
-        
-        if(!is.null(matches$odds[[j]])){
-          temp.odds = bind_rows(temp.odds, temp) %>% 
-            relocate(team)
-        }
-      }
-      
-      odds <- rbind(odds, temp.odds) %>% 
-        distinct()
-      
-      print(i)
-    } else {
-      print(glue::glue("No games for {df$game_date[i]}."))
+
+  bk_name   <- match.arg(bk_name)
+  league_nm <- match.arg(league_nm)
+
+  `%||%` <- function(a, b) if (is.null(a)) b else a  # base R only has it from 4.4
+
+  books   <- readRDS('_Helper Files/Other/books.rds')
+  book_id <- as.character(books$book_id[books$book_name == bk_name][1])
+
+  # One price from a market: pregame, full game, main line, optional side/team
+  price <- function(outcomes, field, side = NULL, team = NULL) {
+    for (o in outcomes) {
+      if (!identical(o$period %||% "event", "event")) next
+      if (isTRUE(o$is_live) || isTRUE(o$is_alt_market)) next
+      if (!is.null(side) && !identical(o$side, side)) next
+      if (!is.null(team) && !isTRUE(o$team_id == team)) next
+      return(as.numeric(o[[field]] %||% NA_real_))
     }
-    
-    if(i < length(df$game_date)){
-      Sys.sleep(2)
-    }
+    NA_real_
   }
-  
-  return(odds)
+
+  game_rows <- function(g) {
+    ev <- g$markets[[book_id]]$event
+    if (is.null(ev)) return(NULL)
+
+    one_side <- function(type, tm, opp) {
+      data.frame(
+        type        = type,
+        ml          = price(ev$moneyline, "odds", team = tm),
+        spread      = price(ev$spread, "value", team = tm),
+        spread_line = price(ev$spread, "odds", team = tm),
+        tm_total    = price(ev$core_bet_type_6_team_score, "value", side = "over", team = tm),
+        tm_over     = price(ev$core_bet_type_6_team_score, "odds", side = "over", team = tm),
+        tm_under    = price(ev$core_bet_type_6_team_score, "odds", side = "under", team = tm),
+        total       = price(ev$total, "value", side = "over"),
+        over        = price(ev$total, "odds", side = "over"),
+        under       = price(ev$total, "odds", side = "under"),
+        game_id     = g$id,
+        action_id   = tm,
+        opp_id      = opp
+      )
+    }
+    rbind(one_side("away", g$away_team_id, g$home_team_id),
+          one_side("home", g$home_team_id, g$away_team_id))
+  }
+
+  odds <- purrr::map(seq_along(df$game_date), function(i) {
+    day <- as.Date(df$game_date[i])
+    url <- paste0('https://api.actionnetwork.com/web/v2/scoreboard/', league_nm,
+                  '?division=D1&date=', format(day, "%Y%m%d"))
+
+    data <- jsonlite::fromJSON(paste(readLines(url, warn = FALSE), collapse = ""),
+                               simplifyVector = FALSE)
+    if (i < length(df$game_date)) Sys.sleep(2)
+
+    if (length(data$games) == 0) {
+      print(glue::glue("No games for {day}."))
+      return(NULL)
+    }
+
+    purrr::map(data$games, game_rows) %>%
+      purrr::list_rbind() %>%
+      mutate(date = day)
+  }) %>%
+    purrr::list_rbind()
+
+  if (nrow(odds) == 0) return(data.frame())
+
+  # Same columns as before: team / espn_tm and opponent / espn_opp from `teams`
+  odds %>%
+    left_join(teams %>%
+                select(team, espn_tm = team_id, action_network_id),
+              by = c("action_id" = "action_network_id")) %>%
+    left_join(teams %>%
+                select(opponent = team, espn_opp = team_id, action_network_id),
+              by = c("opp_id" = "action_network_id")) %>%
+    filter(!is.na(team), !is.na(opponent)) %>%
+    relocate(team) %>%
+    distinct()
 }
 
 # Two rows per simulated game (one per team), with scores
