@@ -21,24 +21,27 @@ bets <- readRDS(glue::glue('VRGL/Stats/Season Schedules/Results/{season}/all_bet
 
 # ---- PRINT RESULTS FOR MBB -------------------------
 ## OVERALL ---------------------------
-results_mbb %>% 
+results_mbb |> 
   with_groups(.groups = game_id,
               slice,
-              1) %>% 
+              1) |> 
   select(-c(game_id, team_id, opp_id,
             win_noprior, result_noprior)) |> 
   arrange(game_date, Team)
 
 ## SPREAD -----------------------------
-bets$spread %>%
-  filter(spread_val > 1.0) %>% 
+bets$spread |>
+  filter(spread_val > 1.0) |> 
   arrange(team)
 
-
+bets$spread |> 
+  arrange(desc(cover)) |> 
+  slice(1:10) |> 
+  arrange(team)
 
 ## MONEY LINE ---------------------
-bets$ml %>% 
-  arrange(desc(ml_val)) %>% 
+bets$ml |> 
+  arrange(desc(ml_val)) |> 
   filter(ml_val >= 0.05)
 
 ## GAME TOTALS --------------
@@ -51,9 +54,9 @@ bets$game_under |>
   arrange(desc(odds_val))
 
 # ---- PRINT RESULTS FOR WBB ---------------------
-results_wbb %>%
+results_wbb |>
   with_groups(.groups = game_id,
               slice,
-              1) %>% 
+              1) |> 
   arrange(game_date, Team)
 
