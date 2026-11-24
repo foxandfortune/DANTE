@@ -212,3 +212,88 @@ if (save_graded) {
   saveRDS(list(summary = summary_tbl, bets = graded),
           glue::glue("{results_dir}/graded_bets_{grade_date}.rds"))
 }
+
+# Season to date and day by day ------------------------------------------------------
+# Every graded day this season (graded_bets_*.rds in results_dir), with today's
+# grading in place of any saved copy for grade_date. Same columns as the summary
+# above, for one unit and quarter Kelly. Kelly units are per day: each day's
+# stakes come from a fresh `bankroll`-unit bankroll, as above.
+graded_files <- list.files(results_dir, pattern = "^graded_bets_\\d{4}-\\d{2}-\\d{2}\\.rds$",
+                           full.names = TRUE)
+season_graded <- graded_files %>%
+  set_names(str_extract(basename(graded_files), "\\d{4}-\\d{2}-\\d{2}")) %>%
+  map(~ readRDS(.x)$bets) %>%
+  discard(~ is.null(.x) || nrow(.x) == 0) %>%
+  map(~ .x %>% mutate(game_id = as.character(game_id), team_id = as.integer(team_id))) %>%
+  bind_rows(.id = "date") %>%
+  mutate(date = as.Date(date)) %>%
+  filter(date != grade_date) %>%
+  bind_rows(graded %>% mutate(date = grade_date)) %>%
+  filter(outcome != "Pending", !game_id %in% as.character(exclude_game_ids))
+
+# One row per category, plus a Total row
+by_category <- function(df) {
+  bind_rows(
+    df %>%
+      mutate(category = factor(category, levels = category_order)) %>%
+      group_by(category, .add = TRUE) %>%
+      summarise_bets() %>%
+      mutate(category = as.character(category)),
+    df %>% summarise_bets() %>% mutate(category = "Total")
+  )
+}
+
+## Season to date
+season_tbl <- season_graded %>%
+  by_category() %>%
+  relocate(category) %>%
+  arrange(factor(category, levels = c(category_order, "Total")))
+
+## Day by day (long): one row per date and category, with running totals
+daily_tbl <- season_graded %>%
+  group_by(date) %>%
+  by_category() %>%
+  relocate(date, category) %>%
+  arrange(factor(category, levels = c(category_order, "Total")), date) %>%
+  group_by(category) %>%
+  mutate(cum_units = round(cumsum(units), 2),
+         cum_kelly_units = round(cumsum(kelly_units), 2)) %>%
+  ungroup() %>%
+  arrange(date, factor(category, levels = c(category_order, "Total")))
+
+## Day by day, one table per bet type: one unit, then quarter Kelly, each with
+## its season-to-date (YTD) running total
+daily_by_type <- function(cat_name) {
+  daily_tbl %>%
+    filter(category == cat_name) %>%
+    arrange(date) %>%
+    transmute(date,
+              bets,
+              record      = paste0(W, "-", L, if_else(P > 0, paste0("-", P), "")),
+              units,
+              roi,
+              ytd_units   = cum_units,
+              kelly_bets,
+              kelly_staked,
+              kelly_units,
+              kelly_roi,
+              ytd_kelly   = cum_kelly_units)
+}
+daily_type_tbls <- map(set_names(category_order), daily_by_type)
+
+cat("\n\n"); cat(glue::glue("==== Season to date: {min(season_graded$date)} to {max(season_graded$date)} ",
+               "({n_distinct(season_graded$date)} days) ===="), "\n")
+print(as.data.frame(season_tbl), row.names = FALSE)
+
+for (cat_name in category_order) {
+  d <- daily_type_tbls[[cat_name]]
+  cat("\n\n====", cat_name, "====\n")
+  if (nrow(d) == 0) { cat("No graded bets yet.\n"); next }
+  cat("One unit:\n")
+  print(as.data.frame(d %>% select(date, bets, record, units, roi, ytd_units)), row.names = FALSE)
+  cat("\nQuarter Kelly (each day's stakes from a fresh", bankroll, "unit bankroll):\n")
+  print(as.data.frame(d %>% select(date, bets = kelly_bets, staked = kelly_staked, units = kelly_units,
+                                   roi = kelly_roi, ytd_units = ytd_kelly)), row.names = FALSE)
+}
+cat("\nAll of it in one long table (with a Total row per day): daily_tbl, e.g. View(daily_tbl).",
+    "One bet type: daily_type_tbls[[\"Spread\"]].\n")
